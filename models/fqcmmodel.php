@@ -1,0 +1,1111 @@
+<?php
+
+/**
+ * @property CI_Loader $load
+ * @property CI_Form_validation $form_validation
+ * @property CI_Input $input
+ * @property CI_Email $email
+ * @property CI_DB_active_record $db
+ * @property CI_DB_forge $dbforge
+ */
+class FqcmModel extends Model {
+
+    public function __construct() {
+        parent::Model();
+
+        // connect to database
+        $this->load->database();
+        $this->load->helper('xml');
+    }
+
+    public function getUsers() {
+        $query = $this->db->query("SELECT a.AgentID,s.Name FROM specifyuser s
+            JOIN agent a ON s.SpecifyUserID=a.SpecifyUserID
+            WHERE UserType IN('FullAccess','Manager')
+            ORDER BY Name ASC");
+
+        if ($query->num_rows())
+            return $query->result_array();
+
+        else
+            return false;
+    }
+
+      public function missingPreparation($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID", "left");
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        $this->db->where("p.PreparationID IS NULL AND DATE(co.TimestampCreated) >=", $startdate);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+        public function tooManyPrimaryPreparations($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,8,10,12,13)", "left");
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
+        $this->db->groupby("co.CatalogNumber", FALSE);
+        $this->db->having("COUNT(p.PrepTypeID)>1", FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+        public function noPrimaryPreparations($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,6,8,10,12,13)", "left");
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
+        $this->db->groupby("co.CatalogNumber", FALSE);
+        $this->db->having("COUNT(p.PrepTypeID)=0", FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+      public function inappropriateQuantityInPreparation($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID", "left");
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        $this->db->where("((p.CountAmt > 1 AND p.PrepTypeID IN (1,3,4,8,10,12,13,14)) OR (p.CountAmt IS NULL OR p.CountAmt = 0))", FALSE, FALSE);
+        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
+        
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    public function partMissingFromMultisheetMessage($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID, co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID", "left");
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        $this->db->where("p.Remarks IS NOT NULL AND p.Remarks !='' AND p.Remarks NOT LIKE '%A%'AND DATE(co.TimestampCreated) >=", $startdate);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+        public function jarSizeMissing($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID", "left");
+        $this->db->join("preptype pt", "pt.PrepTypeID=p.PrepTypeID AND pt.Name='Spirit'");
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        $this->db->where("p.Status IS NULL AND DATE(co.TimestampCreated) >=", $startdate);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    /* SELECT co.CatalogNumber,co.notifications AS Mixed,a1.LastName AS CreatedBy,LEFT(co.TimestampCreated,10) AS Created,a2.LastName AS EditedBy,LEFT(co.TimestampModified,10) AS Edited,p.PreparationID,p.Remarks
+      FROM preparation p
+      JOIN collectionobject co ON co.CollectionObjectID=p.CollectionObjectID
+      LEFT JOIN agent a1 ON a1.AgentID=co.CreatedByAgentID
+      LEFT JOIN agent a2 ON a2.AgentID=co.ModifiedByAgentID
+      WHERE (p.Remarks IS NOT NULL AND p.Remarks !='') AND p.Remarks NOT LIKE '%A%'
+      AND LEFT(co.TimestampCreated,10)> '2011-12-19'; */
+
+    public function missingAltitudeUnit($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited,
+ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxElevation,l.ElevationMethod AS Units", FALSE);
+        $this->db->from("locality l");
+        $this->db->join("collectingevent ce", "l.LocalityID=ce.LocalityID");
+        $this->db->join("collectionobject co", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("(l.MinElevation IS NOT NULL OR l.MaxElevation IS NOT NULL) AND l.ElevationMethod IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function missingLocality($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
+        $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("ce.LocalityID IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+        public function missingGeography($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
+        $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
+        $this->db->join("geography g", "l.GeographyID=g.GeographyID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("l.GeographyID IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function missingSourceOrPrecision($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
+        $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("Latitude1 IS NOT NULL AND (LatLongMethod IS NULL OR OriginalElevationUnit IS NULL) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function missingDetermination($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("d.DeterminationID IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function typeMismatch($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("d.FeatureOrBasis !='Type status' AND d.YesNo1=1 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.ModifiedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+        public function missingCollectors($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
+        $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
+AND col.CollectingEventID IS NULL AND (cea.Text1 IS NULL OR cea.Text1='')", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function typeDetIsCurrent($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("d.FeatureOrBasis ='Type status' AND d.IsCurrent =1 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.ModifiedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+        public function alternativeNameInCurrentDetermination($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(d.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(d.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID AND d.IsCurrent=1");
+        $this->db->join("agent a", "a.AgentID=d.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=d.ModifiedByAgentID");
+        $this->db->where("d.AlternateName IS NOT NULL AND d.AlternateName !=''", FALSE, FALSE);
+        $this->db->where("DATE(d.TimestampCreated) >='$startdate'", FALSE, FALSE);
+        
+        if ($userid)
+            $this->db->where("d.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function typeDetOverriddenByIndet($startdate, $enddate=FALSE, $userid=FALSE) {
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination ty", "co.CollectionObjectID=ty.CollectionObjectID AND ty.YesNo1=1");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID AND d.IsCurrent=1");
+        $this->db->join("taxon t", "d.TaxonID=t.TaxonID");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("t.RankID<220 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.ModifiedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function missingTaxonName($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(d.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID");
+        $this->db->join("agent a", "a.AgentID=d.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=d.ModifiedByAgentID");
+        $this->db->where("d.TaxonID IS NULL AND d.AlternateName IS NULL AND DATE(d.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("d.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function newSubgenus($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("t.FullName,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(t.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(t.TimestampModified) AS Edited", FALSE);
+        $this->db->from("taxon t");
+        $this->db->join("agent a", "a.AgentID=t.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=t.ModifiedByAgentID");
+        if ($userid)
+            $this->db->where("t.CreatedByAgentID", $userid);
+        $this->db->where("DATE(t.TimestampCreated) >='$startdate'", FALSE, FALSE);
+        $this->db->where("t.RankID", 190);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function missingAuthor($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("t.FullName,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(t.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(t.TimestampModified) AS Edited", FALSE);
+        $this->db->from("taxon t");
+        $this->db->join("agent a", "a.AgentID=t.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=t.ModifiedByAgentID");
+        if ($userid)
+            $this->db->where("t.CreatedByAgentID", $userid);
+        $this->db->where("DATE(t.TimestampCreated) >='$startdate'", FALSE, FALSE);
+        $this->db->where("t.RankID > 180", FALSE, FALSE);
+        $this->db->where("t.Name NOT LIKE '%sp.%' AND t.NcbiTaxonNumber IS NULL AND IsHybrid IS NULL", FALSE, FALSE, FALSE);
+        $this->db->where("t.Author IS NULL", FALSE, FALSE);
+
+
+        if ($userid)
+            $this->db->where("t.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function detDateEarlierThanCollDate($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->select("d.DeterminedDate, d.DeterminedDatePrecision, ce.StartDate, ce.StartDatePrecision");
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+        $this->db->where("DATE(co.TimestampCreated) >='$startdate'", FALSE, FALSE);
+        /* $this->db->where("((d.DeterminedDatePrecision=1 AND d.DeterminedDate<ce.StartDate) OR
+          (d.DeterminedDatePrecision=2 AND LEFT(d.DeterminedDate, 7)<LEFT(ce.StartDate, 7)) OR
+          (d.DeterminedDatePrecision=3 AND YEAR(d.DeterminedDate)<YEAR(ce.StartDate)));",
+          FALSE, FALSE); */
+
+
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            $ret = array();
+            foreach ($query->result() as $row) {
+                $rec = array(
+                    'CollectionObjectID' => $row->CollectionObjectID,
+                    'CatalogNumber' => $row->CatalogNumber,
+                    'CreatedBy' => $row->CreatedBy,
+                    'Created' => $row->Created,
+                    'EditedBy' => $row->EditedBy,
+                    'Edited' => $row->Edited,
+                );
+                if ($row->DeterminedDate && $row->DeterminedDatePrecision == 1 && $row->DeterminedDate < $row->StartDate)
+                    $ret[] = $rec;
+
+                elseif ($row->DeterminedDate && $row->DeterminedDatePrecision == 2 && substr($row->DeterminedDate, 0, 7) < substr($row->StartDate, 0, 7))
+                    $ret[] = $rec;
+                elseif ($row->DeterminedDate && $row->DeterminedDatePrecision == 3 && substr($row->DeterminedDate, 0, 4) < substr($row->StartDate, 0, 4))
+                    $ret[] = $rec;
+            }
+            return $ret;
+            //return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function missingProtologue($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(d.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(d.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID AND d.FeatureOrBasis='Type status'");
+        $this->db->join("taxon t", "d.TaxonID=t.TaxonID");
+        $this->db->join("agent a", "a.AgentID=d.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=d.ModifiedByAgentID");
+        $this->db->where("t.CommonName IS NULL AND NcbiTaxonNumber IS NULL AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.ModifiedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function duplicateHerbariaInWrongPreparation($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
+        $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("p.PrepTypeID NOT IN (15,16,17) AND (p.Text1 IS NOT NULL AND p.Text1 !='')
+AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function duplicateCountMismatch($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
+        $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("LENGTH(p.Text1) - LENGTH(REPLACE(p.Text1, ',', '')) != p.CountAmt-1
+AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function somethingInNumberThatShouldntBeThere($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
+        $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17,18) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
+AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function somethingMissingFromNumberField($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
+        $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17,18) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
+            AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function missingPrimaryCollectors($startdate, $enddate=FALSE, $userid=FALSE) {
+        /*
+          SELECT co.CollectionObjectID, co.CatalogNumber, CONCAT(a.FirstName, ' ', a.LastName) AS CreatedBy, DATE(co.TimestampCreated) AS Created, CONCAT(aa.FirstName, ' ', aa.LastName) AS EditedBy, DATE(co.TimestampModified) AS Edited
+          FROM (collectionobject co)
+          JOIN collectingevent ce ON ce.CollectingEventID=co.CollectingEventID
+          JOIN collector c ON ce.CollectingEventID=c.CollectingEventID
+          JOIN agent a ON a.AgentID=co.CreatedByAgentID
+          JOIN agent aa ON aa.AgentID=co.ModifiedByAgentID
+          WHERE DATE(co.TimestampCreated)>= '2012-01-01'
+          GROUP BY co.CollectionObjectID
+          HAVING SUM(IsPrimary)=0;
+         */
+        $this->db->select("co.CollectionObjectID, co.CatalogNumber, CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,
+            DATE(co.TimestampCreated) AS Created, CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,
+            DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from('collectionobject co');
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join('collectingevent ce', 'ce.CollectingEventID=co.CollectingEventID');
+        $this->db->join('collector c', 'ce.CollectingEventID=c.CollectingEventID');
+        $this->db->join('agent a', 'a.AgentID=co.CreatedByAgentID');
+        $this->db->join('agent aa', 'aa.AgentID=co.ModifiedByAgentID');
+        $this->db->where("co.TimestampCreated > '$startdate'", FALSE, FALSE);
+        $this->db->group_by('co.CollectionObjectID');
+        $this->db->having('SUM(IsPrimary)=0', FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function missingIntroSource($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
+AND cea.Text11 IS NOT NULL AND cea.Text12 IS NULL", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+     public function missingCultSource($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
+        $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
+AND cea.Text13 IS NOT NULL AND (cea.Text14 IS NULL OR cea.Text14='')", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+        public function primaryCollectorNotFirst($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
+        $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
+AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function endDateWithNoStartDate($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,
+                        CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
+                        AND ce.StartDate IS NULL AND ce.EndDate IS NOT NULL", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+        public function noCollectingDate($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,
+                        CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collector col", "col.CollectingEventID=ce.CollectingEventID AND col.IsPrimary=1");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
+                        AND ce.StartDate IS NULL AND col.AgentID=co.CreatedByAgentID", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function tooEarlyForGPS($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
+        $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("LatLongMethod=4 AND StartDate<'1980-01-01' AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+        public function missingDatum($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS Collector,StationFieldNumber", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
+        $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
+        $this->db->join("collector col", "col.CollectingEventID=ce.CollectingEventID AND col.IsPrimary=1");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=col.AgentID");
+        $this->db->where("LatLongMethod=4 AND Datum IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        $this->db->orderby("Collector, StationFieldNumber", FALSE);
+        $this->db->where("co.CreatedByAgentID=col.AgentID", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function groupAgentsWithoutIndividuals($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("a.AgentID,a.LastName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
+            LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited");
+        $this->db->from("agent a");
+        $this->db->join("agent a2", "a.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "a.ModifiedByAgentID=a3.AgentID");
+        $this->db->join("groupperson gp", "a.AgentID=gp.GroupID", "left");
+        $this->db->where("a.AgentType=3 AND gp.GroupPersonID IS NULL AND DATE(a.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("a.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function agentsWithNoLastName($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("a.AgentID,a.FirstName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
+            LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited");
+        $this->db->from("agent a");
+        $this->db->join("agent a2", "a.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "a.ModifiedByAgentID=a3.AgentID");
+        $this->db->join("groupperson gp", "a.AgentID=gp.GroupID", "left");
+        $this->db->where("a.LastName IS NULL AND DATE(a.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("a.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function sharedLocalities($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("l.LocalityID,COUNT(*) AS LocCount", FALSE);
+        $this->db->from("locality l");
+        $this->db->join("collectingevent ce", "l.LocalityID=ce.LocalityID");
+        $this->db->where("DATE(l.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        $this->db->group_by("l.LocalityID");
+        $this->db->having("COUNT(*)>", 1, FALSE);
+
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach ($query->result_array() as $row) {
+                $this->db->select("co.CollectionObjectID,co.CatalogNumber,
+                    collectorstring(ce.CollectingEventID,1) AS PrimaryCollectors,ce.StationFieldNumber AS CollectingNo,ce.StartDate AS CollDate,p.Remarks AS Multisheets,
+                    CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy, DATE(co.TimestampCreated) AS Created", FALSE);
+                $this->db->from("locality l");
+                $this->db->join("collectingevent ce", "ce.LocalityID=l.LocalityID");
+                $this->db->join("collectionobject co", "co.CollectingEventID=ce.CollectingEventID");
+                $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID", "left");
+                $this->db->join("preparation p", "p.CollectionObjectID=co.CollectionObjectID");
+                $this->db->where("l.LocalityID", $row['LocalityID']);
+                $this->db->where("DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+                $this->db->group_by("co.CatalogNumber");
+
+                if ($userid)
+                    $this->db->where("co.CreatedByAgentID", $userid);
+
+                $query2 = $this->db->get();
+                if ($query2->num_rows) {
+                    foreach ($query2->result_array() as $row2) {
+                        $ret[] = array_merge($row, $row2);
+                    }
+                }
+            }
+            return $ret;
+        }
+        else
+            return false;
+    }
+
+    public function highCatalogueNumbers($startdate, $enddate=FALSE, $userid=FALSE) {
+        $this->db->select("MAX(EndNumber) AS maxnumber", FALSE);
+        $this->db->from("melnumbers");
+
+        $maxnumber = $this->db->get();
+        $maxnumber = $maxnumber->row();
+
+        $maxnumber = $maxnumber->maxnumber;
+
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");        
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("LEFT(co.CatalogNumber,7)>", $maxnumber, FALSE);
+        $this->db->where("co.TimestampCreated >", $startdate);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+        public function dodgyPart($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,
+            LEFT(co.TimestampCreated,10) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,LEFT(co.TimestampModified,10) AS Edited");
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
+        $this->db->where("RIGHT(CatalogNumber,1) NOT REGEXP '[a-zA-Z]'", FALSE, FALSE);
+        $this->db->where("DATE(co.TimestampModified)>=", $startdate);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function possiblyDodgyPart($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,
+            LEFT(co.TimestampCreated,10) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,LEFT(co.TimestampModified,10) AS Edited");
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
+        $this->db->where("RIGHT(CatalogNumber,1) NOT REGEXP '[a-eA-E]'", FALSE, FALSE);
+        $this->db->where("DATE(co.TimestampModified)>=", $startdate);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function storedUnderMultipleNames($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select('co.CollectionObjectID');
+        $this->db->from('collectionobject co');
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID AND d.YesNo1=1');
+        $this->db->where('co.TimestampModified >', $startdate);
+        if ($enddate)
+            $this->db->where('DATE(co.TimestampModified) <=', $enddate, FALSE);
+        if ($userid)
+            $this->db->where('co.ModifiedByAgentID', $userid);
+        $this->db->group_by('co.CollectionObjectID');
+        $this->db->having('count(*)>1');
+        $init = $this->db->get();
+        if ($init->num_rows()) {
+            foreach ($init->result() as $initrow) {
+                $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,
+                    LEFT(d.TimestampCreated,10) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,LEFT(d.TimestampModified,10) AS Edited");
+                    $this->db->from("determination d");        
+                    $this->db->join("collectionobject co", 'd.CollectionObjectID=co.CollectionObjectID');        
+                    $this->db->join("agent a2", "d.CreatedByAgentID=a2.AgentID");
+                    $this->db->join("agent a3", "d.ModifiedByAgentID=a3.AgentID");
+                    $this->db->where('d.YesNo1', 'Y');
+                    $this->db->where('d.CollectionObjectID', $initrow->CollectionObjectID);
+                    $this->db->order_by('d.TimestampCreated', 'desc');
+                    
+                    $query = $this->db->get();
+                    if ($query->num_rows())
+                        $ret[] = $query->row_array();
+            }
+        }
+        return $ret;
+    }
+
+    function createRecordSetItems($recordsetid, $recordsetitems) {
+        // adapted from function of same name in recordsetmodel.php
+        foreach ($recordsetitems as $recordid) {
+            $insert = "INSERT INTO recordsetitem (RecordSetID, RecordID)
+                VALUES ($recordsetid, $recordid);";
+            $this->db->query($insert);
+        }
+    }
+    
+    public function getMissingGenusStorage($startdate, $enddate=FALSE, $userid=FALSE) {
+        $name = array();
+        $taxonid = array();
+        $ret = array();
+
+        $this->db->select("t.TaxonID, t.Name, t.NodeNumber, t.HighestChildNodeNumber,
+            CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(t.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(t.TimestampModified) AS Edited", false);
+        $this->db->from('taxon t');
+        $this->db->join('genusstorage gs', 't.TaxonID=gs.TaxonID', 'left');
+        $this->db->join("agent a", "a.AgentID=t.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=t.ModifiedByAgentID");
+        $this->db->where('gs.GenusStorageID');
+        $this->db->where('t.TaxonTreeDefItemID', 12);
+        if ($userid)
+            $this->db->where("t.CreatedByAgentID", $userid);
+        $this->db->where("DATE(t.TimestampCreated) >='$startdate'", FALSE, FALSE);
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            foreach ($query->result() as $row) {
+                $num_query = $this->db->query("SELECT count(*) as num
+                FROM taxon t
+                JOIN determination d ON t.TaxonID=d.TaxonID
+                WHERE (d.IsCurrent=1 OR d.YesNo1=1) AND t.NodeNumber>=$row->NodeNumber AND t.NodeNumber<=$row->HighestChildNodeNumber");
+                $num_row = $num_query->row();
+                if ($num_row->num > 0) {
+                    $name[] = $row->Name;
+                    $taxonid[] = $row->TaxonID;
+                    $ret[] = (array) $row;
+                }
+            }
+        }
+        
+        $this->db->select("t.TaxonID, t.Name,
+            CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(t.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(t.TimestampModified) AS Edited", false);
+        $this->db->from('taxon t');
+        $this->db->join('taxontreedefitem td', 't.TaxonTreeDefItemID=td.TaxonTreeDefItemID');
+        $this->db->join('determination d', 't.TaxonID=d.TaxonID');
+        $this->db->join('genusstorage gs', 't.TaxonID=gs.TaxonID', 'left');
+        $this->db->join("agent a", "a.AgentID=t.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=t.ModifiedByAgentID");
+        $this->db->where('gs.GenusStorageID');
+        $this->db->where('td.RankID <', 180);
+        $this->db->where('d.IsCurrent', 1);
+        if ($userid)
+            $this->db->where("t.CreatedByAgentID", $userid);
+        $this->db->where("DATE(t.TimestampCreated) >='$startdate'", FALSE, FALSE);
+        $this->db->group_by('t.TaxonID');
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            foreach ($query->result() as $row) {
+                $name[] = $row->Name;
+                $taxonid[] = $row->TaxonID;
+                $ret[] = (array) $row;
+            }
+        }
+        
+        if ($name) {
+            array_multisort($name, SORT_ASC, $taxonid, SORT_ASC, $ret);
+            return $ret;
+        }
+        else return FALSE;
+    }
+
+    //public function partlyAtomisedHabitat($startdate, $enddate=FALSE, $userid=FALSE) {
+    //    $ret = array();
+    //    $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,
+    //        LEFT(co.TimestampCreated,10) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,LEFT(co.TimestampModified,10) AS Edited", FALSE);
+    //    $this->db->from("collectionobject co");
+    //    $this->db->join("collectingevent ce", "co.CollectingEventID=ce.CollectingEventID");
+    //    $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID");
+    //    $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
+    //    $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
+    //    $this->db->where("co.CollectionMemberID", 4);
+    //    $this->db->where("ce.Remarks Is Not Null AND (cea.Remarks Is Not Null OR cea.Text1 Is Not Null OR cea.Text2 Is Not Null 
+    //        OR cea.Text7 Is Not Null OR cea.Text9 Is Not Null OR cea.Text17 Is Not Null OR cea.Text4 Is Not Null)", FALSE, FALSE);
+    //    $this->db->where("DATE(co.TimestampCreated)>=", $startdate);
+
+    //    if ($userid)
+    //        $this->db->where("co.CreatedByAgentID", $userid);
+
+    //    $query = $this->db->get();
+    //    if ($query->num_rows()) {
+    //        return $query->result_array();
+    //    }
+    //    else
+    //        return false;
+    //}
+    
+}
+
+?>

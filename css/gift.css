@@ -1,0 +1,9 @@
+#gift p {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+#gift p label {
+    vertical-align: top;
+    padding-top: 3px;
+}
