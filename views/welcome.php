@@ -180,6 +180,28 @@
 
     <?=form_fieldset_close();?>
 
+    <br />
+    <?=form_fieldset('Vic. Ref. Set');?>
+    <?=form_radio(array(
+        'name' => 'labeltype',
+        'id' => 'lt19',
+        'value' => '19',
+        'checked' => false,
+        'style' => ''
+    )); ?>&nbsp;<?=form_label('Vic. Ref. Set label', 'lt19', 
+            array('style' => 'width: 240px;')); ?>
+    <br/>
+    <?=form_radio(array(
+        'name' => 'labeltype',
+        'id' => 'lt20',
+        'value' => '20',
+        'checked' => false,
+        'style' => ''
+    )); ?>&nbsp;<?=form_label('Vic. Ref. Set barcode', 'lt20', 
+            array('style' => 'width: 240px;')); ?>
+
+    <?=form_fieldset_close();?>
+
     <br/>
     <?=form_label('Start printing at label:', 'start', array('style' => 'width: 150px')); ?>
     <?=form_input(array(

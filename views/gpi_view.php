@@ -26,8 +26,10 @@ the first row, will break the script.</p>
 <h3>Uploaded data sets:</h3>
     <table>
         <tr><th>Batch no.</th><th>Date uploaded</th>
-            <th>Records</th><th>Errors</th><th colspan="2">Output</th>
-            <th>Delete batch</th></tr>
+            <th>Records</th><th>Errors</th><th colspan="3">Output</th>
+            <th>Delete batch</th>
+            <th>Marked in MELISR</th>
+        </tr>
     <?php foreach ($DataSets as $set): ?>
         <tr>
             <td><?=$set['BatchNo']?></td><td><?=$set['DateUploaded']?></td>
@@ -39,7 +41,15 @@ the first row, will break the script.</p>
                 title="get XML (with BioCASe wrapper)">XML (BioCASe)</a></td>
             <td><a href="<?=site_url()?>/gpi/get_xml/<?=$set['BatchNo']?>/csv"
                 title="get CSV">CSV</a></td>
-                <td><a href="<?=site_url()?>/gpi/delete_batch/<?=$set['BatchNo']?>">delete</a></td>
+                <td><a href="<?=site_url()?>/gpi/delete_batch/<?=$set['BatchNo']?>">Delete</a></td>
+            <td>
+                <?php if($set['NumMarked']==$set['NumRecords']): ?>
+                Marked
+                <?php else: ?>
+                <a href="<?=site_url()?>/gpi/mark_in_melisr/<?=$set['BatchNo']?>">Mark in MELISR</a>
+                <?php endif; ?>
+                
+            </td>
         </tr>
     <?php endforeach; ?>
     </table>
