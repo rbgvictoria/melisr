@@ -226,7 +226,7 @@ class TransactionModel extends Model {
     function getShipmentMethod($method) {
         $this->db->select('Title');
         $this->db->from('picklistitem');
-        $this->db->where('PickListID', 9);
+        $this->db->where('PickListID', 150);
         $this->db->where('Value', $method);
         $query = $this->db->get();
         if ($query->num_rows) {
