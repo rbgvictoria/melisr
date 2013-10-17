@@ -39,6 +39,7 @@ class MelisrLabels extends Controller {
     function label() {
         $this->load->model('recordsetmodel');
         $this->load->model('labeldatamodel');
+        $this->load->model('fqcmmodel');
         $data['bannerimage'] = $this->banner();
         $get = $this->uri->uri_to_assoc();
         $type = $this->input->post('labeltype');
@@ -84,68 +85,21 @@ class MelisrLabels extends Controller {
 
         if($recordset || $records) {
             $records = ($records) ? ($records) : $this->recordsetmodel->getRecordSetItems($recordset);
-            switch ($type) {
-                case $type < 6: // our (more or less) standard labels
-                case 17:
-                    $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
-                    //print_r($labeldata);
-                    
-                    $storagemissing = FALSE;
-                    foreach ($labeldata as $rec) {
-                        if (!$rec['StoredUnder'])
-                            $storagemissing = TRUE;
-                    }
-                    if ($storagemissing) {
-                        $data['message'] = 'One or more of your records do not have storage information.<br/>
-                            Please check the genus storage.';
-                        $this->load->view('message', $data);
-                        break;
-                    }
-                    else {
-                        //$labeldata = $this->labelHtml($labeldata, $type);
-                        $this->printLabelNew($labeldata, $config, $start-1);
-                        break;
-                    }
-                case 6:
-                case 7:
-                case 13:
-                case 14: // various duplicate labels
-                    $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, TRUE, $type);
-                    if (count($labeldata) < 1) {
-                        $data['message'] = 'Nothing to print';
-                        $this->load->view('message', $data);
-                        break;
-                    }
-                    //print_r($labeldata);
-                    $this->printLabelNew($labeldata, $config, $start-1);
-                    break;
-                case 8: // spirit jar labels
-                    $labeldata = $this->labeldatamodel->getSpiritJarLabelData($records);
-                    if (count($labeldata) > 0){
-                        $labeldata = $this->spiritLabelHtml($labeldata);
-                        $this->printAveryLabel($labeldata, $config, $start-1);
-                    } else {
-                        $data['message'] = 'Your record set does not contain records for spirit collections.';
-                        $this->load->view('message', $data);
-                    }
-                    break;
-                case 9: // multisheet labels
-                    $labeldata = $this->labeldatamodel->getMultisheetLabelData($records);
-                    if (count($labeldata) > 0){
-                        $labeldata = $this->multisheetLabelHtml($labeldata);
-                        $this->printAveryLabel($labeldata, $config, $start-1);
-                    } else {
-                        $data['message'] = 'Your record set does not contain multisheets.';
-                        $this->load->view('message', $data);
-                    }
-                    break;
-                case 10: // type folder labels
-                    $labeldata = $this->labeldatamodel->getTypeFolderLabelData($records);
-                    //print_r($labeldata);
-                    if ($labeldata){
+            
+            $passedqc = $this->qc($records);
+            
+            if ($passedqc) {
+            
+                switch ($type) {
+                    case $type < 6: // our (more or less) standard labels
+                    case 17:
+                    case 19:
+                        $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
+                        //print_r($labeldata);
+
                         $storagemissing = FALSE;
                         foreach ($labeldata as $rec) {
-                            if (!$rec['Family'])
+                            if (!$rec['StoredUnder'])
                                 $storagemissing = TRUE;
                         }
                         if ($storagemissing) {
@@ -155,60 +109,120 @@ class MelisrLabels extends Controller {
                             break;
                         }
                         else {
-                            //$labeldata = $this->typeFolderLabelHtml($labeldata);
-                            //$this->printAveryLabel($labeldata, $config);
-                            $this->printTypeFolderLabel($labeldata, $config);
+                            //$labeldata = $this->labelHtml($labeldata, $type);
+                            $this->printLabelNew($labeldata, $config, $start-1);
+                            break;
                         }
-                    } else {
-                        $data['message'] = 'Your record set does not contain types.';
-                        $this->load->view('message', $data);
-                    }
-                    break;
-                case 11: // barcode stickers
-                    if ($this->input->post('recordset')) {
-                        $barcodes = $this->labeldatamodel->getBarcodeLabelData($records);
-                        //print_r($barcodes);
-                        $this->printBarcodeLabelRecordSet($config, $barcodes, $start-1);
-                    }
-                    elseif ($this->input->post('melno_start')) {
-                        $barcode_start = $this->input->post('melno_start');
-                        if ($this->input->post('melno_count'))
-                            $barcode_count = $this->input->post('melno_count');
-                        else
-                            $barcode_count = $this->input->post('melno_end')-$this->input->post('melno_start')+1;
-                        $this->printBarcodeLabel($config, $barcode_start, $barcode_count, $start-1);
-                    }
-                case 12: // spirit cards
-                    $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
-                    //$labeldata = $this->spiritCardHtml($labeldata, $type);
-                    $this->printLabelNew($labeldata, $config, $start-1);
-                    break;
-
-                case 15:
-                    $labeldata = $this->labeldatamodel->getAnnotationSlipData($records);
-                    if ($labeldata){
+                    case 6:
+                    case 7:
+                    case 13:
+                    case 14: // various duplicate labels
+                        $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, TRUE, $type);
+                        if (count($labeldata) < 1) {
+                            $data['message'] = 'Nothing to print';
+                            $this->load->view('message', $data);
+                            break;
+                        }
                         //print_r($labeldata);
-                        $this->printAnnotationSlip($labeldata, $config, TRUE, $start-1);
-                    }
-                    else {
-                        $data['message'] = 'Nothing to print';
-                        $this->load->view('message', $data);
-                    }
-                    break;
-                case 16: // det. slips
-                    $labeldata = $this->labeldatamodel->getAnnotationSlipData($records);
-                    $this->printAnnotationSlip($labeldata, $config, TRUE);
-                    break;
-                case 18: // silicagel sample labels
-                    $labeldata = $this->labeldatamodel->getSpiritJarLabelData($records, 7);
-                    if (count($labeldata) > 0){
-                        $labeldata = $this->spiritLabelHtml($labeldata);
-                        $this->printAveryLabel($labeldata, $config, $start-1);
-                    } else {
-                        $data['message'] = 'Your record set does not contain records for silica gel samples.';
-                        $this->load->view('message', $data);
-                    }
-                    break;
+                        $this->printLabelNew($labeldata, $config, $start-1);
+                        break;
+                    case 8: // spirit jar labels
+                        $labeldata = $this->labeldatamodel->getSpiritJarLabelData($records);
+                        if (count($labeldata) > 0){
+                            $labeldata = $this->spiritLabelHtml($labeldata);
+                            $this->printAveryLabel($labeldata, $config, $start-1);
+                        } else {
+                            $data['message'] = 'Your record set does not contain records for spirit collections.';
+                            $this->load->view('message', $data);
+                        }
+                        break;
+                    case 9: // multisheet labels
+                        $labeldata = $this->labeldatamodel->getMultisheetLabelData($records);
+                        if (count($labeldata) > 0){
+                            $labeldata = $this->multisheetLabelHtml($labeldata);
+                            $this->printAveryLabel($labeldata, $config, $start-1);
+                        } else {
+                            $data['message'] = 'Your record set does not contain multisheets.';
+                            $this->load->view('message', $data);
+                        }
+                        break;
+                    case 10: // type folder labels
+                        $labeldata = $this->labeldatamodel->getTypeFolderLabelData($records);
+                        //print_r($labeldata);
+                        if ($labeldata){
+                            $storagemissing = FALSE;
+                            foreach ($labeldata as $rec) {
+                                if (!$rec['Family'])
+                                    $storagemissing = TRUE;
+                            }
+                            if ($storagemissing) {
+                                $data['message'] = 'One or more of your records do not have storage information.<br/>
+                                    Please check the genus storage.';
+                                $this->load->view('message', $data);
+                                break;
+                            }
+                            else {
+                                //$labeldata = $this->typeFolderLabelHtml($labeldata);
+                                //$this->printAveryLabel($labeldata, $config);
+                                $this->printTypeFolderLabel($labeldata, $config);
+                            }
+                        } else {
+                            $data['message'] = 'Your record set does not contain types.';
+                            $this->load->view('message', $data);
+                        }
+                        break;
+                    case 11: // barcode stickers
+                        if ($this->input->post('recordset')) {
+                            $barcodes = $this->labeldatamodel->getBarcodeLabelData($records);
+                            //print_r($barcodes);
+                            $this->printBarcodeLabelRecordSet($config, $barcodes, $start-1);
+                        }
+                        elseif ($this->input->post('melno_start')) {
+                            $barcode_start = $this->input->post('melno_start');
+                            if ($this->input->post('melno_count'))
+                                $barcode_count = $this->input->post('melno_count');
+                            else
+                                $barcode_count = $this->input->post('melno_end')-$this->input->post('melno_start')+1;
+                            $this->printBarcodeLabel($config, $barcode_start, $barcode_count, $start-1);
+                        }
+                        break;
+                    case 20:
+                        $barcodes = $this->labeldatamodel->getVrsBarcodeLabelData($records);
+                        //print_r($barcodes);
+                        $this->printVrsBarcodeLabelRecordSet($config, $barcodes, $start-1);
+                        break;
+                    case 12: // spirit cards
+                        $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
+                        //$labeldata = $this->spiritCardHtml($labeldata, $type);
+                        $this->printLabelNew($labeldata, $config, $start-1);
+                        break;
+
+                    case 15:
+                        $labeldata = $this->labeldatamodel->getAnnotationSlipData($records, $part);
+                        if ($labeldata){
+                            //print_r($labeldata);
+                            $this->printAnnotationSlip($labeldata, $config, TRUE, $start-1);
+                        }
+                        else {
+                            $data['message'] = 'Nothing to print';
+                            $this->load->view('message', $data);
+                        }
+                        break;
+                    case 16: // det. slips
+                        $labeldata = $this->labeldatamodel->getAnnotationSlipData($records);
+                        $this->printAnnotationSlip($labeldata, $config, TRUE);
+                        break;
+                    case 18: // silicagel sample labels
+                        $labeldata = $this->labeldatamodel->getSpiritJarLabelData($records, 7);
+                        if (count($labeldata) > 0){
+                            $labeldata = $this->spiritLabelHtml($labeldata);
+                            $this->printAveryLabel($labeldata, $config, $start-1);
+                        } else {
+                            $data['message'] = 'Your record set does not contain records for silica gel samples.';
+                            $this->load->view('message', $data);
+                        }
+                        break;
+                }
             }
         }
     }
@@ -221,6 +235,28 @@ class MelisrLabels extends Controller {
         $config['dimensions'] = $this->labelDimensions($config, $type);
         $config['type'] = $type;
         return $config;
+    }
+    
+    function qc($records) {
+        $this->load->model('fqcmmodel');
+        $data = array();
+        $data['MissingGeography'] = $this->fqcmmodel->missingGeography(FALSE, FALSE, FALSE, $records);
+        $data['MissingTaxonName'] = $this->fqcmmodel->missingTaxonName(FALSE, FALSE, FALSE, $records);
+        $data['MissingPreparation'] = $this->fqcmmodel->missingPreparation(FALSE, FALSE, FALSE, $records);
+
+        $error = FALSE;
+        foreach (array_values($data) AS $value) {
+            if ($value)
+                $error = TRUE;
+        }
+        if ($error) {
+            $data['bannerimage'] = $this->banner();
+            $data['Users'] = $this->fqcmmodel->getUsers();
+            $this->load->view('fqcmview', $data);
+            return FALSE;
+        }
+        else
+            return TRUE;
     }
 
     function spiritLabelHtml($labeldata) {
@@ -654,7 +690,7 @@ class MelisrLabels extends Controller {
         for ($i = 0; $i<$numy; $i++)
         $labeldimensions['labelbody_pos']['y'][] = $config['yhtml'] + $i*$labeldimensions['labelheight'];
 
-        if ((($type < 7 || $type > 9) && $type < 14) || $type == 16) {
+        if ((($type < 7 || $type > 9) && $type < 14) || $type == 16 || $type == 18 || $type == 19) {
             $labeldimensions['barcode_pos'] = array();
             $labeldimensions['barcode_pos']['x'] = array();
             for ($i = 0; $i<$numx; $i++)
@@ -880,10 +916,21 @@ class MelisrLabels extends Controller {
             if($j%$numlabels == 0) $pdf->AddPage();
             
             $pdf->MultiCell($props['wheader'], 7.5, $labelheader, 0, 'C', 0, 1, $labelheader_pos['x'][$x], $labelheader_pos['y'][$y], true, false, true);
+            if ($this->input->post('labeltype') == 19) {
+                $pdf->MultiCell($props['wheader'], 5, '<b>Victorian Reference Set</b>', 0, 'C', 0, 1, $labelheader_pos['x'][$x], $pdf->GetY(), true, false, true);
+            }
+            
             if(!$dup) {
-                $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
-                $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, 12, 0.1, $barcodestyle, 'N');
-                $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y], true, false, true);
+                if ($this->input->post('labeltype') == 19) {
+                    $vrsnumber = 'VRS ' . $labeldata[$i]['VRSNumber'];
+                    $pdf->write1DBarcode($vrsnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, 12, 0.1, $barcodestyle, 'N');
+                    $pdf->MultiCell(55, 5, '<b>'.$vrsnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y], true, false, true);
+                }
+                else {
+                    $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
+                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, 12, 0.1, $barcodestyle, 'N');
+                    $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y], true, false, true);
+                }
             }
             
             if (isset($labeldata[$i]['SpiritInfo']) && $labeldata[$i]['SpiritInfo']) {
@@ -891,12 +938,19 @@ class MelisrLabels extends Controller {
                 $pdf->MultiCell(51, 5, $spirit, 0, 'R', 0, 1, $barcodetext_pos['x'][$x], $barcode_pos['y'][$y]-6, true, false, true);
             }
             
+            $pdf->SetY($labelbody_pos['y'][$y]);
+            
+            
+            if ($this->input->post('labeltype') == 19) {
+                $pdf->MultiCell($props['whtml'], 5, '<b>' . strtoupper($labeldata[$i]['Family']) . '</b>', 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, true, 0, 'T', false);
+                $pdf->SetY($pdf->GetY()-1);
+            }
 
             $formattedname = '';
             if($labeldata[$i]['Introduced'] == 'Not native') $formattedname .= '*';
             $formattedname .= $labeldata[$i]['FormattedName'];
             $formattedname = "<div style=\"font-size: 11pt;\">$formattedname</div>";
-            $pdf->MultiCell($props['whtml'], 5, $formattedname, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 0, 'T', false);
+            $pdf->MultiCell($props['whtml'], 5, $formattedname, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, true, 0, 'T', false);
             
             if ($labeldata[$i]['ExtraInfo'])
                 $pdf->MultiCell($props['whtml'], 5, $labeldata[$i]['ExtraInfo'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()-1, true, 0, true, true, 0, 'T', false);
@@ -963,7 +1017,7 @@ class MelisrLabels extends Controller {
                 $pdf->MultiCell($props['whtml'], 5, implode('<br/>', $not), 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()-1, true, 0, true, true, 0, 'T', false);
             }
             
-            if ($labeldata[$i]['Multisheet'] && !$dup) {
+            if ($labeldata[$i]['Multisheet'] && !$dup && $this->input->post('labeltype')!=19) {
                 $pdf->SetY($pdf->GetY() + 2);
                 $pdf->MultiCell($props['whtml'], 5, $labeldata[$i]['Multisheet'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
             }
@@ -977,7 +1031,7 @@ class MelisrLabels extends Controller {
                 $pdf->MultiCell($props['whtml'], 5, $mixed, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
             }
             
-            if ($dup) {
+            if ($dup || $this->input->post('labeltype')==19) {
                 $dupl = '<b>This specimen is a duplicate of MEL ' . $labeldata[$i]['MelNumber'] . '.</b>';
                 $pdf->MultiCell($props['whtml'], 5, $dupl, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
             }
@@ -998,13 +1052,17 @@ class MelisrLabels extends Controller {
                 else {
                     if ($labeldata[$i]['Continent'])
                         $storedunder .= ' (' . $labeldata[$i]['Continent'] . ')';
-                    $footer = '<div style="font-size: 7pt">' . $storedunder . '<br/>';
-                    $footer .= 'Printed from MELISR, ' . date('d M. Y') . '</div>';
+                    $footer = array();
+                    
+                    if ($this->input->post('labeltype') != 19)
+                        $footer[] = '<div style="font-size: 7pt">' . $storedunder . '</div>';
+                    $footer[] = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
+                    $footer = implode('', $footer);
                     $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $labelfooter_pos['y'][$y], true, 0, true, true, 0, 'T', false);
                 }
             }
             else {
-                $y = $pdf->getY()+5;
+                $y = $pdf->GetY()+5;
                 if ($dup) {
                     $footer = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
                     $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
@@ -1016,8 +1074,12 @@ class MelisrLabels extends Controller {
                 else {
                     if ($labeldata[$i]['Continent'])
                         $storedunder .= ' (' . $labeldata[$i]['Continent'] . ')';
-                    $footer = '<div style="font-size: 7pt">' . $storedunder . '<br/>';
-                    $footer .= 'Printed from MELISR, ' . date('d M. Y') . '</div>';
+                    $footer = array();
+                    
+                    if ($this->input->post('labeltype') != 19)
+                        $footer[] = '<div style="font-size: 7pt">' . $storedunder . '</div>';
+                    $footer[] = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
+                    $footer = implode('', $footer);
                     $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $y, true, 0, true, true, 0, 'T', false);
                 }
             }
@@ -1409,6 +1471,89 @@ class MelisrLabels extends Controller {
         // Close and output PDF document
         $pdf->Output('mellabel.pdf', 'I');
     }
+
+    function printVrsBarcodeLabelRecordSet($props, $barcodes, $start=0) {
+        $numx = $props['numx'];
+        $numy = $props['numy'];
+        $labelheight = $props['dimensions']['labelheight'];
+        $labelwidht = $props['dimensions']['labelwidth'];
+        $labelheader_pos = $props['dimensions']['labelheader_pos'];
+        $labelbody_pos = $props['dimensions']['labelbody_pos'];
+        $numlabels = $numx*$numy;
+        $barcode_pos = $props['dimensions']['barcode_pos'];
+        $barcodetext_pos = $props['dimensions']['barcodetext_pos'];
+
+        set_time_limit (600);
+        // create new PDF document
+        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+
+        // set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Niels Klazenga');
+        $pdf->SetTitle('MEL Label');
+        $pdf->SetSubject('MEL Label');
+
+        //set margins
+        $pdf->SetMargins(5, 7.5, 5);
+
+        //set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, 3);
+
+        // remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // ---------------------------------------------------------
+
+        // set font
+        $pdf->SetFont('helvetica', '', 9);
+        // set cell padding
+        $pdf->setCellPaddings(0, 0, 0, 0);
+        // set cell margins
+        $pdf->setCellMargins(0, 0, 0, 0);
+
+
+        $barcodestyle = array(
+            'position' => '',
+            'padding' => 0,
+            'align' => 'C',
+            'stretch' => true,
+            'cellfitalign' => '',
+            'border' => false,
+            'hpadding' => 'auto',
+            'vpadding' => 'auto',
+            'fgcolor' => array(0,0,0),
+            'bgcolor' => false, //array(255,255,255),
+            'text' => false,
+        );
+
+
+        if ($start > 0) $pdf->AddPage();
+        for($i=0; $i<count($barcodes); $i++) {
+            $j = $i+$start;
+            $offset = $j%($numx*$numy);
+            $x = $offset%$numx;
+            $y = floor($offset/$numx);
+
+            if($j%$numlabels == 0) $pdf->AddPage();
+
+            $pdf->MultiCell(55 , 5, '<b>Victorian Reference Set</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcode_pos['y'][$y]-3, true, false, true);
+            
+            $vrsnumber = $barcodes[$i]['Barcode'];
+
+            $pdf->write1DBarcode($vrsnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, 8, 0.1, $barcodestyle, 'N');
+            $pdf->MultiCell(55 , 5, '<b>'.$vrsnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y]-4, true, false, true);
+            $pdf->MultiCell(55 , 5, 'Duplicate of ' . $barcodes[$i]['MELNumber'], 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y], true, false, true);
+        }
+        // move pointer to last page
+        $pdf->lastPage();
+
+        // ---------------------------------------------------------
+
+        // Close and output PDF document
+        $pdf->Output('mellabel.pdf', 'I');
+    }
+    
 }
 
 ?>

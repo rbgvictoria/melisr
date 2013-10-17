@@ -198,7 +198,7 @@ QUERY;
                 $newdoc->appendChild($node);
 
                 $docstring = $newdoc->saveXML();
-                $docstring = str_replace('african:', '', $docstring);
+                $docstring = str_replace('ns0:', '', $docstring);
 
                 $search = "<DataSet xmlns:african=\"http://plants.jstor.org/XSD/AfricanTypesv2.xsd\">";
                 $repl = "<DataSet xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://plants.jstor.org/XSD/AfricanTypesv2.xsd\">";
@@ -330,6 +330,11 @@ QUERY;
         else {
             $this->load->view('recordsxml_view', $this->data);
         }
+    }
+    
+    function mark_in_melisr($batch) {
+        $this->gpimodel->markInMelisr($batch);
+        $this->index();
     }
 
 }
