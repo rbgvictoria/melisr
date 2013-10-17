@@ -25,6 +25,8 @@ class LabelDataModel extends Model {
         $this->db->where('d.IsCurrent', 1);
         //$this->db->where('d.Remarks IS NOT NULL', FALSE, FALSE);
         $this->db->where('d.DeterminerID IS NOT NULL', FALSE, FALSE);
+        if (!$part)
+            $this->db->where("substring(CatalogNumber, 8, 1)='A'", FALSE, FALSE);
         $query = $this->db->get();
 
         if ($query->num_rows()) {
@@ -71,11 +73,11 @@ class LabelDataModel extends Model {
               l.Long1Text AS Longitude,
               l.MinElevation,
               l.MaxElevation,
-              l.ElevationMethod,
+              l.Text1 AS AltitudeUnit,
               l.LocalityID,
               ce.CollectingEventID,
               ce.Remarks AS Habitat,
-              ce.VerbatimLocality AS AssociatedTaxa,
+              cea.Text2 AS AssociatedTaxa,
               ce.CollectingTripID,
               cea.Text5 AS Host,
               cea.Text4 AS Substrate,
@@ -128,7 +130,7 @@ class LabelDataModel extends Model {
                 $labeldata['Geography'] = $this->getGeographyString($row->GeographyID);
                 $labeldata['Latitude'] = $row->Latitude;
                 $labeldata['Longitude'] = $row->Longitude;
-                $labeldata['Altitude'] = ($row->MinElevation) ? $this->altitude($row->MinElevation, $row->MaxElevation, $row->ElevationMethod) : FALSE;
+                $labeldata['Altitude'] = ($row->MinElevation) ? $this->altitude($row->MinElevation, $row->MaxElevation, $row->AltitudeUnit) : FALSE;
                 $labeldata['Depth'] = ($row->LocalityID) ? $this->depth($row->LocalityID) : FALSE;
 
                 $labeldata['Habitat'] = array();
@@ -226,12 +228,13 @@ class LabelDataModel extends Model {
               l.Long1Text AS Longitude,
               l.MinElevation,
               l.MaxElevation,
-              l.ElevationMethod,
+              l.Text1 AS AltitudeUnit,
               l.LocalityID,
               ce.CollectingEventID,
               ce.Remarks AS Habitat,
-              ce.VerbatimLocality AS AssociatedTaxa,
+              ce.VerbatimLocality AS CollectingNotes,
               ce.CollectingTripID,
+              cea.Text2 AS AssociatedTaxa,
               cea.Text5 AS Host,
               cea.Text4 AS Substrate,
               cea.Text3 AS Provenance,
@@ -239,7 +242,7 @@ class LabelDataModel extends Model {
               cea.Text13 AS Cultivated,
               co.Text1 AS Habit,
               co.Text2 AS HabitCtd,
-              co.Remarks AS CollectingNotes,
+              co.Remarks AS MiscellaneousNotes,
               cea.Text11 AS Introduced,
               coa.Remarks AS EthnobotanyInfo,
               coa.Text3 AS ToxicityInfo,
@@ -268,6 +271,7 @@ class LabelDataModel extends Model {
                 $labeldata['CatalogNumber'] = $row->CatalogNumber;
                 $labeldata['MelNumber'] = (int) substr($row->CatalogNumber, 0, 7);
                 $colobj = $row->CollectionObjectID;
+                $labeldata['Family'] = $this->getFamily($colobj);
                 $labeldata['FormattedName'] = $this->getFormattedNameString($colobj, 'b');
                 $labeldata['ExtraInfo'] = $row->ExtraInfo;
                 $labeldata['Collector'] = $this->getFormattedCollectorString($row->CollectingEventID, 1);
@@ -283,7 +287,7 @@ class LabelDataModel extends Model {
                 $labeldata['Geography'] = $this->getGeographyString($row->GeographyID);
                 $labeldata['Latitude'] = $row->Latitude;
                 $labeldata['Longitude'] = $row->Longitude;
-                $labeldata['Altitude'] = ($row->MinElevation) ? $this->altitude($row->MinElevation, $row->MaxElevation, $row->ElevationMethod) : FALSE;
+                $labeldata['Altitude'] = ($row->MinElevation) ? $this->altitude($row->MinElevation, $row->MaxElevation, $row->AltitudeUnit) : FALSE;
                 $labeldata['Depth'] = ($row->LocalityID) ? $this->depth($row->LocalityID) : FALSE;
 
                 $labeldata['Habitat'] = $row->Habitat;
@@ -355,6 +359,7 @@ class LabelDataModel extends Model {
                 $numdups = $this->getNumberOfDuplicates($row->CollectionObjectID, $type);
                 $labeldata['numdups'] = $numdups;
                 $labeldata['DuplicateInfo'] = $this->getDuplicateInfo($row->CollectionObjectID);
+                $vrsnumbers = $this->vrsNumber($row->CollectionObjectID);
                 
                 
                 if ($type == 6 || $type == 7 || $type == 13 || $type == 14) {
@@ -363,12 +368,38 @@ class LabelDataModel extends Model {
                             $labelarray[] = $labeldata;
                     }
                 }
+                elseif ($type == 19) {
+                    $vrsnumbers = $this->vrsNumber($row->CollectionObjectID);
+                    if ($vrsnumbers) {
+                        foreach($vrsnumbers as $number) {
+                            $labeldata['VRSNumber'] = $number;
+                            $labelarray[] = $labeldata;
+                        }
+                    }
+                }
                 else {
                     $labelarray[] = $labeldata;
                 }
            }
-            return $labelarray;
+           return $labelarray;
         } else return 'no records selected';
+    }
+    
+    function vrsNumber($colobj) {
+        $this->db->select('SampleNumber');
+        $this->db->from('preparation');
+        $this->db->where('CollectionObjectID', $colobj);
+        $this->db->where('PrepTypeID', 18);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            $numbers = array();
+            foreach ($query->result() as $row)
+                $numbers[] = $row->SampleNumber;
+            return $numbers;
+        }
+        else {
+            return FALSE;
+        }
     }
 
     function altitude($min, $max, $unit) {
@@ -459,8 +490,25 @@ class LabelDataModel extends Model {
             return $labelarray;
         }
     }
-
-
+    
+    function getVrsBarcodeLabelData($collobjects) {
+        $this->db->select('co.CatalogNumber, p.SampleNumber');
+        $this->db->from('collectionobject co');
+        $this->db->join('preparation p', 'co.CollectionObjectID=p.CollectionObjectID');
+        $this->db->where('p.PrepTypeID', 18);
+        $this->db->where_in('co.CollectionObjectID', $collobjects);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            $labelarray = array();
+            foreach ($query->result() as $row) {
+                $labeldata = array();
+                $labeldata['Barcode'] = 'VRS ' . $row->SampleNumber;
+                $labeldata['MELNumber'] = 'MEL ' . (int) substr($row->CatalogNumber, 0, 7);
+                $labelarray[] = $labeldata;
+            }
+            return $labelarray;
+        }
+    }
 
     function getMultisheetLabelData($colobjects) {
         $colobjects = implode(', ', $colobjects);
@@ -721,6 +769,33 @@ class LabelDataModel extends Model {
         elseif ($startdateprecision == 3) // year
             $daterange = $startdate . '–' . $enddate;
         return $daterange;
+    }
+    
+    function getFamily($colobj) {
+        $this->db->select('t.NodeNumber');
+        $this->db->from('determination d');
+        $this->db->join('taxon t', 'd.TaxonID=t.TaxonID');
+        $this->db->where('d.CollectionObjectID', $colobj);
+        $this->db->where('d.IsCurrent', 1);
+        $query = $this->db->get();
+        
+        if ($query->num_rows()) {
+            $row = $query->row();
+            $this->db->select('FullName');
+            $this->db->from('taxon');
+            $this->db->where('NodeNumber <=', $row->NodeNumber);
+            $this->db->where('HighestChildNodeNumber >=', $row->NodeNumber);
+            $this->db->where('RankID', 140);
+            $query = $this->db->get();
+            if ($query->num_rows()) {
+                $row = $query->row();
+                return $row->FullName;
+            }
+            else
+                return FALSE;
+        }
+        else
+            return FALSE;
     }
     
     function getFormattedNameString($colobj, $style='i', $bas=FALSE) {
@@ -1317,7 +1392,7 @@ class LabelDataModel extends Model {
         $this->db->select('SUM(CountAmt) AS NumDups', FALSE);
         $this->db->from('preparation');
         if ($type == 6 || $type == 7)
-            $this->db->where_in('PrepTypeID', array(15, 18));
+            $this->db->where_in('PrepTypeID', array(15));
         elseif ($type == 13 || $type == 14)
             $this->db->where_in('PrepTypeID', array(16));
         $this->db->where('CollectionObjectID', $colobj);
@@ -1330,7 +1405,7 @@ class LabelDataModel extends Model {
         $this->db->select('p.PrepTypeID, p.Text1');
         $this->db->from('preparation p');
         $this->db->where('p.CollectionObjectID', $colobj);
-        $this->db->where_in('p.PrepTypeID', array(15, 18));
+        $this->db->where_in('p.PrepTypeID', array(15));
         //$this->db->where('p.Text1 IS NOT NULL', FALSE, FALSE);
         $query = $this->db->get();
         if ($query->num_rows() > 0) {
@@ -1338,8 +1413,6 @@ class LabelDataModel extends Model {
             foreach ($query->result() as $row ) {
             if ($row->PrepTypeID == 15)
                 $string[] = $row->Text1;
-            elseif ($row->PrepTypeID == 18)
-                $string[] = 'Vic. Ref. Set';
             }
             return implode(', ', $string);
         } else return FALSE;

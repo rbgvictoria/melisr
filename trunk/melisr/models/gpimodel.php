@@ -488,9 +488,10 @@ class GpiModel extends Model {
      */
     public function showDataSets() {
         $this->db->select('d.BatchNo, DATE(d.TimestampCreated) AS DateUploaded,
-            count(*) AS NumRecords', FALSE);
+            count(*) AS NumRecords, count(co.YesNo5) AS NumMarked', FALSE);
         $this->db->from('gpi.dataset d');
         $this->db->join('gpi.unit u', 'd.DataSetID=u.DataSetID');
+        $this->db->join('collectionobject co', 'u.SpCollectionObjectID=co.CollectionObjectID');
         $this->db->group_by('d.DataSetID');
         $query = $this->db->get();
         if ($query->num_rows()) {
@@ -506,7 +507,8 @@ class GpiModel extends Model {
                     'BatchNo' => $row->BatchNo,
                     'DateUploaded' => $row->DateUploaded,
                     'NumRecords' => $row->NumRecords,
-                    'NumErrors' => $numerrors
+                    'NumErrors' => $numerrors,
+                    'NumMarked' => $row->NumMarked
                 );
             }
             return $datasets;
@@ -746,8 +748,7 @@ class GpiModel extends Model {
         $this->db->select('u.SpCollectionObjectID, i.SpDeterminationID');
         $this->db->from('gpi.unit u');
         $this->db->join('gpi.identification i', 'u.UnitID=i.UnitID');
-        $this->db->where('u.DataSetID', $batchno);
-        $this->db->where('i.Author');
+        $this->db->where("u.DataSetID=$batchno AND (i.Author IS NULL OR i.Author='') AND i.TypeStatus!='-'", FALSE, FALSE);
         $query = $this->db->get();
         if ($query->num_rows()) {
             foreach($query->result() as $row)
@@ -792,12 +793,28 @@ class GpiModel extends Model {
             WHERE `UnitID` IN (SELECT `UnitID` FROM gpi.`unit` WHERE `DataSetID`=$batch)");
         $this->db->query("DELETE FROM gpi.`unit`
             WHERE `DataSetID`=$batch");
+        $this->db->query("UPDATE collectionobject co
+            JOIN gpi.unit u ON co.CollectionObjectID=u.SpCollectionObjectID
+            SET co.YesNo5=NULL
+            WHERE u.DataSetID=$batch");
         $this->db->query("DELETE FROM gpi.dataset WHERE DataSetID=$batch");
         $this->db->trans_complete();
     }
     
     public function updateMetadata($datesupplied) {
         $this->db->query("UPDATE gpi.metadata SET DateSupplied='$datesupplied'");
+    }
+    
+    public function markInMelisr($batch) {
+        $this->db->select('co.CollectionObjectID');
+        $this->db->from('collectionobject co');
+        $this->db->join('gpi.unit u', 'co.CollectionObjectID=u.SpCollectionObjectID');
+        $this->db->where('u.DataSetID', $batch);
+        $query = $this->db->get();
+        foreach ($query->result() as $row) {
+            $this->db->where('CollectionObjectID', $row->CollectionObjectID);
+            $this->db->update('collectionobject', array('YesNo5'=>1));
+        }
     }
 
 }
