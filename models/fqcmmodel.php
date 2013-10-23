@@ -31,7 +31,8 @@ class FqcmModel extends Model {
             return false;
     }
 
-      public function missingPreparation($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
+ /** This does something useful */
+    public function missingPreparation($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
@@ -66,7 +67,7 @@ class FqcmModel extends Model {
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,8,10,12,13)", "left");
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
-        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
+        $this->db->where("DATE(co.TimestampModified) >=", $startdate);
         $this->db->groupby("co.CatalogNumber", FALSE);
         $this->db->having("COUNT(p.PrepTypeID)>1", FALSE);
 
@@ -89,7 +90,7 @@ class FqcmModel extends Model {
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,6,8,10,12,13)", "left");
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
-        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
+        $this->db->where("DATE(co.TimestampModified) >=", $startdate);
         $this->db->groupby("co.CatalogNumber", FALSE);
         $this->db->having("COUNT(p.PrepTypeID)=0", FALSE);
 
@@ -113,7 +114,7 @@ class FqcmModel extends Model {
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where("((p.CountAmt > 1 AND p.PrepTypeID IN (1,3,4,8,10,12,13,14)) OR (p.CountAmt IS NULL OR p.CountAmt = 0))", FALSE, FALSE);
-        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
+        $this->db->where("DATE(co.TimestampModified) >=", $startdate);
         
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -186,8 +187,13 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+<<<<<<< .mine
+        $this->db->where("(l.MinElevation IS NOT NULL OR l.MaxElevation IS NOT NULL) AND l.Text1 IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+=======
         $this->db->where("(l.MinElevation IS NOT NULL OR l.MaxElevation IS NOT NULL) AND l.Text1 IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
+>>>>>>> .r12
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -259,8 +265,12 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+<<<<<<< .mine
+        $this->db->where("Latitude1 IS NOT NULL AND ((l.Text2 IS NULL AND DATE(co.TimestampCreated) > '2013-10-12') OR OriginalElevationUnit IS NULL) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+=======
         //$this->db->where("Latitude1 IS NOT NULL AND (LatLongMethod IS NULL OR OriginalElevationUnit IS NULL) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         $this->db->where("Latitude1 IS NOT NULL AND ((l.Text2 IS NULL AND DATE(co.TimestampCreated)>'2013-10-12') OR OriginalElevationUnit IS NULL) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+>>>>>>> .r12
 
         /*
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -336,8 +346,13 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
+<<<<<<< .mine
+AND col.CollectingEventID IS NULL AND ((cea.Text1 IS NULL OR cea.Text1='') AND cea.YesNo2 IS NULL AND cea.YesNo3 IS NULL AND cea.YesNo4 IS NULL)", FALSE, FALSE);
+
+=======
 AND col.CollectingEventID IS NULL AND (cea.Text1 IS NULL OR cea.Text1='' AND cea.YesNo2 IS NULL AND cea.YesNo3 IS NULL AND cea.YesNo4 IS NULL)", FALSE, FALSE);
         
+>>>>>>> .r12
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -564,7 +579,7 @@ AND col.CollectingEventID IS NULL AND (cea.Text1 IS NULL OR cea.Text1='' AND cea
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("p.PrepTypeID NOT IN (15,16,17) AND (p.Text1 IS NOT NULL AND p.Text1 !='')
-AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -587,7 +602,7 @@ AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("LENGTH(p.Text1) - LENGTH(REPLACE(p.Text1, ',', '')) != p.CountAmt-1
-AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -610,7 +625,7 @@ AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17,18) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
-AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -633,7 +648,7 @@ AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17,18) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
-            AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+            AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
