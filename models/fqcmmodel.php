@@ -31,7 +31,10 @@ class FqcmModel extends Model {
             return false;
     }
 
- /** This does something useful */
+        /** Looks for collection object records that are missing a preparation 
+         *  (i.e. an indication of what type of specimen it is and what preparations 
+         *  are associated with it (Sheet, Packet, Spirit, Duplicate etc.) 
+         */
     public function missingPreparation($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -59,7 +62,11 @@ class FqcmModel extends Model {
             return false;
         }
     
-        public function tooManyPrimaryPreparations($startdate, $enddate=FALSE, $userid=FALSE) {
+        /** Looks for collection object records that have more than one
+         *  primary preparation, i.e. more than one preparation that should
+         *  have a unique MEL number (Sheet, Packet, Spirit, Carpological etc.)
+         */
+    public function tooManyPrimaryPreparations($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
@@ -82,7 +89,11 @@ class FqcmModel extends Model {
             return false;
     }
     
-        public function noPrimaryPreparations($startdate, $enddate=FALSE, $userid=FALSE) {
+       /** Looks for collection object records that are missing a primary
+        *  preparation, and only have preparation(s) that should not be 
+        *  assigned unique MEL numbers (Duplicate, Silica gel sample etc.)
+        */
+    public function noPrimaryPreparations($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
@@ -104,8 +115,12 @@ class FqcmModel extends Model {
         else
             return false;
     }
-
-      public function inappropriateQuantityInPreparation($startdate, $enddate=FALSE, $userid=FALSE) {
+    
+        /** Looks for preparations for which the quantity is higher than
+         *  it should be, primary preparations with a quantity higher than 1, 
+         *  or any preparations with a quanitity of 0 or null.
+         */
+    public function inappropriateQuantityInPreparation($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
@@ -126,6 +141,10 @@ class FqcmModel extends Model {
         else
             return false;
     }
+    
+        /** Looks for multisheet messages which are missing the part (the 
+         * letter suffix to the MEL catalogue number).
+         */
     public function partMissingFromMultisheetMessage($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID, co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -147,7 +166,9 @@ class FqcmModel extends Model {
             return false;
     }
     
-        public function jarSizeMissing($startdate, $enddate=FALSE, $userid=FALSE) {
+        /** Looks for Spirit preparations that are missing the jar size. 
+         */
+    public function jarSizeMissing($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
@@ -176,7 +197,10 @@ class FqcmModel extends Model {
       LEFT JOIN agent a2 ON a2.AgentID=co.ModifiedByAgentID
       WHERE (p.Remarks IS NOT NULL AND p.Remarks !='') AND p.Remarks NOT LIKE '%A%'
       AND LEFT(co.TimestampCreated,10)> '2011-12-19'; */
-
+    
+        /** Looks for records that have an altitude value recorded, but do
+         *  not have the altitude units recorded. 
+         */
     public function missingAltitudeUnit($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited,
@@ -199,7 +223,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         else
             return false;
     }
-
+    
+        /** Looks for records that are not linked to a locality record. 
+         */
     public function missingLocality($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -221,7 +247,10 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         else
             return false;
     }
-
+    
+        /** Looks for locality records that are not linked to a geography
+         *  record.
+         */
     public function missingGeography($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -250,7 +279,10 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         else
             return false;
     }
-    
+  
+        /** Looks for georeferenced locality records that are missing the 
+         *  geocode source, or a coded precision value. 
+         */    
     public function missingSourceOrPrecision($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -283,6 +315,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for collection object records that are not linked to a
+         *  determination record.
+         */    
     public function missingDetermination($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -304,6 +339,10 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for determination records that have the 'Stored under this
+         *  name' field flagged (which should be only flagged for types), in a
+         *  determination record that is not a 'Type status' determination.  
+         */
     public function typeMismatch($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -325,6 +364,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for records that do not have any collectors recorded, and 
+         *  do not indicate that the collector(s) is unknown or illegible.
+         */
         public function missingCollectors($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -347,6 +389,11 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
     
+        /** Looks for type status determinations that are flagged as the 
+         *  current determination (there needs to be a separate determination
+         *  record for the current determination, even if it is the same as the 
+         *  typified name.
+         */
     public function typeDetIsCurrent($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -368,6 +415,10 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
     
+        /** Looks for determination records flagged as current that have 
+         *  something in the 'Alternative name' field (which should only
+         *  be used for non-current determinations.
+         */
     public function alternativeNameInCurrentDetermination($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(d.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(d.TimestampModified) AS Edited", FALSE);
@@ -390,6 +441,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for records of types where the current determination is
+         *  indeterminate.
+         */
     public function typeDetOverriddenByIndet($startdate, $enddate=FALSE, $userid=FALSE) {
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
@@ -412,6 +466,8 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for determination records that are missing a taxon name.
+         */
     public function missingTaxonName($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(d.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -439,6 +495,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for new taxon name records that have been added at the rank 
+         *  of subgenus, and are possibly supposed to be species.
+         */
     public function newSubgenus($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("t.FullName,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(t.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(t.TimestampModified) AS Edited", FALSE);
@@ -458,6 +517,8 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for new taxon name records that are missing the author.
+         */
     public function missingAuthor($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("t.FullName,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(t.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(t.TimestampModified) AS Edited", FALSE);
@@ -483,6 +544,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for records where the date of determination is earlier than
+         *  the date of collection.
+         */
     public function detDateEarlierThanCollDate($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -530,6 +594,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for taxon records for names of which we hold type specimens, 
+         *  but which are missing protologue details.
+         */
     public function missingProtologue($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(d.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(d.TimestampModified) AS Edited", FALSE);
@@ -552,6 +619,10 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
+        /** Looks for records that have the list of herbaria to which duplicates
+         *  have been sent recorded in the wrong preparation (e.g. in the 
+         *  primary preparation, not in the Duplicate preparation).
+         */
     public function duplicateHerbariaInWrongPreparation($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -575,6 +646,11 @@ AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for Duplicate preparation records where the quantity of 
+         *  duplicate preparations does not equal the number of herbarium codes
+         *  listed in the 'MEL duplicates at' field (calculated as the 
+         *  number of commas in the 'MEL duplicates at' field, minus one).
+         */
     public function duplicateCountMismatch($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -598,6 +674,10 @@ AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for preparation records that have something in the 
+         *  storage number field that shouldn't be there (e.g. a storage number
+         *  in a Sheet, Packet or Carpological preparation).
+         */
     public function somethingInNumberThatShouldntBeThere($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -621,6 +701,10 @@ AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for preparation records that don't have anything in the 
+         *  storage number field, but should have (e.g. no storage number
+         *  in a Spirit, Silica gel sample or Microscope slide preparation).
+         */
     public function somethingMissingFromNumberField($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -644,6 +728,9 @@ AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for records for which none of the collectors are flagged
+         *  as being the primary collector(s).
+         */
     public function missingPrimaryCollectors($startdate, $enddate=FALSE, $userid=FALSE) {
         /*
           SELECT co.CollectionObjectID, co.CatalogNumber, CONCAT(a.FirstName, ' ', a.LastName) AS CreatedBy, DATE(co.TimestampCreated) AS Created, CONCAT(aa.FirstName, ' ', aa.LastName) AS EditedBy, DATE(co.TimestampModified) AS Edited
@@ -680,6 +767,9 @@ AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for records that have the 'Introduced status' field filled
+         *  in, but don't indicate the source of the introduced status.
+         */
     public function missingIntroSource($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -703,6 +793,9 @@ AND cea.Text11 IS NOT NULL AND cea.Text12 IS NULL", FALSE, FALSE);
             return false;
     }
     
+        /** Looks for records that have the 'Cultivated status' field filled
+         *  in, but don't indicate the source of the cultivated status.
+         */
      public function missingCultSource($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -727,6 +820,9 @@ AND cea.Text13 IS NOT NULL AND (cea.Text14 IS NULL OR cea.Text14='')", FALSE, FA
             return false;
     }
     
+        /** Looks for records with multiple collectors for which the primary
+         *  collector(s) has not been listed as the first collector.
+         */
         public function primaryCollectorNotFirst($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -751,6 +847,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for records that have an end date of collection recorded,
+         *  but no start date.
+         */
     public function endDateWithNoStartDate($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,
@@ -774,6 +873,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for records that were databased by the person who collected
+         *  the specimen. amd which don't have a collecting date recorded.
+         */
         public function noCollectingDate($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,
@@ -798,6 +900,10 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
     
+        /** Looks for records that have the geocode Protocol listed as 'GPS', 
+         *  but which were collected before 1980 (and thus are unlikely to have
+         *  been geocoded via GPS).
+         */
     public function tooEarlyForGPS($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -820,6 +926,10 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
     
+        /** Looks for records that were databased by the person who collected
+         *  the specimen, and were geocoded by GPS, but are missing the
+         *  datum.
+         */
         public function missingDatum($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS Collector,StationFieldNumber", FALSE);
@@ -845,6 +955,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for group agent records that haven't had individual agents
+         *  added to the group.
+         */
     public function groupAgentsWithoutIndividuals($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("a.AgentID,a.LastName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
@@ -866,6 +979,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for agent records that are missing data in the 'Last name'
+         *  field.
+         */
     public function agentsWithNoLastName($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("a.AgentID,a.FirstName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
@@ -887,6 +1003,10 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for locality records that are linked to more than one 
+         *  collecting event record, so people can check that locality records
+         *  were shared intentionally, and not accidentally.
+         */
     public function sharedLocalities($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("l.LocalityID,COUNT(*) AS LocCount", FALSE);
@@ -928,6 +1048,10 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
 
+        /** Looks for collection object records where the Catalogue number is
+         *  higher than the highest catalogue number assigned to a user in the
+         *  MEL numbers module (and which must therefore be an error).
+         */
     public function highCatalogueNumbers($startdate, $enddate=FALSE, $userid=FALSE) {
         $this->db->select("MAX(EndNumber) AS maxnumber", FALSE);
         $this->db->from("melnumbers");
@@ -956,6 +1080,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
     
+        /** Looks for records where the last character in the catalogue number
+         *  is not a letter.
+         */
         public function dodgyPart($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,
@@ -977,7 +1104,10 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         else
             return false;
     }
-    
+ 
+        /** Looks for records where the part is between F-Z, and is possibly
+         *  an error.
+         */
     public function possiblyDodgyPart($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,
@@ -1000,6 +1130,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return false;
     }
     
+        /** Looks for records where the 'Stored under this name' field is 
+         *  flaged in more than one determination record.
+         */
     public function storedUnderMultipleNames($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select('co.CollectionObjectID');
@@ -1043,6 +1176,12 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         }
     }
     
+        /** Looks for new taxon record for genera (or higher ranks) that have
+         *  not had their storage locality set (the higher taxonomy in MELISR
+         *  has been decoupled from the storage system at MEL, so the 
+         *  relationship between names in the database and the storage system
+         *  needs to be defined).
+         */
     public function getMissingGenusStorage($startdate, $enddate=FALSE, $userid=FALSE) {
         $name = array();
         $taxonid = array();
