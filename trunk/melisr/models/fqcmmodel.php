@@ -74,7 +74,7 @@ class FqcmModel extends Model {
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,8,10,12,13)", "left");
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
-        $this->db->where("DATE(co.TimestampModified) >=", $startdate);
+        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
         $this->db->groupby("co.CatalogNumber", FALSE);
         $this->db->having("COUNT(p.PrepTypeID)>1", FALSE);
 
@@ -101,7 +101,7 @@ class FqcmModel extends Model {
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,6,8,10,12,13)", "left");
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
-        $this->db->where("DATE(co.TimestampModified) >=", $startdate);
+        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
         $this->db->groupby("co.CatalogNumber", FALSE);
         $this->db->having("COUNT(p.PrepTypeID)=0", FALSE);
 
@@ -606,7 +606,7 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         $this->db->join("taxon t", "d.TaxonID=t.TaxonID");
         $this->db->join("agent a", "a.AgentID=d.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=d.ModifiedByAgentID");
-        $this->db->where("t.CommonName IS NULL AND NcbiTaxonNumber IS NULL AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE, FALSE);
+        $this->db->where("t.CommonName IS NULL AND NcbiTaxonNumber IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE, FALSE);
 
         if ($userid)
             $this->db->where("co.ModifiedByAgentID", $userid);
