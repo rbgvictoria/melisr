@@ -2,7 +2,13 @@
 	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
-	<title>MELISR</title>
+	<title>
+            <?php if(isset($title)):?>
+            <?=$title?>
+            <?php else: ?>
+            MELISR
+            <?php endif; ?>
+        </title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link rel="stylesheet" type="text/css" href="<?=base_url()?>css/default.css" />
         <?php if (isset($css)): ?>

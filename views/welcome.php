@@ -39,6 +39,34 @@
         'size'        => '8'
     )); ?>
     </div>
+    <div>
+    <p style="margin:0px;padding:0px;">or</p>
+    <?=form_label('VRS number (start):', 'vrsno_start', array('style' => 'width: 130px; text-align: left')); ?>
+    <?=form_input(array(
+        'name'        => 'vrsno_start',
+        'id'          => 'vrsno_start',
+        'value'       => '',
+        'maxlength'   => '7',
+        'size'        => '8'
+    )); ?>
+    <?=form_label('count:', 'vrsno_count', array('style' => 'width: 80px; text-align: right')); ?>
+    <?=form_input(array(
+        'name'        => 'vrsno_count',
+        'id'          => 'vrsno_count',
+        'value'       => '1',
+        'maxlength'   => '3',
+        'size'        => '5'
+    )); ?>
+    <span style="display:inline-block;margin-left:15px;margin-right:15px;">or</span>
+    <?=form_label('VRS number (end):', 'vrsno_end', array('style' => 'width: 120px; text-align: left')); ?>
+    <?=form_input(array(
+        'name'        => 'vrsno_end',
+        'id'          => 'vrsno_end',
+        'value'       => '',
+        'maxlength'   => '7',
+        'size'        => '8'
+    )); ?>
+    </div>
     <?=form_fieldset_close()?>
     <?=form_fieldset('Type of label', array('id' => 'fieldset_type'));?>
     <?=form_radio(array(
@@ -188,7 +216,16 @@
         'value' => '19',
         'checked' => false,
         'style' => ''
-    )); ?>&nbsp;<?=form_label('Vic. Ref. Set label', 'lt19', 
+    )); ?>&nbsp;<?=form_label('Vic. Ref. Set label, 4 per page', 'lt19', 
+            array('style' => 'width: 240px;')); ?>
+    <br/>
+    <?=form_radio(array(
+        'name' => 'labeltype',
+        'id' => 'lt21',
+        'value' => '21',
+        'checked' => false,
+        'style' => ''
+    )); ?>&nbsp;<?=form_label('Vic. Ref. Set label, 2 per page', 'lt21', 
             array('style' => 'width: 240px;')); ?>
     <br/>
     <?=form_radio(array(
