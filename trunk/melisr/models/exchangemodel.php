@@ -101,20 +101,6 @@ class ExchangeModel extends TransactionModel {
             return FALSE;
     }
 
-    function getShipmentMethod($method) {
-        $this->db->select('Title');
-        $this->db->from('picklistitem');
-        $this->db->where('PickListID', 9);
-        $this->db->where('Value', $method);
-        $query = $this->db->get();
-        if ($query->num_rows) {
-            $row = $query->row();
-            return $row->Title;
-        }
-        else
-            return FALSE;
-    }
-
     function getAddress($agentid) {
         $this->db->select('Address5, Address, Address2, Address3, Address4, City, State, PostalCode, Country');
         $this->db->from('address');
