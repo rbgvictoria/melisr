@@ -45,6 +45,29 @@ class RecordSetModel extends Model {
         return $items;
     }
 
+    function getRecordsFromVrsNos($start, $count=FALSE, $end=FALSE) {
+        if (!$count && !$end) return FALSE;
+        $start = (int) $start;
+        $items = array();
+        if (!$end) $end = $start+$count-1;
+        else $end = (int) $end;
+        for ($i = $start; $i <= $end; $i++) {
+            /*$select = "SELECT CollectionObjectID
+                FROM collectionobject
+                WHERE CAST(substring(CatalogNumber, 1, 7) AS unsigned)=$i";*/
+            $select = "SELECT co.CollectionObjectID
+                FROM collectionobject co
+                JOIN preparation p ON co.CollectionObjectID=p.CollectionObjectID
+                WHERE p.PrepTypeID=18 AND CAST(p.SampleNumber AS unsigned)=$i";           
+            $query = $this->db->query($select);
+            if ($query->num_rows() > 0) {
+                foreach ($query->result() as $row) {
+                    $items[] = $row->CollectionObjectID;
+                }
+            }
+        }
+        return $items;
+    }
 
     function getRecordSetItems($recordsetid) {
         $this->db->select('RecordID');

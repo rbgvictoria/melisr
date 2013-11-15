@@ -192,6 +192,7 @@ class TransactionModel extends Model {
         $this->db->select('Address5, Address, Address2, Address3, Address4, City, State, PostalCode, Country');
         $this->db->from('address');
         $this->db->where('AgentID', $agentid);
+        $this->db->where('IsCurrent', 1);
         $query = $this->db->get();
         if ($query->num_rows) {
             $row = $query->row();
