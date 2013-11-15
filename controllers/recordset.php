@@ -18,6 +18,7 @@ class RecordSet extends Controller {
         $this->load->helper('url');
         $this->output->enable_profiler(TRUE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['bannerimage'] = 'MELISR | Record set';
         $this->data['js'][] = 'jquery.recordset.js'; 
         $this->load->model('recordsetmodel');
     }

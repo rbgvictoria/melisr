@@ -9,17 +9,21 @@
  */
 
 class Numbers extends Controller {
+    private $data;
+    
     function __construct() {
         parent::Controller();
         $this->load->helper('form');
         $this->load->helper('file');
         $this->load->helper('url');
         $this->output->enable_profiler(FALSE);
+        $this->data = array();
+        $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Numbers';
     }
 
     function index() {
-        $data['bannerimage'] = $this->banner();
-        $this->load->view('numbers', $data);
+        $this->load->view('numbers', $this->data);
     }
 
     function banner() {
@@ -32,82 +36,73 @@ class Numbers extends Controller {
 
     function spirit() {
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
-        $data['spiritnumber'] = $this->countmodel->getSpiritNumber();
-        $this->load->view('numbers', $data);
+        $this->data['spiritnumber'] = $this->countmodel->getSpiritNumber();
+        $this->load->view('numbers', $this->data);
     }
 
     function slide() {
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
-        $data['slidenumber'] = $this->countmodel->getSlideNumber();
-        $this->load->view('numbers', $data);
+        $this->data['slidenumber'] = $this->countmodel->getSlideNumber();
+        $this->load->view('numbers', $this->data);
     }
     
     function silicagel() {
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
-        $data['silicagelnumber'] = $this->countmodel->getSilicagelNumber();
-        $this->load->view('numbers', $data);
+        $this->data['silicagelnumber'] = $this->countmodel->getSilicagelNumber();
+        $this->load->view('numbers', $this->data);
     }
 
     function melnumber() {
         $howmany = $this->input->post('howmany');
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
         $last = $this->countmodel->getMelNumber();
-        $data['startnumber'] = $last+1;
-        $data['endnumber'] = $last+$howmany;
-        $data['howmany'] = $howmany;
-        $this->load->view('numbers', $data);
+        $this->data['startnumber'] = $last+1;
+        $this->data['endnumber'] = $last+$howmany;
+        $this->data['howmany'] = $howmany;
+        $this->load->view('numbers', $this->data);
     }
     
     function melnumbers() {
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
-        $data['melnumbers'] = $this->countmodel->MelNumbers();
-        $this->load->view('melnumbers_view', $data);
+        $this->data['melnumbers'] = $this->countmodel->MelNumbers();
+        $this->load->view('melnumbers_view', $this->data);
     }
 
     function melnumber_insert() {
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
-        $data['startnumber'] = $this->input->post('startnumber');
-        $data['endnumber'] = $this->input->post('endnumber');
+        $this->data['startnumber'] = $this->input->post('startnumber');
+        $this->data['endnumber'] = $this->input->post('endnumber');
         if ($this->input->post('username')){
-            $data['username'] = $this->input->post('username');
-            $data['print'] = TRUE;
+            $this->data['username'] = $this->input->post('username');
+            $this->data['print'] = TRUE;
             if ($this->countmodel->insertMELNumbers($this->input->post('username'), $this->input->post('startnumber'), $this->input->post('endnumber')))
-                $this->load->view('numbers', $data);
+                $this->load->view('numbers', $this->data);
             else {
-                $data['message'] = 'This range of numbers can not be used';
-                $this->load->view('message', $data);
+                $this->data['message'] = 'This range of numbers can not be used';
+                $this->load->view('message', $this->data);
             }
         } else {
-                $data['message'] = 'Please type in a name';
-                $this->load->view('message', $data);
+                $this->data['message'] = 'Please type in a name';
+                $this->load->view('message', $this->data);
         }
     }
 
     function loan() {
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
-        $data['loannumber'] = $this->countmodel->getLoanNumber();
-        $this->load->view('numbers', $data);
+        $this->data['loannumber'] = $this->countmodel->getLoanNumber();
+        $this->load->view('numbers', $this->data);
     }
 
     function exchange() {
         $this->load->model('countmodel');
-        $data['bannerimage'] = $this->banner();
-        $data['exchangenumber'] = $this->countmodel->getExchangeNumber();
-        $this->load->view('numbers', $data);
+        $this->data['exchangenumber'] = $this->countmodel->getExchangeNumber();
+        $this->load->view('numbers', $this->data);
     }
     
     public function melnumbersusage($id) {
         if (!$id)
             $this->melnumbers();
         $this->load->model('countmodel');
-        $this->data['bannerimage'] = $this->banner();
         $this->data['usage'] = $this->countmodel->checkUsage($id);
         $this->load->view('melnumbersusage_view', $this->data);
     }

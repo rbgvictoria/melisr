@@ -18,6 +18,7 @@ class MelisrAdmin extends Controller {
         $this->load->helper('url');
         $this->output->enable_profiler(TRUE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Admin.';
         $this->load->model('adminmodel');
     }
 

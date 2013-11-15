@@ -19,6 +19,7 @@ class LoanSorter extends Controller {
         $this->load->model('loansortermodel');
         $this->output->enable_profiler(TRUE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Loan sorter';
         $this->data['js'][] = 'jquery.loansorter.js';
     }
 

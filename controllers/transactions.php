@@ -26,6 +26,7 @@ class Transactions extends Controller {
         $this->load->model('exchangemodel');
         $this->load->model('nonmelloanmodel');
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Transactions';
     }
 
     function index() {

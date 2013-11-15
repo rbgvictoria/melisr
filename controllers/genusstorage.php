@@ -9,19 +9,22 @@
  */
 
 class GenusStorage extends Controller {
+    private $data;
     function __construct() {
         parent::Controller();
         $this->load->helper('form');
         $this->load->helper('file');
         $this->load->helper('url');
         $this->output->enable_profiler(TRUE);
+        $this->load->model('genusstoragemodel');
+        $this->data = array();
+        $this->data['title'] = 'MELISR | Genus storage';
+        $this->data['bannerimage'] = $this->banner();
     }
 
     function index() {
-        $this->load->model('genusstoragemodel');
-        $data['bannerimage'] = $this->banner();
-        $data['taxa'] = $this->genusstoragemodel->getTaxa();
-        $this->load->view('genusstorageview', $data);
+        $this->data['taxa'] = $this->genusstoragemodel->getTaxa();
+        $this->load->view('genusstorageview', $this->data);
     }
 
     function banner() {
@@ -33,19 +36,17 @@ class GenusStorage extends Controller {
     }
     
     function edit($t) {
-        $this->load->model('genusstoragemodel');
-        $data['bannerimage'] = $this->banner();
-        $data['taxonid'] = $t;
-        $data['name'] = $this->genusstoragemodel->getName($t);
-        $data['classification'] = $this->genusstoragemodel->getClassification($t);
-        $data['options'] = $this->genusstoragemodel->getStorageDropDown();
+        $this->data['bannerimage'] = $this->banner();
+        $this->data['taxonid'] = $t;
+        $this->data['name'] = $this->genusstoragemodel->getName($t);
+        $this->data['classification'] = $this->genusstoragemodel->getClassification($t);
+        $this->data['options'] = $this->genusstoragemodel->getStorageDropDown();
         
-        $this->load->view('genusstorageeditview', $data);
+        $this->load->view('genusstorageeditview', $this->data);
     }
 
     function insert() {
         if ($this->input->post('storedunder')) {
-            $this->load->model('genusstoragemodel');
             $this->genusstoragemodel->insertTaxon($this->input->post('taxonid'), $this->input->post('name'), $this->input->post('storedunder'));
             redirect('/genusstorage/');
         }
