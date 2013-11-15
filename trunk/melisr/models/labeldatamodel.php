@@ -368,7 +368,7 @@ class LabelDataModel extends Model {
                             $labelarray[] = $labeldata;
                     }
                 }
-                elseif ($type == 19) {
+                elseif ($type == 19 || $type == 21) {
                     $vrsnumbers = $this->vrsNumber($row->CollectionObjectID);
                     if ($vrsnumbers) {
                         foreach($vrsnumbers as $number) {
@@ -1272,7 +1272,7 @@ class LabelDataModel extends Model {
     }
 
     function getProtologue($taxonid) {
-        $select = "SELECT CommonName, Number2, EsaStatus FROM taxon WHERE TaxonID=$taxonid";
+        $select = "SELECT CommonName, Number2, EsaStatus FROM taxon WHERE TaxonID=$taxonid AND CommonName IS NOT NULL";
         $query = $this->db->query($select);
         if ($query->num_rows()) {
             $row = $query->row();
@@ -1325,7 +1325,7 @@ class LabelDataModel extends Model {
             FROM determination d
             JOIN collectionobject co ON d.CollectionObjectID=co.CollectionObjectID
             JOIN preparation p ON co.CollectionObjectID=p.CollectionObjectID
-            JOIN storage s ON p.StorageID=s.StorageID
+            LEFT JOIN storage s ON p.StorageID=s.StorageID
             WHERE d.CollectionObjectID IN ($colobjects)
                 AND p.PrepTypeID IN (1, 2, 3, 4, 8, 10)
                 AND d.YesNo1=1";
