@@ -116,6 +116,10 @@ th {
     background-color: #cccccc;
 }
 
+table tr.even td {
+    background-color: #eeeeee;
+}
+
 .spacer {
     clear: both;
 }
@@ -130,7 +134,7 @@ th {
 }
 
 #fieldset_printer, #fieldset_records {
-    height: 90px;
+    height: 140px;
 }
 
 #fieldset_records div {
