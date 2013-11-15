@@ -19,6 +19,7 @@ class LoanReturn extends Controller {
         $this->load->model('loanreturnmodel');
         $this->output->enable_profiler(TRUE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Loan return';
         //$this->data['js'][] = 'jquery-ui-1.10.2.custom.min.js';
         $this->data['js'][] = 'jquery.dataTables.min.js';
         $this->data['js'][] = 'jquery.melisr.htmltableoptions.js';

@@ -16,6 +16,7 @@ class Borrower extends Controller {
         $this->data['js'][] = 'jquery.borrower.js';
         //$this->data['js'][] = 'jquery.transfer.js';
         $this->data['css'][] = 'datatables.css';
+        $this->data['title'] = 'MELISR | Non MEL loans';
     }
     
     public function index() {

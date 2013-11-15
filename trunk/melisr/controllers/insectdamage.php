@@ -20,6 +20,7 @@ class InsectDamage extends Controller {
         $this->load->model('destructormodel');
         $this->output->enable_profiler(TRUE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Insect damage';
     }
     
     public function index() {
