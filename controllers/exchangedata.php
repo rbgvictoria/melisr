@@ -21,6 +21,7 @@ class ExchangeData extends Controller {
         $this->load->model('exchangemodel');
         $this->load->model('recordsetmodel');
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Exchange data';
         $this->load->library('Hispid5ToCsv');
     }
     

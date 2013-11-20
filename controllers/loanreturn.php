@@ -192,6 +192,7 @@ class LoanReturn extends Controller {
         else
             $discipline = 3;
         
+        $this->data['title'] = 'MELISR | Find loan';
         $this->data['discipline'] = $discipline;
         $this->data['years'] = $this->loanreturnmodel->getYears($discipline);
         $this->data['institutions'] = $this->loanreturnmodel->getInstitutions($discipline);

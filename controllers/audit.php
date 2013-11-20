@@ -18,6 +18,7 @@ class Audit extends Controller {
         $this->load->helper('url');
         $this->output->enable_profiler(TRUE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Audit log';
         $this->load->model('auditmodel');
         $this->load->model('fqcmmodel');
         $this->load->library('session');
