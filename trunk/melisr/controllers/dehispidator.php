@@ -19,6 +19,7 @@ class Dehispidator extends Controller {
         $this->load->helper('url');
         $this->output->enable_profiler(FALSE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | Dehispidator';
         $this->load->library('Hispid3ToCsv');
         $this->load->library('Hispid5ToCsv');
     }

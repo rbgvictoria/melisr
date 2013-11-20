@@ -18,6 +18,7 @@ class Fqcm extends Controller {
         $this->load->helper('url');
         $this->output->enable_profiler(TRUE);
         $this->data['bannerimage'] = $this->banner();
+        $this->data['title'] = 'MELISR | FQCM';
         $this->load->model('fqcmmodel');
         $this->load->model('recordsetmodel');
         $this->data['Users'] = $this->fqcmmodel->getUsers();
