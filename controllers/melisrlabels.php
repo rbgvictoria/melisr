@@ -109,7 +109,6 @@ class MelisrLabels extends Controller {
                     case 19:
                     case 21:
                         $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
-                        //print_r($labeldata);
 
                         $storagemissing = FALSE;
                         foreach ($labeldata as $rec) {
@@ -117,13 +116,13 @@ class MelisrLabels extends Controller {
                                 $storagemissing = TRUE;
                         }
                         if ($storagemissing) {
+                            $this->data['bannerimage'] = $this->banner();
                             $this->data['message'] = 'One or more of your records do not have storage information.<br/>
                                 Please check the genus storage.';
                             $this->load->view('message', $this->data);
                             break;
                         }
                         else {
-                            //$labeldata = $this->labelHtml($labeldata, $type);
                             $this->printLabelNew($labeldata, $config, $start-1);
                             break;
                         }

@@ -75,7 +75,7 @@ QUERY;
             //return FALSE;
             
             //echo $query;
-            $command = "curl --data \"query=" . urlencode($query) . "\" http://203.55.15.78/biocase/pywrapper.cgi?dsa=mel_avh";
+            $command = "curl --data \"query=" . urlencode($query) . "\" http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_avh";
 
             $result = `$command`;
             
@@ -113,9 +113,9 @@ QUERY;
                 $docstring = str_replace('hispid:', '', $docstring);
 
                 $search = "<DataSets>";
-                $repl = '<DataSets xmlns="http://www.chah.org.au/schemas/hispid/5" 
+                $repl = '<DataSets xmlns="http://www.tdwg.org/schemas/abcd/2.06" 
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                    xsi:schemaLocation="http://www.chah.org.au/schemas/hispid/5/HISPID5.xsd">';
+                    xsi:schemaLocation="http://www.tdwg.org/schemas/abcd/2.06 http://rs.tdwg.org/abcd/2.06/b/ABCD_2.06b.xsd">';
 
 
                 $docstring = str_replace($search, $repl, $docstring);
