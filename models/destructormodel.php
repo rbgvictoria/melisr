@@ -95,7 +95,7 @@ class DestructorModel extends Model {
                 $newcollectionobjectattributeid = $max->MaxID+1;
                 
                 $insertArray = array(
-                    'CollectionObjectAttributeID' => $row->CollectionObjectAttributeID,
+                    'CollectionObjectAttributeID' => $newcollectionobjectattributeid,
                     'TimestampCreated' => $date,
                     'Version' => 1,
                     'CollectionMemberID' => 4,
@@ -106,7 +106,7 @@ class DestructorModel extends Model {
                 $this->db->insert('collectionobjectattribute', $insertArray);
                 
                 $updateArray = array(
-                    'CollectionObjectAttributeID' => $row->CollectionObjectAttributeID
+                    'CollectionObjectAttributeID' => $newcollectionobjectattributeid
                 );
                 
                 $this->db->where('CollectionObjectID', $row->CollectionObjectID);

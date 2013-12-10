@@ -105,6 +105,7 @@ class ExchangeModel extends TransactionModel {
         $this->db->select('Address5, Address, Address2, Address3, Address4, City, State, PostalCode, Country');
         $this->db->from('address');
         $this->db->where('AgentID', $agentid);
+        $this->db->where('IsCurrent', 1);
         $query = $this->db->get();
         if ($query->num_rows) {
             $row = $query->row();
@@ -156,7 +157,7 @@ class ExchangeModel extends TransactionModel {
         $this->db->select('PrepTypeID, Name');
         $this->db->from('preptype');
         $this->db->where('IsLoanable', 1);
-        $this->db->where_in('PreptypeID', array(15, 16, 17));
+        $this->db->where_in('PreptypeID', array(15, 16, 17, 7));
         $query = $this->db->get();
         if ($query->num_rows) {
             $loan = array();
@@ -236,7 +237,7 @@ class ExchangeModel extends TransactionModel {
         $this->db->select('PrepTypeID, Name');
         $this->db->from('preptype');
         $this->db->where('IsLoanable', 1);
-        $this->db->where_in('PrepTypeID', array(15, 16, 17));
+        $this->db->where_in('PrepTypeID', array(15, 16, 17, 7));
         $query = $this->db->get();
         if ($query->num_rows) {
             $loansummary = array();

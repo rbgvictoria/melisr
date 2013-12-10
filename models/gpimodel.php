@@ -501,7 +501,8 @@ class GpiModel extends Model {
                 $numerrors = count($errors['NotAType'])
                         + count($errors['TypeStatusEqualsCurrent'])
                         + count($errors['NotABasionym'])
-                        + count($errors['NoAuthor']);
+                        + count($errors['NoAuthor'])
+                        + count($errors['NoProtologue']);
 
                 $datasets[] = array(
                     'BatchNo' => $row->BatchNo,
@@ -662,6 +663,7 @@ class GpiModel extends Model {
         }
         $errors['NotABasionym'] = $this->notABasionym($batchno);
         $errors['NoAuthor'] = $this->noAuthor($batchno);
+        $errors['NoProtologue'] = $this->noProtologue($batchno);
         return $errors;
     }
 
@@ -670,7 +672,7 @@ class GpiModel extends Model {
         $errors = $this->findErrors($batchno);
         foreach ($errors as $key=>$array) {
             if ($array){
-                $this->db->select('co.CatalogNumber, t.FullName, t.Author, d.TypeStatusName');
+                $this->db->select('co.CatalogNumber, t.FullName, t.Author, t.CommonName AS Protologue, t.Number2 AS Year, d.TypeStatusName');
                 $this->db->from('collectionobject co');
                 $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID');
                 $this->db->join('taxon t', 'd.TaxonID=t.TaxonID');
@@ -685,6 +687,8 @@ class GpiModel extends Model {
                             'MELNumber' => 'MEL ' . $row->CatalogNumber,
                             'TaxonName' => $row->FullName,
                             'Author' => xml_convert($row->Author),
+                            'Protologue' => xml_convert($row->Protologue),
+                            'Year' => $row->Year,
                             'TypeStatusName' => $row->TypeStatusName
                         );
                     }
@@ -749,6 +753,30 @@ class GpiModel extends Model {
         $this->db->from('gpi.unit u');
         $this->db->join('gpi.identification i', 'u.UnitID=i.UnitID');
         $this->db->where("u.DataSetID=$batchno AND (i.Author IS NULL OR i.Author='') AND i.TypeStatus!='-'", FALSE, FALSE);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach($query->result() as $row)
+                $ret[] = $row->SpDeterminationID;
+        }
+        return $ret;
+    }
+
+    private function noProtologue($batchno) {
+        /*
+        SELECT u.SpCollectionObjectID, i.SpDeterminationID, t.FullName, t.Author, t.CommonName, t.number2
+        FROM (gpi.unit u)
+        JOIN gpi.identification i ON u.UnitID=i.UnitID
+        JOIN determination d ON i.SpDeterminationID=d.DeterminationID
+        JOIN taxon t ON d.TaxonID=t.TaxonID
+        WHERE d.YesNo1=1 AND (t.Author IS NULL OR t.CommonName IS NULL OR t.Number2 IS NULL);
+        */
+        $ret = array();
+        $this->db->select('u.SpCollectionObjectID, i.SpDeterminationID');
+        $this->db->from('gpi.unit u');
+        $this->db->join('gpi.identification i', 'u.UnitID=i.UnitID');
+        $this->db->join('determination d', 'i.spDeterminationID=d.DeterminationID');
+        $this->db->join('taxon t', 'd.TaxonID=t.TaxonID');
+        $this->db->where("u.DataSetID=$batchno AND (t.Author IS NULL OR t.CommonName IS NULL OR t.Number2 IS NULL) AND d.YesNo1=1", FALSE, FALSE);
         $query = $this->db->get();
         if ($query->num_rows()) {
             foreach($query->result() as $row)

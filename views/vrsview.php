@@ -6,6 +6,7 @@
 <?php endif; ?>
 
 <?php if($records): ?>
+<p><?=count($records)?> new records to be added to Vic. Ref. Set collection</p>
 <?=form_open('vrs'); ?>
 <table>
     <tr>
