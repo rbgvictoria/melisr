@@ -95,7 +95,7 @@ class Transactions extends Controller {
                 $this->load->view('message', $this->data);
             }
         }
-        elseif ($this->input->post('output') < 10) {
+        elseif ($this->input->post('output') < 10) { // gifts
             if ($this->input->post('exchangeoutnumber')) {
                 if(!$this->loaninfo = $this->exchangemodel->getInfo($this->input->post('exchangeoutnumber'))) {
                     $this->data['message'] = 'You are way ahead of yourself';
@@ -141,7 +141,7 @@ class Transactions extends Controller {
                 $this->load->view('message', $this->data);
             }
         }
-        elseif ($this->input->post('output') > 11) {
+        elseif ($this->input->post('output') > 11) { // non MEL loans
             if ($this->input->post('nonmelloan')) {
                 if(!$this->loaninfo = $this->nonmelloanmodel->getNonMelLoanInfo($this->input->post('nonmelloan'))) {
                     $this->data['message'] = 'You are way ahead of yourself';
@@ -181,6 +181,7 @@ class Transactions extends Controller {
             'Sheet' => 'sheet',
             'Packet' => 'packet',
             'Microscope slide' => 'microscope slide',
+            'Silica gel sample' => 'silica gel sample',
             'Spirit' => 'spirit jar',
             'Cibachrome' => 'cibachrome',
             'Photograph of specimen' => 'photograph',
@@ -652,6 +653,7 @@ EOD;
         $this->preptypes = array(
             'Duplicate' => 'duplicate',
             'Seed duplicate' => 'seed duplicate',
+            'Silica gel sample' => 'silica gel sample',
             'Shipping material' => 'shipping material',
             'Type' => 'type'
         );
@@ -872,6 +874,7 @@ EOD;
             'Sheet' => 'sheet',
             'Packet' => 'packet',
             'Microscope slide' => 'microscope slide',
+            'Silica gel sample' => 'silica gel sample',
             'Spirit' => 'spirit jar',
             'Cibachrome' => 'cibachrome',
             'Photograph of specimen' => 'photograph',
@@ -928,18 +931,18 @@ EOD;
         $this->preptypes = array(
             'Duplicate' => 'duplicate',
             'Duplicate seed' => 'duplicate seed',
-            'Shipping material' => 'shipping material',
+            'Silica gel sample' => 'silica gel sample',
+            'Shipping material' => 'shipping material sample',
             'Type' => 'type'
         );
 
-        $this->LoanSummaryString();
         $this->loanPrepHeader = array(
             'ExchangeNumber' => $this->loaninfo['GiftNumber'],
             'ExchangeType' => $this->loaninfo['ExchangeType'],
             'ExchangeTo' => $this->loaninfo['Acronym'],
             'LoanAgent' => $this->LoanAgents,
             'ShipmentDate' => $this->loaninfo['ShipmentDate'],
-            'LoanPrepSummary' => $this->ExchangeSummaryString()
+            'LoanPrepSummary' => $this->LoanSummaryString()
         );
 
         set_time_limit(600);
@@ -1088,6 +1091,8 @@ EOD;
     }
     
     function exchangeSummaryString() {
+        //print_r($this->preptypes);
+        //print_r($this->loanpreparationsummary);
         foreach ($this->preptypes as $key => $value) {
             if (isset($this->loanpreparationsummary[$key])){
                 if (strtolower($key) != 'type') {

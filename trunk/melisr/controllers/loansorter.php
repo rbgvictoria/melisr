@@ -31,12 +31,21 @@ class LoanSorter extends Controller {
         if ($this->input->post('melnumbers')) {
             $melnumbers = explode("\n", $this->input->post('melnumbers'));
             $numbers = array();
+            $numbers_nonmel = array();
             foreach ($melnumbers as $number) {
-                $number = trim(str_replace('MEL', '', $number));
-                if (is_numeric($number))
-                    $numbers[] = str_pad ($number, 7, '0', STR_PAD_LEFT) . 'A';
+                if (substr($number, 0, 4) == 'MEL ') {
+                    $number = trim(str_replace('MEL', '', $number));
+                    if (is_numeric($number))
+                        $numbers[] = str_pad ($number, 7, '0', STR_PAD_LEFT) . 'A';
+                }
+                else {
+                    $numbers_nonmel[] = $number;
+                }
             }
-            $this->data['loans'] = $this->loansortermodel->sortByLoan($numbers);
+            if ($numbers)
+                $this->data['loans'] = $this->loansortermodel->sortByLoan($numbers);
+            if ($numbers_nonmel)
+                $this->data['nonmelloans'] = $this->loansortermodel->sortByLoan($numbers_nonmel, TRUE);
                 
         }
         else {
