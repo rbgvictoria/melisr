@@ -1208,12 +1208,12 @@ class LabelDataModel extends Model {
                         WHERE NodeNumber<$row->NodeNumber AND HighestChildNodeNumber>=$row->NodeNumber AND RankID=180";
                     $q1 = $this->db->query($s1);
                     $r1 = $q1->row();
-                    echo "$r1->TaxonID\t$r1->FullName\n";
+                    //echo "$r1->TaxonID\t$r1->FullName\n";
                     $s2 = "SELECT StorageID
                         FROM `genusstorage`
                         WHERE TaxonID=$r1->TaxonID";
                     $q2 = $this->db->query($s2);
-                    if ($q1->num_rows()) {
+                    if ($q1->num_rows() && $q2->num_rows()) {
                         $r2 = $q2->row();
                         if ($r2->StorageID)
                             return $r2->StorageID;

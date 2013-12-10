@@ -31,7 +31,7 @@
                               'rows'        => '150',
                               'cols'        => '80',
                               'style'       => 'width:418px;height:320px;',
-                              'value'       => ''
+                              'value'       => $this->input->post('stickybarcodes')
                             );
                 echo form_textarea($data);
             ?>

@@ -101,7 +101,7 @@ class LoansModel extends TransactionModel {
         $this->db->select('PrepTypeID, Name');
         $this->db->from('preptype');
         $this->db->where('IsLoanable', 1);
-        $this->db->where_not_in('PreptypeID', array(15, 16, 17, 18));
+        $this->db->where_not_in('PreptypeID', array(15, 16, 17, 18, 7));
         $query = $this->db->get();
         if ($query->num_rows) {
             $loan = array();
@@ -182,7 +182,7 @@ class LoansModel extends TransactionModel {
         $this->db->select('PrepTypeID, Name');
         $this->db->from('preptype');
         $this->db->where('IsLoanable', 1);
-        $this->db->where_not_in('PrepTypeID', array(15, 16, 17, 18));
+        $this->db->where_not_in('PrepTypeID', array(15, 16, 17, 18, 7));
         $query = $this->db->get();
         if ($query->num_rows) {
             $loansummary = array();

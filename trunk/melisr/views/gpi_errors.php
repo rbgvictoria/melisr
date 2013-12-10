@@ -3,7 +3,7 @@
 <h2>Batch <?=$BatchNo?></h2>
 
 <?=form_open(site_url() . "/gpi/create_error_record_set/batch/$BatchNo", array('style' => 'display: inline-block'))?>
-<?php $errortypes = array('NotAType', 'TypeStatusEqualsCurrent', 'NotABasionym', 'NoAuthor'); ?>
+<?php $errortypes = array('NotAType', 'TypeStatusEqualsCurrent', 'NotABasionym', 'NoAuthor', 'NoProtologue'); ?>
 
 <?php foreach ($errortypes as $type): ?>
     <?php if (isset($Errors[$type])): ?>
@@ -21,6 +21,9 @@
             case 'NoAuthor':
                 echo '<h3>Name without author</h3>';
                 break;
+            case 'NoProtologue':
+                echo '<h3>Typified name with missing or incomplete protologue info.</h3>';
+                break;
         }
     ?>
 
@@ -28,9 +31,16 @@
     <tr>
         <th style="width: 4%">&nbsp;</th>
         <th style="width: 18%">MEL number</th>
+        <?php if($type == 'NoProtologue') :?>
+        <th>Taxon name</th>
+        <th>Author</th>
+        <th>Protologue</th>
+        <th>Year</th>
+        <?php else: ?>
         <th style="width: 42%">Taxon name</th>
         <th style="width: 24%">Author</th>
         <th style="width: 12%">Type status</th>
+        <?php endif; ?>
     </tr>
     <?php foreach ($Errors[$type] as $error): ?>
     <tr>
@@ -48,7 +58,7 @@
         <td><?=$error['MELNumber']?></td>
         <td style="padding-right: 3px;">
             <?=$error['TaxonName']?>
-            <?php if ($type == 'NotABasionym' || $type == 'NoAuthor'): ?>
+            <?php if ($type == 'NotABasionym' || $type == 'NoAuthor' || $type == 'NoProtologue'): ?>
             <?php
                 if ($type == $errortypes[2])
                     $name = str_replace (' ', '%20', $error['TaxonName']);
@@ -65,7 +75,12 @@
             <?php endif; ?>
         </td>
         <td><?=$error['Author']?></td>
+        <?php if ($type == 'NoProtologue'): ?>
+        <td><?=$error['Protologue']?></td>
+        <td><?=$error['Year']?></td>
+        <?php else:?>
         <td><?=$error['TypeStatusName']?></td>
+        <?php endif;?>
     </tr>
     <?php endforeach; ?>
 </table>

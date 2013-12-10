@@ -26,7 +26,7 @@ the first row, will break the script.</p>
 <h3>Uploaded data sets:</h3>
     <table>
         <tr><th>Batch no.</th><th>Date uploaded</th>
-            <th>Records</th><th>Errors</th><th colspan="3">Output</th>
+            <th>Records</th><th>Issues</th><th colspan="3">Output</th>
             <th>Delete batch</th>
             <th>Marked in MELISR</th>
         </tr>

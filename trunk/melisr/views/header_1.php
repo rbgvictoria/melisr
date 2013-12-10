@@ -33,7 +33,8 @@
             <a href="<?=site_url()?>/loanreturn/loans">Find loan</a> |
             <a href="<?=site_url()?>/loanreturn">Loan returner</a> |
             <a href="<?=site_url()?>/loansorter">Messy loan sorter</a> |
-            <a href="<?=site_url()?>/exchangedata">Exchange data</a>
+            <a href="<?=site_url()?>/exchangedata">Exchange data</a> |
+            <a href="<?=site_url()?>/borrower">Non MEL loans</a>
     </div>
     <div id="content">
 
