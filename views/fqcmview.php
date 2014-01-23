@@ -306,7 +306,7 @@
 
 <?php if (isset($MissingProtologue)): ?>
 <?php if ($MissingProtologue): ?>
-<h4>These records are types, but the protologue details haven't been entered for the typified name (<?=count($MissingProtologue)?>):</h4>
+<h4>These records are types, but some or all of the protologue details are missing (<?=count($MissingProtologue)?>):</h4>
 <div><a href="#" class="selectall">select/clear all</a></div>
 <table class="dberrors headingcolour1" style="width: 100%">
     <tr>
