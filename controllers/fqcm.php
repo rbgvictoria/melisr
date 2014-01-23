@@ -100,6 +100,8 @@ class Fqcm extends Controller {
                     $this->data['EndDateWithNoStartDate'] = $this->fqcmmodel->endDateWithNoStartDate($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'AgentsWithNoLastName')
                     $this->data['AgentsWithNoLastName'] = $this->fqcmmodel->agentsWithNoLastName($startdate, FALSE, $request['user']);
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'GroupAgentAsPersonAgent')
+                    $this->data['GroupAgentAsPersonAgent'] = $this->fqcmmodel->groupAgentAsPersonAgent($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'DodgyPart')
                     $this->data['DodgyPart'] = $this->fqcmmodel->dodgyPart($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'PossiblyDodgyPart')

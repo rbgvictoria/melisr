@@ -599,7 +599,7 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
 
-        /** Looks for records where the date of determination is earlier than
+            /** Looks for records where the date of determination is earlier than
          *  the date of collection.
          */
     public function detDateEarlierThanCollDate($startdate, $enddate=FALSE, $userid=FALSE) {
@@ -1037,7 +1037,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         /** Looks for agent records that are missing data in the 'Last name'
          *  field.
          */
-    public function agentsWithNoLastName($startdate, $enddate=FALSE, $userid=FALSE) {
+     public function agentsWithNoLastName($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("a.AgentID,a.FirstName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
             LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited");
@@ -1046,6 +1046,29 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join("agent a3", "a.ModifiedByAgentID=a3.AgentID");
         $this->db->join("groupperson gp", "a.AgentID=gp.GroupID", "left");
         $this->db->where("a.LastName IS NULL AND DATE(a.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("a.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+            /** Looks for agent records that appear to be group agents, but have 
+             * been entered as person agents.
+         */
+   public function groupAgentAsPersonAgent($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("a.AgentID,a.FirstName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
+            LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited");
+        $this->db->from("agent a");
+        $this->db->join("agent a2", "a.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "a.ModifiedByAgentID=a3.AgentID");
+        $this->db->where("a.LastName LIKE '%;%' AND a.AgentType=1 AND DATE(a.TimestampCreated)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
             $this->db->where("a.CreatedByAgentID", $userid);
