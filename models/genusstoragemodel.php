@@ -16,6 +16,19 @@ class GenusStorageModel extends Model {
         // connect to database
         $this->load->database();
     }
+    
+    /*function getTaxa() {
+        $this->db->select('t.TaxonID, t.Name');
+        $this->db->from('taxon t');
+        $this->db->join('determination d', 't.TaxonID=d.TaxonID');
+        $this->db->join('genusstorage gs', 't.TaxonID=gs.TaxonID', 'left');
+        $this->db->where('gs.GenusStorageID IS NULL', FALSE, FALSE);
+        $this->db->where('t.RankID <=', 180);
+        $this->db->where('(d.IsCurrent=1 OR d.YesNo1=1)', FALSE, FALSE);
+        $this->db->group_by('t.TaxonID');
+        $query = $this->db->get();
+        return $query->result_array();
+    }*/
 
     function getTaxa() {
         $name = array();
@@ -199,6 +212,93 @@ class GenusStorageModel extends Model {
         $query = $this->db->get();
         $row = $query->row();
         return $row->StorageID;
+    }
+    
+    function getCollectionObjects($taxonid) {
+        $ret = array();
+        $this->db->select('RankID');
+        $this->db->from('taxon');
+        $this->db->where('TaxonID', $taxonid);
+        $query = $this->db->get();
+        $row = $query->row();
+        if ($row->RankID == 180) {
+            // Name of  genus, so we need to find subordinate taxa as well
+            $this->db->select('NodeNumber, HighestChildNodeNumber, TaxonID, FullName');
+            $this->db->from('taxon');
+            $this->db->where('TaxonID', $taxonid);
+            $query = $this->db->get();
+            if ($query->num_rows()) {
+                $node = $query->row();
+                $nodenumber = $node->NodeNumber;
+                $highestchildnodenumber = $node->HighestChildNodeNumber;
+                
+                $ret = array();
+                $this->db->select("t.TaxonID, t.FullName, 'Main' AS StorageType, 
+                    co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
+                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+                $this->db->from('taxon t');
+                $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.IsCurrent=1');
+                $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
+                $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+                $this->db->where("(t.NodeNumber >= $nodenumber 
+                        AND t.NodeNumber <= $highestchildnodenumber)", FALSE, FALSE);
+                $query = $this->db->get();
+                $ret = $query->result_array();
+                
+                $this->db->select("t.TaxonID, t.FullName, 'Type' AS StorageType, 
+                    co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
+                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+                $this->db->from('taxon t');
+                $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.Yesno1=1');
+                $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
+                $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+                $this->db->where("(t.NodeNumber >= $nodenumber 
+                        AND t.NodeNumber <= $highestchildnodenumber)", FALSE, FALSE);
+                $query = $this->db->get();
+                $ret = array_merge($ret, $query->result_array());
+            }
+        }
+        else {
+            $ret = array();
+            $this->db->select("t.TaxonID, t.FullName, 'Main' AS StorageType, 
+                co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
+                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+            $this->db->from('taxon t');
+            $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.IsCurrent=1');
+            $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
+            $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+            $this->db->where('t.TaxonID', $taxonid);
+            $query = $this->db->get();
+            $ret = $query->result_array();
+
+            $this->db->select("t.TaxonID, t.FullName, 'Type' AS StorageType, 
+                co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
+                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+            $this->db->from('taxon t');
+            $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.Yesno1=1');
+            $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
+            $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+            $this->db->where('t.TaxonID', $taxonid);
+            $query = $this->db->get();
+            $ret = array_merge($ret, $query->result_array());
+            
+        }
+        return $ret;
+    }
+    
+    public function updateCollectionObjectStorage($colobjs, $storagetypes, $storedunder) {
+        // Disable triggers
+        $this->db->query('SET @DISABLE_TRIGGER=1');
+        
+        foreach ($colobjs as $index=>$obj) {
+            $storageid = ($storagetypes[$index] == 'Type') ? $this->getTypeStorageID($storedunder) : $storedunder;
+            
+            $this->db->where('CollectionObjectID', $obj);
+            $this->db->update('preparation', array('StorageID' => $storageid));
+        }
+        
+        // Enable triggers again
+        $this->db->query('SET @DISABLE_TRIGGER=NULL');
     }
 }
 

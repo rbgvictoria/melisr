@@ -77,6 +77,35 @@ class AdminModel extends Model {
         );
         $this->db->update('sptasksemaphore', $updatearray);
     }
+    
+    public function spVersion() {
+        $this->db->select('AppVersion, SchemaVersion');
+        $this->db->from('spversion');
+        $query = $this->db->get();
+        return $query->row_array();
+    }
+    
+    public function changeVersion($version) {
+        $schemaversion = array(
+            '6.4.13' => '1.7',
+            '6.5.03' => '1.8',
+        );
+        
+        $updateArray = array(
+            'AppVersion' => $version,
+            'SchemaVersion' => $schemaversion[$version],
+        );
+        
+        $this->db->update('spversion', $updateArray);
+    }
+    
+    public function biocaseLastUpdated() {
+        $this->db->select('max(DateLastEdited) AS LastUpdated', FALSE);
+        $this->db->from('biocase.abcd_unit');
+        $query = $this->db->get();
+        $row = $query->row();
+        return $row->LastUpdated;
+    }
 
 }
 
