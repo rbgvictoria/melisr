@@ -39,6 +39,21 @@ class Vrs extends Controller {
         $i = rand(0, $count-1);
         return $banners[$i]['name'];
     }
+    
+    public function not_in_mel() {
+        
+        if ($this->input->post('delete') && $this->input->post('colobj')) {
+            $this->vrsmodel->deleteVrsRecords($this->input->post('colobj'));
+        }
+        
+        $this->data['records'] = $this->vrsmodel->getNotInMelRecords();
+        $this->load->view('vrs_notinmelview', $this->data);
+    }
+    
+    public function updated_determinations() {
+        $this->data['records'] = $this->vrsmodel->getDifferentDets();
+        $this->load->view('vrs_differentdetsview', $this->data);
+    }
 
 }
 

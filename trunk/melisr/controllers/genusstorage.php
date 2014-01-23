@@ -41,14 +41,16 @@ class GenusStorage extends Controller {
         $this->data['name'] = $this->genusstoragemodel->getName($t);
         $this->data['classification'] = $this->genusstoragemodel->getClassification($t);
         $this->data['options'] = $this->genusstoragemodel->getStorageDropDown();
-        
+        $this->data['colobjects'] = $this->genusstoragemodel->getCollectionObjects($t);
         $this->load->view('genusstorageeditview', $this->data);
     }
 
     function insert() {
         if ($this->input->post('storedunder')) {
             $this->genusstoragemodel->insertTaxon($this->input->post('taxonid'), $this->input->post('name'), $this->input->post('storedunder'));
+            $this->genusstoragemodel->updateCollectionObjectStorage($this->input->post('colobj'), $this->input->post('storagetype'), $this->input->post('storedunder'));
             redirect('/genusstorage/');
+            
         }
         else redirect ('/genusstorage/edit/' . $this->input->post('taxonid'));
     }
