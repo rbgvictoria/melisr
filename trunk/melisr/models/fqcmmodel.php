@@ -703,7 +703,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("taxon t", "d.TaxonID=t.TaxonID");
         $this->db->join("agent a", "a.AgentID=d.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=d.ModifiedByAgentID");
-        $this->db->where("t.CommonName IS NULL AND NcbiTaxonNumber IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE, FALSE);
+        $this->db->where("((t.CommonName IS NULL OR t.CommonName = '') OR (t.Number2 IS NULL OR t.Number2 = '')) AND NcbiTaxonNumber IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE, FALSE);
 
         if ($userid)
             $this->db->where("co.ModifiedByAgentID", $userid);
