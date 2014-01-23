@@ -1015,7 +1015,7 @@
 
 <?php if (isset($MissingCollectors)): ?>
 <?php if ($MissingCollectors): ?>
-<h4>There are no collectors for these records and the verbatim collector field is empty (<?=count($MissingCollectors)?>):</h4>
+<h4>There are no collectors for these records and the verbatim collector, collector unknown and collector illegible fields are empty (<?=count($MissingCollectors)?>):</h4>
 <div><a href="#" class="selectall">select/clear all</a></div>
 <table class="dberrors headingcolour3" style="width: 100%">
     <tr>
