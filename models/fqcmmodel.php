@@ -227,7 +227,7 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             /** Looks for records that have an altitude value high than the 
              * highest point in the state. 
          */
-    public function altitudeTooHigh($startdate, $enddate=FALSE, $userid=FALSE) {
+    public function tooMuchAltitude($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited,
 l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
