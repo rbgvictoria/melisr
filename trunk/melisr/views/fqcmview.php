@@ -1003,6 +1003,7 @@
 <?php endif; ?>
 
 <?php if((isset($MissingCollectors) && $MissingCollectors) ||
+        (isset($GroupCollectors) && $GroupCollectors) ||
         (isset($PrimaryCollectorNotFirst) && $PrimaryCollectorNotFirst) ||
         (isset($EndDateWithNoStartDate) && $EndDateWithNoStartDate) ||
         (isset($MissingPrimaryCollectors) && $MissingPrimaryCollectors) ||
@@ -1027,6 +1028,43 @@
         <th style="width: 14%">Edited on</th>
     </tr>
     <?php foreach ($MissingCollectors as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($GroupCollectors)): ?>
+<?php if ($GroupCollectors): ?>
+<h4>A group agent has been entered as a collector (<?=count($GroupCollectors)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour3" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($GroupCollectors as $prep): ?>
     <tr>
         <td style="width: 4%">
             <?php
