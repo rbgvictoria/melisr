@@ -253,7 +253,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
 (g.Name='Australian Capital Territory' AND l.Text1='m' AND (l.MinElevation > 2015 OR l.maxElevation > 2015)) OR
 (g.Name='Australian Capital Territory' AND l.Text1='ft' AND (l.MinElevation > 6300 OR l.maxElevation > 6300)) OR
 (g.Name='Tasmania' AND l.Text1='m' AND (l.MinElevation > 1640 OR l.maxElevation > 1640)) OR
-(g.Name='Tasmania' AND l.Text1='ft' AND (l.MinElevation > 5350 OR l.maxElevation > 5350)) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+(g.Name='Tasmania' AND l.Text1='ft' AND (l.MinElevation > 5350 OR l.maxElevation > 5350))) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
