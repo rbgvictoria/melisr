@@ -419,6 +419,30 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         else
             return false;
     }
+  
+    /** Looks for records that have group agents as the collector.
+         */
+        public function groupCollectors($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
+        $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND col.CollectingEventID IS NULL AND ((cea.Text1 IS NULL OR cea.Text1='') AND (cea.YesNo3 IS NULL OR cea.YesNo3 = '') AND (cea.YesNo4 IS NULL OR cea.YesNo4 = ''))", FALSE, FALSE);
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
     
         /** Looks for type status determinations that are flagged as the 
          *  current determination (there needs to be a separate determination
