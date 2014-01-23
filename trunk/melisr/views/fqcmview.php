@@ -1617,7 +1617,8 @@
 <?php endif; ?>
 
 <?php if((isset($GroupAgentsWithoutIndividuals) && $GroupAgentsWithoutIndividuals) ||
-        (isset($AgentsWithNoLastName) && $AgentsWithNoLastName)): ?>
+        (isset($AgentsWithNoLastName) && $AgentsWithNoLastName)
+        (isset($GroupAgentAsPersonAgent) && GroupAgentAsPersonAgent)): ?>
 <h3>Agent</h3>
 <?php endif; ?>
 
@@ -1660,6 +1661,32 @@
         <th style="width: 14%">Edited on</th>
     </tr>
     <?php foreach ($AgentsWithNoLastName as $prep): ?>
+    <tr>
+        <td>&nbsp;</td>
+        <td><?=$prep ['FirstName']?></td>
+        <td><?=$prep['AgentCreatedBy']?></td>
+        <td><?=$prep['AgentCreated']?></td>
+        <td><?=$prep['AgentEditedBy']?></td>
+        <td><?=$prep['AgentEdited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table> 
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($GroupAgentAsPersonAgent)): ?>
+<?php if ($GroupAgentAsPersonAgent): ?>
+<h4>This appears to be a group agent, but has been entered as a person agent (<?=count($GroupAgentAsPersonAgent)?>):</h4>
+<table class="dberrors headingcolour5" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 28%">Initials</th>
+        <th style="width: 20%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 20%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($GroupAgentAsPersonAgent as $prep): ?>
     <tr>
         <td>&nbsp;</td>
         <td><?=$prep ['FirstName']?></td>
