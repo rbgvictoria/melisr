@@ -34,7 +34,7 @@ class Fqcm extends Controller {
         $request = $this->uri->uri_to_assoc();
         if ($request && !isset($request['user']))
             $request['user'] = FALSE;
-        if (!$request && ($this->input->post('submit') || $this->input->post('createrecordset'))){
+        if (!$request && ($this->input->post('submit') || $this->input->post('submit_localities') || $this->input->post('createrecordset'))){
             $request['startdate'] = $this->input->post('startdate');
             $request['user'] = $this->input->post('user');
             $request['createrecordset'] = $this->input->post('createrecordset');
@@ -48,7 +48,7 @@ class Fqcm extends Controller {
             if ($this->input->post('createrecordset')) {
                 $this->createRecordSet();
             }
-            if ($request || $this->input->post('createrecordset')) {
+            if (($request || $this->input->post('createrecordset')) && !$this->input->post('submit_localities')) {
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'HighCatalogueNumbers')
                     $this->data['HighCatalogueNumbers'] = $this->fqcmmodel->HighCatalogueNumbers($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingPreparation')
@@ -135,7 +135,9 @@ class Fqcm extends Controller {
                     $this->data['MissingCultSource'] = $this->fqcmmodel->missingCultSource($startdate, FALSE, $request['user']);                
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingIntroSource')
                     $this->data['MissingIntroSource'] = $this->fqcmmodel->missingIntroSource($startdate, FALSE, $request['user']);    
-                }
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingStorage')
+                    $this->data['MissingStorage'] = $this->fqcmmodel->missingStorage($startdate, FALSE, $request['user']);    
+            }
             elseif ($this->input->post('submit_localities')) {
                 $this->data['SharedLocalities'] = $this->fqcmmodel->sharedLocalities($startdate, FALSE, $this->input->post('user'));               
             }
