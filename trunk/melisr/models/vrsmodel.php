@@ -18,13 +18,16 @@ class VrsModel extends Model {
     }
     
     public function getRecords() {
-        $query = $this->db->query("SELECT p.PreparationID, co.CollectionObjectID, co.CatalogNumber, p.SampleNumber, p.ModifiedByAgentID, mba.MiddleInitial, p.TimestampModified,
+        $query = $this->db->query("SELECT p.PreparationID, co.CollectionObjectID, co.CatalogNumber, p.SampleNumber,
+            IF(p.ModifiedByAgentID IS NOT NULL, p.ModifiedByAgentID, p.CreatedByAgentID) AS ModifiedByAgentID,
+              IF(p.ModifiedByAgentID IS NOT NULL, mba.MiddleInitial, cba.MiddleInitial) AS MiddleInitial, p.TimestampModified,
               coa.Number1 AS Flowers, coa.Number2 AS Fruit, coa.Number3 AS Buds,
               coa.Number4 AS Leafless, coa.Number5 AS Fertile, coa.Number6 AS Sterile
             FROM collectionobject co
             LEFT JOIN collectionobjectattribute coa ON co.CollectionObjectAttributeID=coa.CollectionObjectAttributeID
             JOIN preparation p ON co.CollectionObjectID=p.CollectionObjectID
-            JOIN agent mba ON p.ModifiedByAgentID=mba.AgentID
+            LEFT JOIN agent mba ON p.ModifiedByAgentID=mba.AgentID
+            LEFT JOIN agent cba ON p.CreatedByAgentID=cba.AgentID
             LEFT JOIN collectionobject vrs ON p.SampleNumber=vrs.CatalogNumber AND vrs.CollectionID=65536
             WHERE co.CollectionID=4 AND p.PrepTypeID=18 AND vrs.CollectionObjectID IS NULL
             ORDER BY SampleNumber");
@@ -199,6 +202,67 @@ class VrsModel extends Model {
           // 48 bits for "node"
           mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
         );
+    }
+    
+    public function getNotInMelRecords() {
+        $query = $this->db->query("SELECT co.CollectionObjectID, co.CatalogNumber AS VRSNumber, oi.Institution AS MELNumber, 
+            CONCAT(a.LastName, ', ', a.FirstName) AS Perp, co.TimestampCreated
+            FROM collectionobject co
+            JOIN otheridentifier oi ON co.CollectionObjectID=oi.CollectionObjectID
+            JOIN agent a ON co.CreatedByAgentID=a.AgentID
+            WHERE co.CollectionMemberID=65536 AND co.CatalogNumber NOT IN (
+              SELECT p.SampleNumber
+              FROM collectionobject co
+              JOIN preparation p ON co.CollectionObjectID=p.CollectionObjectID
+              WHERE co.CollectionMemberID=4 AND p.PrepTypeID=18
+            )");
+        if ($query->num_rows())
+            return $query->result_array();
+        else
+            return FALSE;
+    }
+    
+    public function deleteVrsRecords($colobjs) {
+        foreach ($colobjs as $id) {
+            $this->db->trans_start();
+            
+            $this->db->delete('otheridentifier', array('CollectionObjectID' => $id));
+            $this->db->delete('preparation', array('CollectionObjectID' => $id));
+            $this->db->delete('determination', array('CollectionObjectID' => $id));
+            
+            $this->db->select('CollectionObjectAttributeID');
+            $this->db->from('collectionobject');
+            $this->db->where('CollectionObjectID', $id);
+            $query = $this->db->get();
+            $row = $query->row();
+            
+            $this->db->delete('collectionobject', array('CollectionObjectID' => $id));
+            $this->db->delete('collectionobjectattribute', array('CollectionObjectAttributeID' => $row->CollectionObjectAttributeID));
+            $this->db->trans_complete();
+        }
+    }
+    
+    public function getDifferentDets() {
+        $this->db->select("vrs.CatalogNumber AS vrsCatalogNumber, vrs_t.FullName AS vrsFullName, IF(vrs_a.FirstName IS NOT NULL, CONCAT(vrs_a.LastName, ', ', vrs_a.FirstName), vrs_a.LastName) AS vrsDeterminer,
+            if(vrs_d.DeterminedDatePrecision=3, SUBSTR(vrs_d.DeterminedDate, 1, 4), IF(vrs_d.DeterminedDatePrecision=2, SUBSTR(vrs_d.DeterminedDate, 1, 7), vrs_d.DeterminedDate)) AS vrsDeterminationDate,
+            mel.CatalogNumber AS melCatalogNumber, mel_t.FullName AS melFullName, IF(mel_a.FirstName IS NOT NULL, CONCAT(mel_a.LastName, ', ', mel_a.FirstName), mel_a.LastName) AS melDeterminer,
+            if(mel_d.DeterminedDatePrecision=3, SUBSTR(mel_d.DeterminedDate, 1, 4), IF(mel_d.DeterminedDatePrecision=2, SUBSTR(mel_d.DeterminedDate, 1, 7), mel_d.DeterminedDate)) AS melDeterminationDate", FALSE);
+        $this->db->from('collectionobject vrs');
+        $this->db->join('determination vrs_d', 'vrs.CollectionObjectID=vrs_d.CollectionObjectID AND vrs_d.IsCurrent=1');
+        $this->db->join('agent vrs_a', 'vrs_d.DeterminerID=vrs_a.AgentID', 'left');
+        $this->db->join('taxon vrs_t', 'vrs_d.TaxonID=vrs_t.TaxonID');
+        $this->db->join('otheridentifier oi', 'vrs.CollectionObjectID=oi.CollectionObjectID');
+        $this->db->join('collectionobject mel', 'oi.Institution=mel.CatalogNumber AND mel.CollectionMemberID=4');
+        $this->db->join('determination mel_d', 'mel.CollectionObjectID=mel_d.CollectionObjectID AND mel_d.IsCurrent=1');
+        $this->db->join('agent mel_a', 'mel_d.DeterminerID=mel_a.AgentID', 'left');
+        $this->db->join('taxon mel_t', 'mel_d.TaxonID=mel_t.TaxonID');
+        $this->db->where('vrs.CollectionMemberID', 65536);
+        $this->db->where('vrs_d.TaxonID!=mel_d.TaxonID', FALSE, FALSE);
+        
+        $query = $this->db->get();
+        
+        return $query->result_array();
+        
     }
 
 

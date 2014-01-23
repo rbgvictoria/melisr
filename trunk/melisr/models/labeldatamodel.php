@@ -224,6 +224,8 @@ class LabelDataModel extends Model {
               ce.EndDatePrecision AS CollectingEndDatePrecision,
               l.LocalityName,
               l.GeographyID,
+              l.Latitude1,
+              l.Longitude1,
               l.Lat1Text AS Latitude,
               l.Long1Text AS Longitude,
               l.MinElevation,
@@ -285,8 +287,8 @@ class LabelDataModel extends Model {
                 } elseif ($row->VerbatimCollectingDate) $labeldata['CollectingDate'] = $row->VerbatimCollectingDate;
                 $labeldata['Locality'] = $this->xml_convert($row->LocalityName);
                 $labeldata['Geography'] = $this->getGeographyString($row->GeographyID);
-                $labeldata['Latitude'] = $row->Latitude;
-                $labeldata['Longitude'] = $row->Longitude;
+                $labeldata['Latitude'] = ($row->Latitude1) ? $row->Latitude : FALSE;
+                $labeldata['Longitude'] = ($row->Longitude1) ? $row->Longitude : FALSE;
                 $labeldata['Altitude'] = ($row->MinElevation) ? $this->altitude($row->MinElevation, $row->MaxElevation, $row->AltitudeUnit) : FALSE;
                 $labeldata['Depth'] = ($row->LocalityID) ? $this->depth($row->LocalityID) : FALSE;
 
@@ -323,6 +325,7 @@ class LabelDataModel extends Model {
                 }
                 else $labeldata['DescriptiveNotes'] = FALSE;
                 $labeldata['CollectingNotes'] = $this->xml_convert($row->CollectingNotes);
+                $labeldata['MiscellaneousNotes'] = $this->xml_convert($row->MiscellaneousNotes);
                 $labeldata['Introduced'] = $row->Introduced;
 
                 $cultivatedArray = array('Cultivated', 'Presumably cultivated', 'Possibly cultivated');
