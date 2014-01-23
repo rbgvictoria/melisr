@@ -238,7 +238,22 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
-        $this->db->where("(g.Name='Victoria' AND l.MinElevation > 2010 AND l.Text1='m') AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        $this->db->where("((g.Name='Victoria' AND l.Text1='m' AND (l.MinElevation > 2010 OR l.maxElevation > 2010)) OR
+(g.Name='Victoria' AND l.Text1='ft' AND (l.MinElevation > 6600 OR l.maxElevation > 6600)) OR
+(g.Name='Western Australia' AND l.Text1='m' AND (l.MinElevation > 1280 OR l.maxElevation > 1280)) OR
+(g.Name='Western Australia' AND l.Text1='ft' AND (l.MinElevation > 4200 OR l.maxElevation > 4200)) OR
+(g.Name='Northern Territory' AND l.Text1='m' AND (l.MinElevation > 1560 OR l.maxElevation > 1560)) OR
+(g.Name='Northern Territory' AND l.Text1='ft' AND (l.MinElevation > 5100 OR l.maxElevation > 5100)) OR
+(g.Name='South Australia' AND l.Text1='m' AND (l.MinElevation > 1460 OR l.maxElevation > 1460)) OR
+(g.Name='South Australia' AND l.Text1='ft' AND (l.MinElevation > 4800 OR l.maxElevation > 4800)) OR
+(g.Name='Queensland' AND l.Text1='m' AND (l.MinElevation > 1650 OR l.maxElevation > 1650)) OR
+(g.Name='Queensland' AND l.Text1='ft' AND (l.MinElevation > 5400 OR l.maxElevation > 5400)) OR
+(g.Name='New South Wales' AND l.Text1='m' AND (l.MinElevation > 2250 OR l.maxElevation > 2250)) OR
+(g.Name='New South Wales' AND l.Text1='ft' AND (l.MinElevation > 7400 OR l.maxElevation > 7400)) OR
+(g.Name='Australian Capital Territory' AND l.Text1='m' AND (l.MinElevation > 2015 OR l.maxElevation > 2015)) OR
+(g.Name='Australian Capital Territory' AND l.Text1='ft' AND (l.MinElevation > 6300 OR l.maxElevation > 6300)) OR
+(g.Name='Tasmania' AND l.Text1='m' AND (l.MinElevation > 1640 OR l.maxElevation > 1640)) OR
+(g.Name='Tasmania' AND l.Text1='ft' AND (l.MinElevation > 5350 OR l.maxElevation > 5350)) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
