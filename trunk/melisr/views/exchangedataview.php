@@ -33,7 +33,7 @@
             'checked'     => 'checked',
         );
         echo form_radio($data);
-        echo form_label('HISPID 5', 'hispid');
+        echo form_label('AVH data (ABCD 2.06)', 'hispid', array('style'=>'width:auto;'));
         echo '<br/>';
         $data = array(
             'name'        => 'format',
@@ -52,10 +52,17 @@
         echo form_label('BioCASe', 'biocase');
     ?>
 
+    <p><?=form_submit('submit', 'Submit')?></p>
     <?=form_fieldset_close()?>
-    <br />
-    <?=form_submit('submit', 'Submit')?>
 <?=form_close(); ?>
+    <div>
+        <?=form_open('exchangedata/updateBiocase')?>
+        <?=form_hidden('lastupdated', $biocaseLastUpdated)?>
+        <p>If any of the records in the exchange or record set have been created or modified today, you may have to update
+            the BioCASe tables in order to get the latest changes. The biocase tables are up-to-date to: <?=$biocaseLastUpdated?>.</p>
+        <p><?=form_submit('submit','Update BioCASe')?></p>
+        <?=form_close()?>
+    </div>
     <div style="clear: both;">&nbsp;</div>
     </div>
 </div>

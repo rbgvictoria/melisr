@@ -50,5 +50,28 @@
 <?php endif;?>
 
 
+<p><?=anchor('melisradmin/version', "Specify version")?></p>
+<?php if (isset($SpVersion) && $SpVersion): ?>
+<?=form_open('melisradmin/version');?>
+<?php 
+    $options = array(
+        '6.4.13' => '6.4.13',
+        '6.5.03' => '6.5.03',
+    );
+    echo form_dropdown('version', $options, $SpVersion['AppVersion']);
+    echo form_submit('change', 'Change');
+?>
+<?=form_close()?>
+<?php endif;?>
+    
+<p><?=anchor('melisradmin/biocase', "Biocase tables")?></p>
+<?php if (isset($lastUpdated) && $lastUpdated): ?>
+<p>Biocase tables last updated: <?=$lastUpdated?></p>
+<?=form_open('melisradmin/biocase')?>
+<?=form_hidden('lastupdated', $lastUpdated); ?>
+<?=form_submit('update', 'Update biocase');?>
+<?=form_close()?>
+
+<?php endif; ?>    
 <?php require_once('footer.php'); ?>
 
