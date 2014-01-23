@@ -238,7 +238,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
-        $this->db->where("(g.Name='Victoria' AND l.MinElevation > 2010 AND l.Text1='metres') AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        $this->db->where("(g.Name='Victoria' AND l.MinElevation > 2010 AND l.Text1='m') AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
