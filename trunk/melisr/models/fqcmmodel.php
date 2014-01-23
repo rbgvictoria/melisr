@@ -223,6 +223,33 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         else
             return false;
     }
+
+            /** Looks for records that have an altitude value high than the 
+             * highest point in the state. 
+         */
+    public function altitudeTooHigh($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited,
+l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
+        $this->db->from("locality l");
+        $this->db->join("geography g", "l.GeographyID=g.GeographyID AND RankID=300");
+        $this->db->join("collectingevent ce", "l.LocalityID=ce.LocalityID");
+        $this->db->join("collectionobject co", "ce.CollectingEventID=co.CollectingEventID");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("(g.Name='Victoria' AND l.MinElevation > 2010 AND l.Text1='metres') AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
     
         /** Looks for records that are not linked to a locality record. 
          */
@@ -1040,7 +1067,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
      public function agentsWithNoLastName($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("a.AgentID,a.FirstName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
-            LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited");
+            LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited,a.FirstName AS FirstName");
         $this->db->from("agent a");
         $this->db->join("agent a2", "a.CreatedByAgentID=a2.AgentID");
         $this->db->join("agent a3", "a.ModifiedByAgentID=a3.AgentID");
@@ -1064,7 +1091,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
    public function groupAgentAsPersonAgent($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("a.AgentID,a.FirstName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
-            LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited");
+            LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited,a.LastName AS LastName");
         $this->db->from("agent a");
         $this->db->join("agent a2", "a.CreatedByAgentID=a2.AgentID");
         $this->db->join("agent a3", "a.ModifiedByAgentID=a3.AgentID");

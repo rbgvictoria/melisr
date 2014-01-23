@@ -55,6 +55,8 @@ class Fqcm extends Controller {
                     $this->data['MissingPreparation'] = $this->fqcmmodel->missingPreparation($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingAltitudeUnit')
                     $this->data['MissingAltitudeUnit'] = $this->fqcmmodel->missingAltitudeUnit($startdate, FALSE, $request['user']);
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'AltitudeTooHigh')
+                    $this->data['AltitudeTooHigh'] = $this->fqcmmodel->altitudeTooHigh($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingLocality')
                     $this->data['MissingLocality'] = $this->fqcmmodel->missingLocality($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingSourceOrPrecision')
