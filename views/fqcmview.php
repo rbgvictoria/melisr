@@ -1617,7 +1617,7 @@
 <?php endif; ?>
 
 <?php if((isset($GroupAgentsWithoutIndividuals) && $GroupAgentsWithoutIndividuals) ||
-        (isset($AgentsWithNoLastName) && $AgentsWithNoLastName)
+        (isset($AgentsWithNoLastName) && $AgentsWithNoLastName) ||
         (isset($GroupAgentAsPersonAgent) && GroupAgentAsPersonAgent)): ?>
 <h3>Agent</h3>
 <?php endif; ?>
