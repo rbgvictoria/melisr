@@ -280,7 +280,38 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
             return false;
     }
   
-        /** Looks for georeferenced locality records that are missing the 
+        /** Looks for newly databased records where 'Cultivated' has been entered in the geography instead of a country name
+         */
+    public function cultivatedInGeography($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
+        $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
+        $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
+        $this->db->join("geography g", "l.GeographyID=g.GeographyID", "left");
+        $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->where("l.GeographyID=31752", FALSE, FALSE);
+        
+        if ($startdate)
+            $this->db->where("DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+        
+        if ($recordset)
+            $this->db->where_in('co.CollectionObjectID', $recordset);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    /** Looks for georeferenced locality records that are missing the 
          *  geocode source, or a coded precision value. 
          */    
     public function missingSourceOrPrecision($startdate, $enddate=FALSE, $userid=FALSE) {
