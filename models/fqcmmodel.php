@@ -408,7 +408,7 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
-        $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND col.CollectingEventID IS NULL AND ((cea.Text1 IS NULL OR cea.Text1='') AND cea.YesNo2 IS NULL AND cea.YesNo3 IS NULL AND cea.YesNo4 IS NULL)", FALSE, FALSE);
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND col.CollectingEventID IS NULL AND ((cea.Text1 IS NULL OR cea.Text1='') AND cea.YesNo3 IS NULL AND cea.YesNo4 IS NULL)", FALSE, FALSE);
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
