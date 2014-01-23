@@ -36,6 +36,10 @@ class ExchangeData extends Controller {
     function index() {
         $this->data['gifts'] = $this->exchangemodel->getGiftNumbers();
         $this->data['recordsets'] = $this->recordsetmodel->getCollectionObjectRecordSets();
+        
+        $this->load->model('adminmodel');
+        $this->data['biocaseLastUpdated'] = $this->adminmodel->biocaseLastUpdated();
+        
         $this->load->view('exchangedataview', $this->data);
     }
     
@@ -55,6 +59,9 @@ class ExchangeData extends Controller {
                 $values[] = '<value>' . $unit . '</value>';
             $values = implode('', $values);
             
+            $url = 'http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi';
+            $dsa = 'mel_avh';
+            
             $query =<<<QUERY
 <?xml version="1.0" encoding="UTF-8"?>
 <request xmlns="http://www.biocase.org/schemas/protocol/1.3">
@@ -70,17 +77,10 @@ class ExchangeData extends Controller {
 </request>
 QUERY;
             
-            //$this->data['message'] = ($query);
-            //$this->load->view('message', $this->data);
-            //return FALSE;
-            
-            //echo $query;
-            $command = "curl --data \"query=" . urlencode($query) . "\" http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_avh";
+            $command = "curl --proxy nklaze:32dicranol@203.55.15.4:8080 --data \"query=" . urlencode($query) . "\" http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_avh";
 
             $result = `$command`;
             
-            
-//
             $orgdoc = new DOMDocument('1.0', 'UTF-8');
             $orgdoc->loadXML($result);
             
@@ -137,8 +137,13 @@ QUERY;
         }
         
     }
-
-
+    
+    public function updateBiocase() {
+        $updatefrom = $this->input->post('lastupdated');
+        `php /home/melisr/biocase/update_biocase.php \"$updatefrom\" exchange`;
+        redirect('exchangedata');
+    }
+    
 }
 
 ?>

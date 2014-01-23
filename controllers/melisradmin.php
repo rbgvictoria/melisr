@@ -56,6 +56,25 @@ class MelisrAdmin extends Controller {
         $i = rand(0, $count-1);
         return $banners[$i]['name'];
     }
+    
+    public function version() {
+        if ($this->input->post('change')) {
+            $this->adminmodel->changeVersion($this->input->post('version'));
+        }
+        
+        $this->data['SpVersion'] = $this->adminmodel->spVersion();
+        $this->load->view('admin_view', $this->data);
+    }
+    
+    public function biocase() {
+        if ($this->input->post('update')) {
+            $updatefrom = $this->input->post('lastupdated');
+            `php /home/melisr/biocase/update_biocase.php \"$updatefrom\"`;
+        }
+        
+        $this->data['lastUpdated'] = $this->adminmodel->biocaseLastUpdated();
+        $this->load->view('admin_view', $this->data);
+    }
 
 }
 ?>

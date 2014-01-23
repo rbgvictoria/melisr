@@ -109,6 +109,7 @@ class MelisrLabels extends Controller {
                     case 19:
                     case 21:
                         $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
+                        //print_r($labeldata);
 
                         $storagemissing = FALSE;
                         foreach ($labeldata as $rec) {
@@ -271,6 +272,7 @@ class MelisrLabels extends Controller {
         $this->data['MissingGeography'] = $this->fqcmmodel->missingGeography(FALSE, FALSE, FALSE, $records);
         $this->data['MissingTaxonName'] = $this->fqcmmodel->missingTaxonName(FALSE, FALSE, FALSE, $records);
         $this->data['MissingPreparation'] = $this->fqcmmodel->missingPreparation(FALSE, FALSE, FALSE, $records);
+        $this->data['MissingStorage'] = $this->fqcmmodel->missingPreparation(FALSE, FALSE, FALSE, $records);
 
         $error = FALSE;
         foreach (array_values($this->data) AS $value) {
@@ -1038,6 +1040,7 @@ class MelisrLabels extends Controller {
             if ($labeldata[$i]['CollectingNotes']) $not['CollectingNotes'] = '<b>Collecting notes:</b> ' . xml_convert($labeldata[$i]['CollectingNotes']);
             if ($labeldata[$i]['Ethnobotany']) $not['Ethnobotany'] = '<b>Ethnobotany notes:</b> ' . $labeldata[$i]['Ethnobotany'];
             if ($labeldata[$i]['Toxicity']) $not['Toxicity'] = '<b>Toxicity notes:</b> ' . $labeldata[$i]['Toxicity'];
+            if ($labeldata[$i]['MiscellaneousNotes']) $not['MiscellaneousNotes'] = '<b>Misc. notes:</b> ' . xml_convert($labeldata[$i]['MiscellaneousNotes']);
             
             if ($not) {
                 $pdf->SetY($pdf->GetY() + 1);
