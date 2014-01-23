@@ -1352,7 +1352,7 @@
         (isset($CultivatedInGeography) && $CultivatedInGeography) ||
         (isset($MissingSourceOrPrecision) && $MissingSourceOrPrecision) ||
         (isset($MissingAltitudeUnit) && $MissingAltitudeUnit) ||
-        (isset($AltitudeTooHigh) && $AltitudeTooHigh) ||
+        (isset($TooMuchAltitude) && $TooMuchAltitude) ||
         (isset($TooEarlyForGPS) && $TooEarlyForGPS) ||
         (isset($MissingDatum) && $MissingDatum)): ?>
 <h3>Locality</h3>
@@ -1543,9 +1543,9 @@
 <?php endif; ?>
 <?php endif; ?>
 
-<?php if (isset($AltitudeTooHigh)): ?>
-<?php if ($AltitudeTooHigh): ?>
-<h4>The altitude is too high for the state or territory (<?=count($AltitudeTooHigh)?>):</h4>
+<?php if (isset($TooMuchAltitude)): ?>
+<?php if ($TooMuchAltitude): ?>
+<h4>The altitude is too high for the state or territory (<?=count($TooMuchAltitude)?>):</h4>
 <div><a href="#" class="selectall">select/clear all</a></div>
 <table class="dberrors headingcolour4" style="width: 100%">
     <tr>
@@ -1556,7 +1556,7 @@
         <th style="width: 25%">Edited by</th>
         <th style="width: 14%">Edited on</th>
     </tr>
-    <?php foreach ($AltitudeTooHigh as $prep): ?>
+    <?php foreach ($TooMuchAltitude as $prep): ?>
     <tr>
         <td style="width: 4%">
             <?php
