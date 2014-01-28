@@ -216,7 +216,6 @@ class LabelDataModel extends Model {
               d.DeterminerID,
               d.DeterminedDate,
               d.DeterminedDatePrecision,
-              d.Remarks AS DeterminationNotes,
               ce.StationFieldNumber AS CollectingNumber,
               ce.StartDate AS CollectingDate,
               ce.StartDatePrecision AS CollectingDatePrecision,
@@ -248,6 +247,7 @@ class LabelDataModel extends Model {
               cea.Text11 AS Introduced,
               coa.Remarks AS EthnobotanyInfo,
               coa.Text3 AS ToxicityInfo,
+              coa.YesNo4=1 AS IsHortRefSet,
               co.Number1');
         $this->db->from('collectionobject co');
         $this->db->join('collectionobjectattribute coa', 'co.CollectionObjectAttributeID=coa.CollectionObjectAttributeID', 'left');
@@ -354,7 +354,6 @@ class LabelDataModel extends Model {
                 $labeldata['DetType'] = $row->FeatureOrBasis;
                 $labeldata['DeterminedBy'] = ($row->DeterminerID) ? $this->getAgentName($row->DeterminerID) : FALSE;
                 $labeldata['DeterminedDate'] = ($row->DeterminedDate) ? $this->getProperDate($row->DeterminedDate, $row->DeterminedDatePrecision) : FALSE;
-                $labeldata['DeterminationNotes'] = $row->DeterminationNotes;
 
                 if ($type == 12)
                     $labeldata['SpiritInfo'] = $this->getSpiritInfo ($row->CollectionObjectID);
@@ -362,6 +361,8 @@ class LabelDataModel extends Model {
                 $numdups = $this->getNumberOfDuplicates($row->CollectionObjectID, $type);
                 $labeldata['numdups'] = $numdups;
                 $labeldata['DuplicateInfo'] = $this->getDuplicateInfo($row->CollectionObjectID);
+                $labeldata['HortRefSet'] = $row->IsHortRefSet;
+                
                 $vrsnumbers = $this->vrsNumber($row->CollectionObjectID);
                 
                 
