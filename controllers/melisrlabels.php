@@ -948,6 +948,11 @@ class MelisrLabels extends Controller {
             if ($this->input->post('labeltype') == 19 || $this->input->post('labeltype') == 21) {
                 $pdf->MultiCell($props['wheader'], 5, '<b>Victorian Reference Set</b>', 0, 'C', 0, 1, $labelheader_pos['x'][$x], $pdf->GetY(), true, false, true);
             }
+            elseif($labeldata[$i]['HortRefSet']) {
+                $pdf->MultiCell($props['wheader'], 5, '<b>Horticultural Reference Set</b>', 0, 'C', 0, 1, $labelheader_pos['x'][$x], $pdf->GetY(), true, false, true);
+                $barcode_pos['y'][$y]+=3;
+                $barcodetext_pos['y'][$y]+=3;
+            }
             
             if(!$dup) {
                 if ($this->input->post('labeltype') == 19 || $this->input->post('labeltype') == 21) {
@@ -1070,6 +1075,8 @@ class MelisrLabels extends Controller {
                 $pdf->MultiCell($props['whtml'], 5, '<b>Dupl.:</b> ' . $labeldata[$i]['DuplicateInfo'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
             
             $storedunder = $labeldata[$i]['StoredUnder'];
+            if ($labeldata[$i]['HortRefSet'])
+                $storedunder = str_replace ('Main collection', 'Hort. Ref. Set', $storedunder);
             if($props['footerpositionabsolute']) {
                 if ($dup) {
                     $footer = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
