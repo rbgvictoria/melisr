@@ -189,7 +189,7 @@
         (isset($TypeDetIsCurrent) && $TypeDetIsCurrent) ||
         (isset($AlternativeNameInCurrentDetermination) && $AlternativeNameInCurrentDetermination) ||
         (isset($TypeDetOverriddenByIndet) && $TypeDetOverriddenByIndet) ||
-        (isset($StoredUnderMultipleNames) && $StoredUnderMultipleNames)): ?>
+        (isset($StoredUnderMultipleNames) && $StoredUnderMultipleNames)) : ?>
 
 <h3>Determination</h3>
 
@@ -628,7 +628,8 @@
         (isset($JarSizeMissing) && $JarSizeMissing) ||
         (isset($InappropriateQuantityInPreparation) && $InappropriateQuantityInPreparation) ||
         (isset($TooManyPrimaryPreparations) && $TooManyPrimaryPreparations) ||
-        (isset($NoPrimaryPreparations) && $NoPrimaryPreparations)): ?>
+        (isset($NoPrimaryPreparations) && $NoPrimaryPreparations) ||
+        (isset($MissingStorage) && $MissingStorage)): ?>
 <h3>Preparation</h3>
 <?php endif; ?>
 
@@ -979,6 +980,43 @@
         <th style="width: 14%">Edited on</th>
     </tr>
     <?php foreach ($NoPrimaryPreparations as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($MissingStorage)): ?>
+<?php if ($MissingStorage): ?>
+<h4>The records don't have the storage set (<?=count($MissingStorage)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour2" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($MissingStorage as $prep): ?>
     <tr>
         <td style="width: 4%">
             <?php

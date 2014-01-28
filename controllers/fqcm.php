@@ -129,8 +129,7 @@ class Fqcm extends Controller {
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingGeography')
                     $this->data['MissingGeography'] = $this->fqcmmodel->missingGeography($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'CultivatedInGeography')
-                    $this->data['CultivatedInGeography'] = $this->fqcmmodel->cultivatedInGeography($startdate, FALSE, $request['user']); //               if (!isset($request['fqcr']) || $request['fqcr'] == 'PartlyAtomisedHabitat')
- //                   $this->data['PartlyAtomisedHabitat'] = $this->fqcmmodel->partlyAtomisedHabitat($startdate, FALSE, $request['user']);
+                    $this->data['CultivatedInGeography'] = $this->fqcmmodel->cultivatedInGeography($startdate, FALSE, $request['user']); 
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingCultSource')
                     $this->data['MissingCultSource'] = $this->fqcmmodel->missingCultSource($startdate, FALSE, $request['user']);                
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingIntroSource')
