@@ -242,7 +242,6 @@ class LabelDataModel extends Model {
               cea.Text6 AS VerbatimCollectingDate,
               cea.Text13 AS Cultivated,
               co.Text1 AS Habit,
-              co.Text2 AS HabitCtd,
               co.Remarks AS MiscellaneousNotes,
               cea.Text11 AS Introduced,
               coa.Remarks AS EthnobotanyInfo,
@@ -321,7 +320,6 @@ class LabelDataModel extends Model {
 
                 if ($row->Habit) {
                     $labeldata['DescriptiveNotes'] = $this->xml_convert($row->Habit);
-                    if($row->HabitCtd) $labeldata['DescriptiveNotes'] .= ' ' . $this->xml_convert($row->HabitCtd);
                 }
                 else $labeldata['DescriptiveNotes'] = FALSE;
                 $labeldata['CollectingNotes'] = $this->xml_convert($row->CollectingNotes);
@@ -711,6 +709,7 @@ class LabelDataModel extends Model {
     }
 
     function getProperDate($date, $precision) {
+        $properDate = FALSE;
         $dateArray = explode('-', $date);
         $year = $dateArray[0];
         switch ((int) $dateArray[1]) {
