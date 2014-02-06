@@ -80,7 +80,8 @@ class Fqcm extends Controller {
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingCollectors')
                     $this->data['MissingCollectors'] = $this->fqcmmodel->missingCollectors($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'GroupCollectors')
-                    $this->data['GroupCollectors'] = $this->fqcmmodel->groupCollectors($startdate, FALSE, $request['user']);                if (!isset($request['fqcr']) || $request['fqcr'] == 'DuplicateHerbariaInWrongPreparation')
+                    $this->data['GroupCollectors'] = $this->fqcmmodel->groupCollectors($startdate, FALSE, $request['user']);                
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'DuplicateHerbariaInWrongPreparation')
                     $this->data['DuplicateHerbariaInWrongPreparation'] = $this->fqcmmodel->duplicateHerbariaInWrongPreparation($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'DuplicateCountMismatch')
                     $this->data['DuplicateCountMismatch'] = $this->fqcmmodel->DuplicateCountMismatch($startdate, FALSE, $request['user']);

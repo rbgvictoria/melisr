@@ -476,7 +476,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND col.CollectingEventID IS NULL AND (cea.Text1 IS NULL OR cea.Text1='' AND cea.YesNo2 IS NULL AND cea.YesNo3 IS NULL AND cea.YesNo4 IS NULL)", FALSE, FALSE);
+        $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND col.CollectingEventID IS NULL AND (cea.Text1 IS NULL OR cea.Text1='') AND (cea.YesNo3 IS NULL OR cea.YesNo3 = 0) AND (cea.YesNo4 IS NULL OR cea.YesNo4 = 0)", FALSE, FALSE);
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
