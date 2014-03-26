@@ -48,6 +48,7 @@ class Fqcm extends Controller {
             if ($this->input->post('createrecordset')) {
                 $this->createRecordSet();
             }
+            $this->fqcmmodel->getCollectionObjects($startdate, FALSE, $request['user']);     
             if (($request || $this->input->post('createrecordset')) && !$this->input->post('submit_localities')) {
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'HighCatalogueNumbers')
                     $this->data['HighCatalogueNumbers'] = $this->fqcmmodel->HighCatalogueNumbers($startdate, FALSE, $request['user']);

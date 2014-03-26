@@ -9,15 +9,18 @@
  * @property CI_DB_forge $dbforge
  */
 class FqcmModel extends Model {
-
+    private $collids;
+        
     public function __construct() {
         parent::Model();
 
         // connect to database
         $this->load->database();
         $this->load->helper('xml');
+    
+        $this->collids=array();
     }
-
+    
     public function getUsers() {
         $query = $this->db->query("SELECT a.AgentID,s.Name FROM specifyuser s
             JOIN agent a ON s.SpecifyUserID=a.SpecifyUserID
@@ -31,6 +34,29 @@ class FqcmModel extends Model {
             return false;
     }
 
+        /** 
+         * Creates an array of collection object identifiers for the other co 
+         * queries to use.
+         */
+    public function getCollectionObjects ($startdate, $enddate=FALSE, $userid=FALSE) {
+        $this->db->select("CollectionObjectID");
+        $this->db->from("collectionobject");
+        $this->db->where("(DATE(TimestampCreated)>='$startdate' OR DATE(TimestampModified)>='$startdate')", FALSE, FALSE);
+        if ($enddate) {
+            $this->db->where("(DATE(TimestampCreated)<='$enddate' OR DATE(TimestampModified)<='$enddate')", FALSE, FALSE);
+        }
+        if ($userid) {
+            $this->db->where("(CreatedByAgentID=$userid OR ModifiedByAgentID=$userid)", FALSE, FALSE);
+        }
+        $query=$this->db->get();
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $this->collids[]=$row->CollectionObjectID;
+            }
+        }
+    }
+    
+    
         /** Looks for collection object records that are missing a preparation 
          *  (i.e. an indication of what type of specimen it is and what preparations 
          *  are associated with it (Sheet, Packet, Spirit, Duplicate etc.) 
@@ -45,6 +71,9 @@ class FqcmModel extends Model {
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("p.PreparationID IS NULL", FALSE, FALSE);
         
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($startdate)
             $this->db->where("DATE(co.TimestampCreated) >=$startdate", FALSE, FALSE);
             
@@ -78,6 +107,9 @@ class FqcmModel extends Model {
         $this->db->groupby("co.CatalogNumber", FALSE);
         $this->db->having("COUNT(p.PrepTypeID)>1", FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -105,6 +137,9 @@ class FqcmModel extends Model {
         $this->db->groupby("co.CatalogNumber", FALSE);
         $this->db->having("COUNT(p.PrepTypeID)=0", FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -125,6 +160,10 @@ class FqcmModel extends Model {
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where('co.CollectionMemberID', 4);
         $this->db->where('p.StorageID IS NULL', FALSE, FALSE);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($startdate)
             $this->db->where("DATE(co.TimestampModified)>=\"$startdate\"", FALSE, FALSE);
             
@@ -157,6 +196,9 @@ class FqcmModel extends Model {
         $this->db->where("((p.CountAmt > 1 AND p.PrepTypeID IN (1,3,4,8,10,12,13,14)) OR (p.CountAmt IS NULL OR p.CountAmt = 0))", FALSE, FALSE);
         $this->db->where("DATE(co.TimestampModified) >=", $startdate);
         
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -181,6 +223,9 @@ class FqcmModel extends Model {
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("p.Remarks IS NOT NULL AND p.Remarks !='' AND p.Remarks NOT LIKE '%A%'AND DATE(co.TimestampCreated) >=", $startdate);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -204,6 +249,9 @@ class FqcmModel extends Model {
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("p.Status IS NULL AND DATE(co.TimestampCreated) >=", $startdate);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -239,6 +287,9 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("(l.MinElevation IS NOT NULL OR l.MaxElevation IS NOT NULL) AND l.Text1 IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -281,6 +332,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
 (g.Name='Tasmania' AND l.Text1='m' AND (l.MinElevation > 1640 OR l.maxElevation > 1640)) OR
 (g.Name='Tasmania' AND l.Text1='ft' AND (l.MinElevation > 5350 OR l.maxElevation > 5350))) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -304,6 +358,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("ce.LocalityID IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -331,6 +388,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("l.GeographyID IS NULL", FALSE, FALSE);
         
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($startdate)
             $this->db->where("DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
@@ -361,6 +421,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("l.GeographyID=31752", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
         
         if ($startdate)
             $this->db->where("DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
@@ -403,6 +466,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("Latitude1 IS NOT NULL AND ((l.Text2 IS NULL AND DATE(co.TimestampCreated) > '2013-10-12') OR OriginalElevationUnit IS NULL) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
          */
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -426,6 +492,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("d.DeterminationID IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -452,6 +521,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("d.FeatureOrBasis !='Type status' AND d.YesNo1=1 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.ModifiedByAgentID", $userid);
 
@@ -477,6 +549,10 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND col.CollectingEventID IS NULL AND (cea.Text1 IS NULL OR cea.Text1='') AND (cea.YesNo3 IS NULL OR cea.YesNo3 = 0) AND (cea.YesNo4 IS NULL OR cea.YesNo4 = 0)", FALSE, FALSE);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -501,6 +577,10 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->join("agent aaa", "aaa.AgentID=col.AgentID");
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND aaa.AgentType=3", FALSE, FALSE);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -526,6 +606,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("d.FeatureOrBasis ='Type status' AND d.IsCurrent =1 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.ModifiedByAgentID", $userid);
@@ -577,6 +660,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("t.RankID<220 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.ModifiedByAgentID", $userid);
@@ -601,6 +687,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("d.TaxonID IS NULL AND d.AlternateName IS NULL", FALSE, FALSE);
         
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($startdate) 
             $this->db->where("DATE(d.TimestampCreated)>='$startdate'", FALSE, FALSE);
 
@@ -683,6 +772,10 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
         $this->db->where("DATE(co.TimestampCreated) >='$startdate'", FALSE, FALSE);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         /* $this->db->where("((d.DeterminedDatePrecision=1 AND d.DeterminedDate<ce.StartDate) OR
           (d.DeterminedDatePrecision=2 AND LEFT(d.DeterminedDate, 7)<LEFT(ce.StartDate, 7)) OR
           (d.DeterminedDatePrecision=3 AND YEAR(d.DeterminedDate)<YEAR(ce.StartDate)));",
@@ -731,6 +824,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("t.CommonName IS NULL AND NcbiTaxonNumber IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.ModifiedByAgentID", $userid);
 
@@ -758,6 +854,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("p.PrepTypeID NOT IN (15,16,17) AND (p.Text1 IS NOT NULL AND p.Text1 !='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+    
         if ($userid)
             $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
         $query = $this->db->get();
@@ -784,6 +883,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("LENGTH(p.Text1) - LENGTH(REPLACE(p.Text1, ',', '')) != p.CountAmt-1
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
@@ -812,6 +914,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
 
@@ -838,6 +943,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
@@ -878,6 +986,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->group_by('co.CollectionObjectID');
         $this->db->having('SUM(IsPrimary)=0', FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -903,6 +1014,9 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
 AND cea.Text11 IS NOT NULL AND cea.Text12 IS NULL", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -931,6 +1045,9 @@ AND cea.Text11 IS NOT NULL AND cea.Text12 IS NULL", FALSE, FALSE);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
 AND cea.Text13 IS NOT NULL AND (cea.Text14 IS NULL OR cea.Text14='')", FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -958,6 +1075,9 @@ AND cea.Text13 IS NOT NULL AND (cea.Text14 IS NULL OR cea.Text14='')", FALSE, FA
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
 AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -984,6 +1104,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
                         AND ce.StartDate IS NULL AND ce.EndDate IS NOT NULL", FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+                
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -1011,6 +1134,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
                         AND ce.StartDate IS NULL AND col.AgentID=co.CreatedByAgentID", FALSE, FALSE);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -1036,6 +1162,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("LatLongMethod=4 AND StartDate<'1980-01-01' AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -1065,6 +1194,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->where("LatLongMethod=4 AND Datum IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         $this->db->orderby("Collector, StationFieldNumber", FALSE);
         $this->db->where("co.CreatedByAgentID=col.AgentID", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -1160,6 +1292,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
         $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
         $this->db->where("a.FirstName LIKE '%[%' AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("a.CreatedByAgentID", $userid);
@@ -1309,6 +1444,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->where("LEFT(co.CatalogNumber,7)>", $maxnumber, FALSE);
         $this->db->where("co.TimestampCreated >", $startdate);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -1333,6 +1471,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("RIGHT(CatalogNumber,1) NOT REGEXP '[a-zA-Z]'", FALSE, FALSE);
         $this->db->where("DATE(co.TimestampModified)>=", $startdate);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
 
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -1359,6 +1500,9 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->where("RIGHT(CatalogNumber,1) NOT REGEXP '[a-eA-E]'", FALSE, FALSE);
         $this->db->where("DATE(co.TimestampModified)>=", $startdate);
 
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
 
@@ -1380,6 +1524,10 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID AND d.YesNo1=1');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where('co.TimestampModified >', $startdate);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
         if ($enddate)
             $this->db->where('DATE(co.TimestampModified) <=', $enddate, FALSE);
         if ($userid)
