@@ -105,6 +105,8 @@ class Fqcm extends Controller {
                     $this->data['AgentsWithNoLastName'] = $this->fqcmmodel->agentsWithNoLastName($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'GroupAgentAsPersonAgent')
                     $this->data['GroupAgentAsPersonAgent'] = $this->fqcmmodel->groupAgentAsPersonAgent($startdate, FALSE, $request['user']);
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'IncorrectAgentAsCollector')
+                    $this->data['IncorrectAgentAsCollector'] = $this->fqcmmodel->incorrectAgentAsCollector($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'DodgyPart')
                     $this->data['DodgyPart'] = $this->fqcmmodel->dodgyPart($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'PossiblyDodgyPart')
@@ -137,6 +139,12 @@ class Fqcm extends Controller {
                     $this->data['MissingIntroSource'] = $this->fqcmmodel->missingIntroSource($startdate, FALSE, $request['user']);    
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingStorage')
                     $this->data['MissingStorage'] = $this->fqcmmodel->missingStorage($startdate, FALSE, $request['user']);    
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'TreatedByNotNullAndCurationSponsorNull')
+                    $this->data['TreatedByNotNullAndCurationSponsorNull'] = $this->fqcmmodel->treatedByNotNullAndCurationSponsorNull($startdate, FALSE, $request['user']);    
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'TreatedByNotNullOtherTreatmentFieldsNull')
+                    $this->data['TreatedByNotNullOtherTreatmentFieldsNull'] = $this->fqcmmodel->treatedByNotNullOtherTreatmentFieldsNull($startdate, FALSE, $request['user']);    
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'SeverityOrCauseNotNullButAssessedByNull')
+                    $this->data['SeverityOrCauseNotNullButAssessedByNull'] = $this->fqcmmodel->severityOrCauseNotNullButAssessedByNull($startdate, FALSE, $request['user']);    
             }
             elseif ($this->input->post('submit_localities')) {
                 $this->data['SharedLocalities'] = $this->fqcmmodel->sharedLocalities($startdate, FALSE, $this->input->post('user'));               

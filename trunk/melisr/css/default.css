@@ -176,6 +176,11 @@ table tr.even td {
     color: #ffffff;    
 }
 
+.headingcolour7 th {
+    background-color: #EB20F3;
+    color: #ffffff;    
+}
+
 /* pagination links */
 .links {
     margin-top: 12px;
