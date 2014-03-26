@@ -759,8 +759,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
-            $this->db->where("co.CreatedByAgentID", $userid);
-
+            $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
         $query = $this->db->get();
         if ($query->num_rows()) {
             return $query->result_array();
@@ -787,7 +786,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
-            $this->db->where("co.CreatedByAgentID", $userid);
+            $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
 
         $query = $this->db->get();
         if ($query->num_rows()) {
@@ -810,11 +809,11 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17,18) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
+        $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
-            $this->db->where("co.CreatedByAgentID", $userid);
+            $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
 
         $query = $this->db->get();
         if ($query->num_rows()) {
@@ -837,11 +836,11 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17,18) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
+        $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($userid)
-            $this->db->where("co.CreatedByAgentID", $userid);
+            $this->db->where("(co.CreatedByAgentID=$userid OR co.ModifiedByAgentID=$userid)", FALSE, FALSE);
 
         $query = $this->db->get();
         if ($query->num_rows()) {
@@ -1131,7 +1130,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
          */
    public function groupAgentAsPersonAgent($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
-        $this->db->select("a.AgentID,a.FirstName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
+        $this->db->select("a.AgentID,a.LastName,CONCAT(a2.FirstName,' ',a2.LastName) AS AgentCreatedBy,
             LEFT(a.TimestampCreated,10) AS AgentCreated,CONCAT(a3.FirstName,' ',a3.LastName) AS AgentEditedBy,LEFT(a.TimestampModified,10) AS AgentEdited,a.LastName AS LastName");
         $this->db->from("agent a");
         $this->db->join("agent a2", "a.CreatedByAgentID=a2.AgentID");
@@ -1140,6 +1139,101 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
 
         if ($userid)
             $this->db->where("a.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+                /** Looks for agent incorrect or misinterpreted agents (i.e. 
+                 * with [] in initials) that have been recorded as a collector.
+         */
+   public function incorrectAgentAsCollector ($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("agent a");
+        $this->db->join("collector col", "a.AgentID=col.AgentID");
+        $this->db->join("collectingevent ce", "col.CollectingEventID=ce.CollectingEventID");
+        $this->db->join("collectionobject co", "co.CollectingEventID=ce.CollectingEventID");   
+        $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
+        $this->db->where("a.FirstName LIKE '%[%' AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("a.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+        
+                /** Looks for ConservEvent records edited by Nimal with 
+                 * something in Treated by, but nothing in co.Curation sponsor
+         */
+   public function treatedByNotNullAndCurationSponsorNull ($startdate, $enddate=FALSE, $userid=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("conservevent cone");
+        $this->db->join("conservdescription cond", "cone.ConservDescriptionID=cond.ConservDescriptionID");
+        $this->db->join("collectionobject co", "co.CollectionObjectID=cond.CollectionObjectID");   
+        $this->db->join("collectionobjectattribute coa", "coa.CollectionObjectAttributeID=co.CollectionObjectAttributeID", "left");   
+        $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
+        $this->db->where("cone.TreatedByAgentID IS NOT NULL AND coa.Text4 IS NULL AND cone.CreatedByAgentID=10624 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("cone.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+                    /** Looks for ConservEvent records edited by Nimal with 
+                     * something in Treated by, but nothing in Treatment report 
+                     * or Treatment completed
+         */
+   public function treatedByNotNullOtherTreatmentFieldsNull ($startdate, $enddate=FALSE, $userid=FALSE) {
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("conservevent cone");
+        $this->db->join("conservdescription cond", "cone.ConservDescriptionID=cond.ConservDescriptionID");
+        $this->db->join("collectionobject co", "co.CollectionObjectID=cond.CollectionObjectID");   
+        $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
+        $this->db->where("cone.TreatedByAgentID IS NOT NULL AND (cone.TreatmentCompDate IS NULL OR cone.TreatmentReport IS NULL) AND DATE(co.TimestampModified)>='$startdate' AND cone.CreatedByAgentID=10624", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("cone.CreatedByAgentID", $userid);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+                    /** Looks for ConservEvent records with something in 
+                     * Severity or Cause of damage fields, but nothing 
+                     * in Assessed by
+         */
+   public function severityOrCauseNotNullButAssessedByNull ($startdate, $enddate=FALSE, $userid=FALSE) {
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a2.FirstName,' ',a2.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a3.FirstName,' ',a3.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("conservevent cone");
+        $this->db->join("conservdescription cond", "cone.ConservDescriptionID=cond.ConservDescriptionID");
+        $this->db->join("collectionobject co", "co.CollectionObjectID=cond.CollectionObjectID");   
+        $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
+        $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
+        $this->db->where("cone.CuratorID IS NULL AND (cone.AdvTestingExamResults IS NOT NULL OR cone.ConditionReport IS NOT NULL) AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
+
+        if ($userid)
+            $this->db->where("cone.CreatedByAgentID", $userid);
 
         $query = $this->db->get();
         if ($query->num_rows()) {

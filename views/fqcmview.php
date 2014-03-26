@@ -1043,6 +1043,7 @@
 <?php if((isset($MissingCollectors) && $MissingCollectors) ||
         (isset($GroupCollectors) && $GroupCollectors) ||
         (isset($PrimaryCollectorNotFirst) && $PrimaryCollectorNotFirst) ||
+        (isset($IncorrectAgentAsCollector) && $IncorrectAgentAsCollector) ||
         (isset($EndDateWithNoStartDate) && $EndDateWithNoStartDate) ||
         (isset($MissingPrimaryCollectors) && $MissingPrimaryCollectors) ||
         (isset($NoCollectingDate) && $NoCollectingDate) ||
@@ -1177,6 +1178,43 @@
         <th style="width: 14%">Edited on</th>
     </tr>
     <?php foreach ($PrimaryCollectorNotFirst as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($IncorrectAgentAsCollector)): ?>
+<?php if ($IncorrectAgentAsCollector): ?>
+<h4>An incorrect agent name has been entered as a collector (<?=count($IncorrectAgentAsCollector)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour3" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($IncorrectAgentAsCollector as $prep): ?>
     <tr>
         <td style="width: 4%">
             <?php
@@ -1756,7 +1794,7 @@
 <table class="dberrors headingcolour5" style="width: 100%">
     <tr>
         <th style="width: 4%">&nbsp;</th>
-        <th style="width: 28%">Initials</th>
+        <th style="width: 28%">Last name</th>
         <th style="width: 20%">Created by</th>
         <th style="width: 14%">Created on</th>
         <th style="width: 20%">Edited by</th>
@@ -1765,7 +1803,7 @@
     <?php foreach ($GroupAgentAsPersonAgent as $prep): ?>
     <tr>
         <td>&nbsp;</td>
-        <td><?=$prep ['FirstName']?></td>
+        <td><?=$prep ['LastName']?></td>
         <td><?=$prep['AgentCreatedBy']?></td>
         <td><?=$prep['AgentCreated']?></td>
         <td><?=$prep['AgentEditedBy']?></td>
@@ -1776,6 +1814,122 @@
 <?php endif; ?>
 <?php endif; ?>
 
+<?php if((isset($TreatedByNotNullAndCurationSponsorNull) && $TreatedByNotNullAndCurationSponsorNull) ||
+        (isset($TreatedByNotNullOtherTreatmentFieldsNull) && $TreatedByNotNullOtherTreatmentFieldsNull) ||
+        (isset($SeverityOrCauseNotNullButAssessedByNull) && $SeverityOrCauseNotNullButAssessedByNull)): ?>
+<h3>Conserv. event</h3>
+<?php endif; ?>
+
+<?php if (isset($TreatedByNotNullAndCurationSponsorNull)): ?>
+<?php if ($TreatedByNotNullAndCurationSponsorNull): ?>
+<h4>There is something in Treated By but nothing in Curation Sponsor (<?=count($TreatedByNotNullAndCurationSponsorNull)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour7" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($TreatedByNotNullAndCurationSponsorNull as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($TreatedByNotNullOtherTreatmentFieldsNull)): ?>
+<?php if ($TreatedByNotNullOtherTreatmentFieldsNull): ?>
+<h4>There is something in Treated By but nothing in Treatment Completed or Treatment Report (<?=count($TreatedByNotNullOtherTreatmentFieldsNull)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour7" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($TreatedByNotNullOtherTreatmentFieldsNull as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($SeverityOrCauseNotNullButAssessedByNull)): ?>
+<?php if ($SeverityOrCauseNotNullButAssessedByNull): ?>
+<h4>There is something in Severity of Cause of Damage, but nothing in Assessed By (<?=count($SeverityOrCauseNotNullButAssessedByNull)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour7" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($SeverityOrCauseNotNullButAssessedByNull as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
 
 <?php if (isset($SharedLocalities)): ?>
 <?php if ($SharedLocalities): ?>
