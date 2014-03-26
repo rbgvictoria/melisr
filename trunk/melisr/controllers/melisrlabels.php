@@ -934,7 +934,6 @@ class MelisrLabels extends Controller {
             'bgcolor' => false, //array(255,255,255),
             'text' => false,
         );
-        $barcodeheight = 12;
 
         if ($start > 0) $pdf->AddPage();
         for($i=0; $i<count($labeldata); $i++) {
@@ -942,6 +941,8 @@ class MelisrLabels extends Controller {
             $offset = $j%($numx*$numy);
             $x = $offset%$numx;
             $y = floor($offset/$numx);
+            $barcodeheight = 12;
+            $barcode_pos_y = $barcode_pos['y'][$y];
 
             if($j%$numlabels == 0) $pdf->AddPage();
             
@@ -951,26 +952,26 @@ class MelisrLabels extends Controller {
             }
             elseif($labeldata[$i]['HortRefSet']) {
                 $pdf->MultiCell($props['wheader'], 5, '<b>Horticultural Reference Set</b>', 0, 'C', 0, 1, $labelheader_pos['x'][$x], $pdf->GetY(), true, false, true);
-                $barcode_pos['y'][$y] += 3;
+                $barcode_pos_y += 3;
                 $barcodeheight -= 3;
             }
             
             if(!$dup) {
                 if ($this->input->post('labeltype') == 19 || $this->input->post('labeltype') == 21) {
                     $vrsnumber = 'VRS ' . $labeldata[$i]['VRSNumber'];
-                    $pdf->write1DBarcode($vrsnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, $barcodeheight, 0.1, $barcodestyle, 'N');
+                    $pdf->write1DBarcode($vrsnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos_y, 55, $barcodeheight, 0.1, $barcodestyle, 'N');
                     $pdf->MultiCell(55, 5, '<b>'.$vrsnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y], true, false, true);
                 }
                 else {
                     $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
-                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, $barcodeheight, 0.1, $barcodestyle, 'N');
+                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos_y, 55, $barcodeheight, 0.1, $barcodestyle, 'N');
                     $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y], true, false, true);
                 }
             }
             
             if (isset($labeldata[$i]['SpiritInfo']) && $labeldata[$i]['SpiritInfo']) {
                 $spirit = 'Spirit jar: ' . $labeldata[$i]['SpiritInfo']['Number'] . $labeldata[$i]['SpiritInfo']['JarSize'];
-                $pdf->MultiCell(51, 5, $spirit, 0, 'R', 0, 1, $barcodetext_pos['x'][$x], $barcode_pos['y'][$y]-6, true, false, true);
+                $pdf->MultiCell(51, 5, $spirit, 0, 'R', 0, 1, $barcodetext_pos['x'][$x], $barcode_pos_y-6, true, false, true);
             }
             
             $pdf->SetY($labelbody_pos['y'][$y]);
@@ -1053,9 +1054,14 @@ class MelisrLabels extends Controller {
                 $pdf->MultiCell($props['whtml'], 5, implode('<br/>', $not), 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()-1, true, 0, true, true, 0, 'T', false);
             }
             
-            if ($labeldata[$i]['Multisheet'] && !$dup && $this->input->post('labeltype')!=19) {
+            if ($labeldata[$i]['Multisheet'] && !$dup && !in_array($this->input->post('labeltype'), array(19, 21))) {
                 $pdf->SetY($pdf->GetY() + 2);
                 $pdf->MultiCell($props['whtml'], 5, $labeldata[$i]['Multisheet'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
+            }
+            
+            if (isset($labeldata[$i]['VRSMultisheets']) && $labeldata[$i]['VRSMultisheets']) {
+                $pdf->SetY($pdf->GetY() + 2);
+                $pdf->MultiCell($props['whtml'], 5, $labeldata[$i]['VRSMultisheets'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
             }
             
             if ($labeldata[$i]['MixedInfo']) {
