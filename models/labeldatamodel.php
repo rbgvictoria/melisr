@@ -374,7 +374,8 @@ class LabelDataModel extends Model {
                     $vrsnumbers = $this->vrsNumber($row->CollectionObjectID);
                     if ($vrsnumbers) {
                         foreach($vrsnumbers as $number) {
-                            $labeldata['VRSNumber'] = $number;
+                            $labeldata['VRSNumber'] = $number['number'];
+                            $labeldata['VRSMultisheets'] = $number['multisheets'];
                             $labelarray[] = $labeldata;
                         }
                     }
@@ -388,7 +389,7 @@ class LabelDataModel extends Model {
     }
     
     function vrsNumber($colobj) {
-        $this->db->select('SampleNumber');
+        $this->db->select('SampleNumber, Remarks');
         $this->db->from('preparation');
         $this->db->where('CollectionObjectID', $colobj);
         $this->db->where('PrepTypeID', 18);
@@ -396,7 +397,10 @@ class LabelDataModel extends Model {
         if ($query->num_rows()) {
             $numbers = array();
             foreach ($query->result() as $row)
-                $numbers[] = $row->SampleNumber;
+                $numbers[] = array(
+                    'number' => $row->SampleNumber,
+                    'multisheets' => $row->Remarks
+                );
             return $numbers;
         }
         else {
@@ -816,51 +820,51 @@ class LabelDataModel extends Model {
             $namearray = $this->getNameArray($row->TaxonID);
             $qualifier = $row->Qualifier;
             if($qualifier && $qualifier!='?') $qualifier .= ' ';
-            $qualifierrank = ($row->QualifierRank) ? $row->QualifierRank : $namearray['Rank'];
+            $qualifierrank = ($row->QualifierRank) ? $row->QualifierRank : strtolower($namearray['Rank']);
             $formattednamestring = '';
-            if(isset($namearray['Species'])) {
-                if($qualifier && $qualifierrank=='Genus')
+            if(isset($namearray['species'])) {
+                if($qualifier && $qualifierrank=='genus')
                     $formattednamestring .= $qualifier;
                 
                 $formattednamestring .= "<$style>";
-                if ($namearray['GenusHybrid'] == 'x')
+                if ($namearray['genusHybrid'] == 'x')
                     $formattednamestring .= '×';
-                $formattednamestring .= $namearray['Genus'] . "</$style>";
-                if($qualifier && $qualifierrank=='Species')
+                $formattednamestring .= $namearray['genus'] . "</$style>";
+                if($qualifier && $qualifierrank=='species')
                     $formattednamestring .= ' ' . $qualifier;
                 $formattednamestring .= " <$style>";
-                if ($namearray['SpeciesHybrid'] == 'x')
+                if ($namearray['speciesHybrid'] == 'x')
                     $formattednamestring .= '×';
-                elseif ($namearray['SpeciesHybrid'] == 'H')
-                    $namearray['Species'] = str_replace (' x ', ' × ', $namearray['Species']);
-                $formattednamestring .= $namearray['Species'] . "</$style>";
-                if(isset($namearray['Subspecies']) || isset($namearray['variety']) || isset($namearray['forma'])) {
+                elseif ($namearray['speciesHybrid'] == 'H')
+                    $namearray['species'] = str_replace (' x ', ' × ', $namearray['species']);
+                $formattednamestring .= $namearray['species'] . "</$style>";
+                if(isset($namearray['subspecies']) || isset($namearray['variety']) || isset($namearray['forma'])) {
                     if(isset($namearray['forma'])) {
-                        if($namearray['forma']!=$namearray['Species']) {
+                        if($namearray['forma']!=$namearray['species']) {
                             if($qualifier && $qualifierrank=='forma')
                                 $formattednamestring .= ' ' . $qualifier;
                             if ($namearray['formaHybrid'] == 'x')
                                 $formattednamestring .= " nothof. <$style>" . $namearray['forma'] . "</$style>";
                             else {
                                 if ($namearray['formaHybrid'] == 'H')
-                                    $namearray['forma'] = str_replace (' x ', ' × ', $namearray['Forma']);
+                                    $namearray['forma'] = str_replace (' x ', ' × ', $namearray['forma']);
                                 $formattednamestring .= " f. <$style>" . $namearray['forma'] . "</$style>";
                             }
                             $formattednamestring .= ' ' . $namearray['formaAuthor'];
                         } else {
-                            $formattednamestring .= ' ' . $namearray['SpeciesAuthor'];
+                            $formattednamestring .= ' ' . $namearray['speciesAuthor'];
                             if($qualifier && $qualifierrank=='forma')
                                 $formattednamestring .= ' ' . $qualifier;
                             if ($namearray['formaHybrid'] == 'x')
                                 $formattednamestring .= " nothof. <$style>" . $namearray['forma'] . "</$style>";
                             else {
                                 if ($namearray['formaHybrid'] == 'H')
-                                    $namearray['forma'] = str_replace (' x ', ' × ', $namearray['Forma']);
+                                    $namearray['forma'] = str_replace (' x ', ' × ', $namearray['forma']);
                                 $formattednamestring .= " f. <$style>" . $namearray['forma'] . "</$style>";
                             }
                         }
                     } elseif(isset($namearray['variety'])) {
-                        if($namearray['variety']!=$namearray['Species']) {
+                        if($namearray['variety']!=$namearray['species']) {
                             if($qualifier && $qualifierrank=='variety')
                                 $formattednamestring .= ' ' . $qualifier;
                             if ($namearray['varietyHybrid'] == 'x')
@@ -872,7 +876,7 @@ class LabelDataModel extends Model {
                             }
                             $formattednamestring .= ' ' . $namearray['varietyAuthor'];
                         } else {
-                            $formattednamestring .= ' ' . $namearray['SpeciesAuthor'];
+                            $formattednamestring .= ' ' . $namearray['speciesAuthor'];
                             if($qualifier && $qualifierrank=='variety')
                                 $formattednamestring .= ' ' . $qualifier;
                             if ($namearray['varietyHybrid'] == 'x')
@@ -883,92 +887,92 @@ class LabelDataModel extends Model {
                                 $formattednamestring .= " var. <$style>" . $namearray['variety'] . "</$style>";
                             }
                         }
-                    } elseif(isset($namearray['Subspecies'])) {
-                        if($namearray['Subspecies']!=$namearray['Species']) {
+                    } elseif(isset($namearray['subspecies'])) {
+                        if($namearray['subspecies']!=$namearray['species']) {
                             if($qualifier && $qualifierrank=='subspecies')
                                 $formattednamestring .= ' ' . $qualifier;
-                            if ($namearray['SubspeciesHybrid'] == 'x')
-                                $formattednamestring .= " nothosubsp. <$style>" . $namearray['Subspecies'] . "</$style>";
+                            if ($namearray['subspeciesHybrid'] == 'x')
+                                $formattednamestring .= " nothosubsp. <$style>" . $namearray['subspecies'] . "</$style>";
                             else {
-                                if ($namearray['SubspeciesHybrid'] == 'H')
-                                    $namearray['Subspecies'] = str_replace (' x ', ' × ', $namearray['Subspecies']);
-                                $formattednamestring .= " subsp. <$style>" . $namearray['Subspecies'] . "</$style>";
+                                if ($namearray['subspeciesHybrid'] == 'H')
+                                    $namearray['subspecies'] = str_replace (' x ', ' × ', $namearray['subspecies']);
+                                $formattednamestring .= " subsp. <$style>" . $namearray['subspecies'] . "</$style>";
                             }
-                            $formattednamestring .= ' ' . $namearray['SubspeciesAuthor'];
+                            $formattednamestring .= ' ' . $namearray['subspeciesAuthor'];
                         } else {
-                            $formattednamestring .= ' ' . $namearray['SpeciesAuthor'];
+                            $formattednamestring .= ' ' . $namearray['speciesAuthor'];
                             if($qualifier && $qualifierrank=='subspecies')
                                 $formattednamestring .= $qualifier;
-                            if ($namearray['SubspeciesHybrid'] == 'x')
-                                $formattednamestring .= " nothosubsp. <$style>" . $namearray['Subspecies'] . "</$style>";
+                            if ($namearray['subspeciesHybrid'] == 'x')
+                                $formattednamestring .= " nothosubsp. <$style>" . $namearray['subspecies'] . "</$style>";
                             else {
-                                if ($namearray['SubspeciesHybrid'] == 'H')
-                                    $namearray['Subspecies'] = str_replace (' x ', ' × ', $namearray['Subspecies']);
-                                $formattednamestring .= " subsp. <$style>" . $namearray['Subspecies'] . "</$style>";
+                                if ($namearray['subspeciesHybrid'] == 'H')
+                                    $namearray['subspecies'] = str_replace (' x ', ' × ', $namearray['subspecies']);
+                                $formattednamestring .= " subsp. <$style>" . $namearray['subspecies'] . "</$style>";
                             }
                         }
                     }
-                } else $formattednamestring .= ' ' . $namearray['SpeciesAuthor'];
+                } else $formattednamestring .= ' ' . $namearray['speciesAuthor'];
             } 
-            elseif (isset($namearray['Genus']) && (isset($namearray['Subgenus']) || isset($namearray['Section']))) {
+            elseif (isset($namearray['genus']) && (isset($namearray['subgenus']) || isset($namearray['section']))) {
                 $formattednamestring = "<$style>";
-                $formattednamestring .= $namearray['Genus'];
+                $formattednamestring .= $namearray['genus'];
                 $formattednamestring .= "</$style>";
-                if (isset($namearray['Section'])) {
-                    if ($qualifier && $qualifierrank == 'Section')
+                if (isset($namearray['section'])) {
+                    if ($qualifier && $qualifierrank == 'section')
                         $formattednamestring .= ' ' . $qualifier;
-                    $formattednamestring .= " sect. <$style>" . $namearray['Section'] . "</$style>";
-                    if (isset($namearray['SectionAuthor']))
-                        $formattednamestring .= ' ' . $namearray['SectionAuthor'];
+                    $formattednamestring .= " sect. <$style>" . $namearray['section'] . "</$style>";
+                    if (isset($namearray['sectionAuthor']))
+                        $formattednamestring .= ' ' . $namearray['sectionAuthor'];
                 }
-                elseif (isset($namearray['Subgenus'])) {
-                    if ($qualifier && $qualifierrank == 'Subgenus')
+                elseif (isset($namearray['subgenus'])) {
+                    if ($qualifier && $qualifierrank == 'subgenus')
                         $formattednamestring .= ' ' . $qualifier;
-                    $formattednamestring .= " subgen. <$style>" . $namearray['Subgenus'] . "</$style>";
-                    if (isset($namearray['SubgenusAuthor']))
-                        $formattednamestring .= ' ' . $namearray['SubgenusAuthor'];
+                    $formattednamestring .= " subgen. <$style>" . $namearray['subgenus'] . "</$style>";
+                    if (isset($namearray['subgenusAuthor']))
+                        $formattednamestring .= ' ' . $namearray['subgenusAuthor'];
                 }
             }
-            elseif (isset($namearray['Family']) && (isset($namearray['Subfamily']) || isset($namearray['Tribe']))) {
+            elseif (isset($namearray['family']) && (isset($namearray['subfamily']) || isset($namearray['tribe']))) {
                 $formattednamestring = "<$style>";
-                $formattednamestring .= $namearray['Family'];
+                $formattednamestring .= $namearray['family'];
                 $formattednamestring .= "</$style>";
-                if (isset($namearray['Tribe'])) {
-                    if ($qualifier && $qualifierrank == 'Tribe')
+                if (isset($namearray['tribe'])) {
+                    if ($qualifier && $qualifierrank == 'tribe')
                         $formattednamestring .= ' ' . $qualifier;
-                    $formattednamestring .= " tr. <$style>" . $namearray['Tribe'] . "</$style>";
-                    if (isset($namearray['TribeAuthor']))
-                        $formattednamestring .= ' ' . $namearray['TribeAuthor'];
+                    $formattednamestring .= " tr. <$style>" . $namearray['tribe'] . "</$style>";
+                    if (isset($namearray['tribeAuthor']))
+                        $formattednamestring .= ' ' . $namearray['tribeAuthor'];
                 }
-                elseif (isset($namearray['Subfamily'])) {
-                    if ($qualifier && $qualifierrank == 'Subfamily')
+                elseif (isset($namearray['subfamily'])) {
+                    if ($qualifier && $qualifierrank == 'subfamily')
                         $formattednamestring .= ' ' . $qualifier;
-                    $formattednamestring .= " subfam. <$style>" . $namearray['Subfamily'] . "</$style>";
-                    if (isset($namearray['SubfamilyAuthor']))
-                        $formattednamestring .= ' ' . $namearray['SubfamilyAuthor'];
+                    $formattednamestring .= " subfam. <$style>" . $namearray['subfamily'] . "</$style>";
+                    if (isset($namearray['subfamilyAuthor']))
+                        $formattednamestring .= ' ' . $namearray['subfamilyAuthor'];
                 }
             }
-            elseif (isset($namearray['Order']) && isset($namearray['Suborder'])) {
+            elseif (isset($namearray['order']) && isset($namearray['suborder'])) {
                 $formattednamestring = "<$style>";
-                $formattednamestring .= $namearray['Order'];
+                $formattednamestring .= $namearray['order'];
                 $formattednamestring .= "</$style>";
-                if ($qualifier && $qualifierrank == 'Suborder')
+                if ($qualifier && $qualifierrank == 'suborder')
                     $formattednamestring .= ' ' . $qualifier;
-                $formattednamestring .= " subord. <$style>" . $namearray['Suborder'];
-                if (isset($namearray['SuborderAuthor']))
-                    $formattednamestring .= ' ' . $namearray['SuborderAuthor'];
+                $formattednamestring .= " subord. <$style>" . $namearray['suborder'];
+                if (isset($namearray['suborderAuthor']))
+                    $formattednamestring .= ' ' . $namearray['suborderAuthor'];
             }
             else {
-                $rankarray = array('Genus', 'Tribe', 'Subfamily', 'Family', 'Suborder', 'Order', 'Superorder',
-                    'Subclass', 'Class', 'Subdivision', 'Division', 'Subkingdom', 'Kingdom');
+                $rankarray = array('genus', 'tribe', 'subfamily', 'family', 'suborder', 'order', 'superorder',
+                    'subclass', 'class', 'subdivision', 'division', 'subkingdom', 'kingdom');
                 foreach($rankarray as $rank) {
                     if(isset($namearray[$rank])) {
-                        if($qualifier && $qualifierrank==$rank)
+                        if($qualifier && $qualifierrank == strtolower($rank))
                             $formattednamestring .= ' ' . $qualifier;
-                            if (isset($namearray['Genus']) && $namearray['GenusHybrid'] == 'x')
-                                $namearray['Genus'] = '×' . $namearray['Genus'];
-                            elseif (isset($namearray['Genus']) && $namearray['GenusHybrid'] == 'H')
-                                $namearray['Genus'] = str_replace (' x ', ' × ', $namearray['Genus']);
+                            if (isset($namearray['genus']) && $namearray['genusHybrid'] == 'x')
+                                $namearray['genus'] = '×' . $namearray['genus'];
+                            elseif (isset($namearray['genus']) && $namearray['genusHybrid'] == 'H')
+                                $namearray['genus'] = str_replace (' x ', ' × ', $namearray['genus']);
                         $formattednamestring .= "<$style>" . $namearray[$rank] . "</$style>";
                         $formattednamestring .= ($namearray[$rank.'Author']) ? ' ' . $namearray[$rank.'Author'] : '';
                         break;
@@ -1040,7 +1044,6 @@ class LabelDataModel extends Model {
                 $row = $query->row();
                 $namearray['Order'] = $row->Name;
             }
-            
             return $namearray;
         } else return false;
     }

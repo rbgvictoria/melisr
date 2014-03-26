@@ -77,7 +77,7 @@ class ExchangeData extends Controller {
 </request>
 QUERY;
             
-            $command = "curl --proxy nklaze:32dicranol@203.55.15.4:8080 --data \"query=" . urlencode($query) . "\" http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_avh";
+            $command = "curl --proxy helpdesk:glass3d@203.55.15.4:8080 --data \"query=" . urlencode($query) . "\" http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_avh";
 
             $result = `$command`;
             

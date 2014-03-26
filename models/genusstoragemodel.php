@@ -34,9 +34,11 @@ class GenusStorageModel extends Model {
         $name = array();
         $taxonid = array();
 
-        $this->db->select('t.TaxonID, t.Name, t.NodeNumber, t.HighestChildNodeNumber', false);
+        $this->db->select("t.TaxonID, t.Name, t.NodeNumber, t.HighestChildNodeNumber,
+            IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS CreatedBy", false);
         $this->db->from('taxon t');
         $this->db->join('genusstorage gs', 't.TaxonID=gs.TaxonID', 'left');
+        $this->db->join('agent a', 't.CreatedByAgentID=a.AgentID');
         $this->db->where('gs.GenusStorageID');
         $this->db->where('t.TaxonTreeDefItemID', 12);
         $query = $this->db->get();
@@ -46,29 +48,23 @@ class GenusStorageModel extends Model {
                 $num_query = $this->db->query("SELECT d.DeterminationID
                 FROM taxon t
                 JOIN determination d ON t.TaxonID=d.TaxonID
-                WHERE t.NodeNumber>=$row->NodeNumber AND t.NodeNumber<=$row->HighestChildNodeNumber");
+                WHERE t.NodeNumber>=$row->NodeNumber AND t.NodeNumber<=$row->HighestChildNodeNumber
+                  AND (d.IsCurrent=1 OR d.YesNo1=1)");
                 if ($num_query->num_rows() > 0) {
-                    foreach ($num_query->result() as $num_row) {
-                        $this->db->select('count(*) AS num', FALSE);
-                        $this->db->from('determination');
-                        $this->db->where('DeterminationID', $num_row->DeterminationID);
-                        $this->db->where('(IsCurrent=1 OR YesNo1=1)', FALSE, FALSE);
-                        $ch_query = $this->db->get();
-                        $ch_row = $ch_query->row();
-                        if ($ch_row->num) {
-                            $name[] = $row->Name;
-                            $taxonid[] = $row->TaxonID;
-                        }
-                    }
+                    $name[] = $row->Name;
+                    $taxonid[] = $row->TaxonID;
+                    $createdby[] = $row->CreatedBy;
                 }
             }
         }
        
-        $this->db->select('t.TaxonID, t.Name', false);
+        $this->db->select("t.TaxonID, t.Name,
+            IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS CreatedBy", false);
         $this->db->from('taxon t');
         $this->db->join('taxontreedefitem td', 't.TaxonTreeDefItemID=td.TaxonTreeDefItemID');
         $this->db->join('determination d', 't.TaxonID=d.TaxonID');
         $this->db->join('genusstorage gs', 't.TaxonID=gs.TaxonID', 'left');
+        $this->db->join('agent a', 't.CreatedByAgentID=a.AgentID');
         $this->db->where('gs.GenusStorageID');
         $this->db->where('td.RankID <', 180);
         $this->db->where('d.IsCurrent', 1);
@@ -79,16 +75,18 @@ class GenusStorageModel extends Model {
             foreach ($query->result() as $row) {
                 $name[] = $row->Name;
                 $taxonid[] = $row->TaxonID;
+                $createdby[] = $row->CreatedBy;
             }
         }
         
         if ($name) {
-            array_multisort($name, SORT_ASC, $taxonid, SORT_ASC);
+            array_multisort($name, SORT_ASC, $taxonid, SORT_ASC, $createdby, SORT_ASC);
 
             $ret = array();
             for ($i = 0; $i < count($name); $i++) {
                 $ret[$i] = array('Name' => $name[$i],
-                    'TaxonID' => $taxonid[$i]);
+                    'TaxonID' => $taxonid[$i],
+                    'CreatedBy' => $createdby[$i]);
             }
             return $ret;
         }
@@ -235,11 +233,13 @@ class GenusStorageModel extends Model {
                 $ret = array();
                 $this->db->select("t.TaxonID, t.FullName, 'Main' AS StorageType, 
                     co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
-                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+                IF(a.AgentID IS NOT NULL, IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)), 
+                IF(ca.MiddleInitial IS NOT NULL, CONCAT(ca.MiddleInitial, ' ', ca.LastName), CONCAT(ca.FirstName, ' ', ca.LastName))) AS ModifiedBy", FALSE);
                 $this->db->from('taxon t');
                 $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.IsCurrent=1');
                 $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
-                $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+                $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID', 'left');
+                $this->db->join('agent ca', 'co.CreatedByAgentID=ca.AgentID', 'left');
                 $this->db->where("(t.NodeNumber >= $nodenumber 
                         AND t.NodeNumber <= $highestchildnodenumber)", FALSE, FALSE);
                 $query = $this->db->get();
@@ -247,11 +247,13 @@ class GenusStorageModel extends Model {
                 
                 $this->db->select("t.TaxonID, t.FullName, 'Type' AS StorageType, 
                     co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
-                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+                IF(a.AgentID IS NOT NULL, IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)), 
+                IF(ca.MiddleInitial IS NOT NULL, CONCAT(ca.MiddleInitial, ' ', ca.LastName), CONCAT(ca.FirstName, ' ', ca.LastName))) AS ModifiedBy", FALSE);
                 $this->db->from('taxon t');
                 $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.Yesno1=1');
                 $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
-                $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+                $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID', 'left') ;
+                $this->db->join('agent ca', 'co.CreatedByAgentID=ca.AgentID', 'left');
                 $this->db->where("(t.NodeNumber >= $nodenumber 
                         AND t.NodeNumber <= $highestchildnodenumber)", FALSE, FALSE);
                 $query = $this->db->get();
@@ -262,22 +264,26 @@ class GenusStorageModel extends Model {
             $ret = array();
             $this->db->select("t.TaxonID, t.FullName, 'Main' AS StorageType, 
                 co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
-                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+                IF(a.AgentID IS NOT NULL, IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)), 
+                IF(ca.MiddleInitial IS NOT NULL, CONCAT(ca.MiddleInitial, ' ', ca.LastName), CONCAT(ca.FirstName, ' ', ca.LastName))) AS ModifiedBy", FALSE);
             $this->db->from('taxon t');
             $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.IsCurrent=1');
             $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
-            $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+            $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID', 'left') ;
+            $this->db->join('agent ca', 'co.CreatedByAgentID=ca.AgentID', 'left');
             $this->db->where('t.TaxonID', $taxonid);
             $query = $this->db->get();
             $ret = $query->result_array();
 
             $this->db->select("t.TaxonID, t.FullName, 'Type' AS StorageType, 
                 co.CatalogNumber, co.CollectionObjectID, DATE(co.TimestampModified) AS DateModified, 
-                IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)) AS ModifiedBy", FALSE);
+                IF(a.AgentID IS NOT NULL, IF(a.MiddleInitial IS NOT NULL, CONCAT(a.MiddleInitial, ' ', a.LastName), CONCAT(a.FirstName, ' ', a.LastName)), 
+                IF(ca.MiddleInitial IS NOT NULL, CONCAT(ca.MiddleInitial, ' ', ca.LastName), CONCAT(ca.FirstName, ' ', ca.LastName))) AS ModifiedBy", FALSE);
             $this->db->from('taxon t');
             $this->db->join('determination d', 't.TaxonID=d.TaxonID AND d.Yesno1=1');
             $this->db->join('collectionobject co', 'd.CollectionobjectID=co.CollectionObjectID');
-            $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID') ;
+            $this->db->join('agent a', 'co.ModifiedByAgentID=a.AgentID', 'left') ;
+            $this->db->join('agent ca', 'co.CreatedByAgentID=ca.AgentID', 'left');
             $this->db->where('t.TaxonID', $taxonid);
             $query = $this->db->get();
             $ret = array_merge($ret, $query->result_array());
