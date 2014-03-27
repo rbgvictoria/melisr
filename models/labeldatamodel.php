@@ -1253,11 +1253,11 @@ class LabelDataModel extends Model {
 
             $typeinfo .= '<b>' . strtoupper($typestatus) . '</b> of ';
             
-            if ($namearray['GenusHybrid'])
+            if ($namearray['genusHybrid'])
                 $typeinfo .= '×';
-            $sphybrid = ($namearray['SpeciesHybrid']) ? '×' : '';
-            $typeinfo .= " <i>$namearray[Genus] {$sphybrid}$namearray[Species]</i>";
-            if(isset($namearray['Subspecies']) || isset($namearray['variety']) || isset($namearray['forma'])) {
+            $sphybrid = ($namearray['speciesHybrid']) ? '×' : '';
+            $typeinfo .= " <i>$namearray[genus] {$sphybrid}$namearray[species]</i>";
+            if(isset($namearray['subspecies']) || isset($namearray['variety']) || isset($namearray['forma'])) {
                 if(isset($namearray['forma'])) {
                     $rank = ($namearray['formaHybrid']) ? 'nothof.' : 'f.';
                     $typeinfo .= " $rank <i>" . $namearray['forma'] . "</i>";
@@ -1266,12 +1266,12 @@ class LabelDataModel extends Model {
                     $rank = ($namearray['varietyHybrid']) ? 'nothovar.' : 'var.';
                     $typeinfo .= " $rank <i>" . $namearray['variety'] . "</i>";
                     $typeinfo .= ' ' . $namearray['varietyAuthor'];
-                } elseif(isset($namearray['Subspecies'])) {
-                    $rank = ($namearray['SubspeciesHybrid']) ? 'nothosubsp.' : 'subsp.';
-                    $typeinfo .= " $rank <i>" . $namearray['Subspecies'] . "</i>";
-                    $typeinfo .= ' ' . $namearray['SubspeciesAuthor'];
+                } elseif(isset($namearray['subspecies'])) {
+                    $rank = ($namearray['subspeciesHybrid']) ? 'nothosubsp.' : 'subsp.';
+                    $typeinfo .= " $rank <i>" . $namearray['subspecies'] . "</i>";
+                    $typeinfo .= ' ' . $namearray['subspeciesAuthor'];
                 }
-            } else $typeinfo .= ' ' . $namearray['SpeciesAuthor'];
+            } else $typeinfo .= ' ' . $namearray['speciesAuthor'];
             $typeinfo .= $this->getProtologue($row->TaxonID);
             return $typeinfo;
         } return null;
