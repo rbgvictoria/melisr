@@ -32,6 +32,7 @@
             'hispidonly.csv'    => 'Just the HISPID fields thanks',
             'specifywb.csv'   => 'Specify WorkBench fields',
             'alison.csv' => "Alison's custom output",
+            'perth.csv' => "PERTH data",
         );
         echo form_label('Output fields:', 'outputfields', array('style' => 'width: 100px;'));
         echo form_dropdown('outputfields', $options, 'allfields.csv');

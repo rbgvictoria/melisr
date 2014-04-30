@@ -10,4 +10,11 @@ $(document).ready(function() {
 		//"sDom": '<"top"lip><"table"rt>',
 		"bSortClasses": false  // different color for sort columns
 	} );
+    
+	$('.image-records').dataTable( {
+		"sPaginationType": "full_numbers",
+        "bAutoWidth": false
+	} );
+    
+    
 });

@@ -149,6 +149,41 @@ class Hispid3ToCsv {
             if (isset($unit['det'])) 
                 $data[$index][] = $this->DeterminerRole($unit['det']);
             
+            if ((isset($unit['misc']) || isset($unit['fre'])) && $unit['insid'] == 'PERTH') {
+                $misc = (isset($unit['misc'])) ? trim($unit['misc']) : NULL;
+                if ($misc && substr($misc, strlen($misc)-1) != '.')
+                        $misc .= '.';
+                $fre = (isset($unit['fre'])) ? ucfirst(trim($unit['fre'])) : NULL;
+                if ($fre && substr($fre, strlen($fre)-1) != '.')
+                        $fre .= '.';
+                $data[$index][] = array(
+                    'column' => 'CollectingNotes',
+                    'value' => trim($misc . ' ' . $fre)
+                );
+            }
+            elseif (isset($unit['fre'])) {
+                $fre = ucfirst(trim($unit['fre']));
+                if (substr($fre, strlen($fre)-1) != '.')
+                        $fre .= '.';
+                $data[$index][] = array(
+                    'column' => 'CollectingNotes',
+                    'value' => $fre
+                );
+            }
+            
+            if (isset($unit['hab']) || isset($unit['veg']))
+                $data[$index][] = $this->Habitat($unit);
+
+            $data[$index][] = array(
+                'column' => 'WBUpload',
+                'value' => 1,
+            );
+            
+            $data[$index][] = array(
+                'column' => 'PrepType',
+                'value' => 'Sheet',
+            );
+            
             $data[$index][] = array(
                 'column' => 'LocalityUniquefier',
                 'value' => $index + 1,
@@ -169,9 +204,24 @@ class Hispid3ToCsv {
         );
     }
     
+    function Habitat($unit) {
+        $hab = (isset($unit['hab'])) ? trim($unit['hab']) : NULL;
+        if ($hab && substr($hab, strlen($hab)-1) != '.')
+                $hab .= '.';
+        $veg = (isset($unit['veg'])) ? trim($unit['veg']) : NULL;
+        if ($veg && substr($veg, strlen($veg)-1) != '.')
+                $veg .= '.';
+        return array(
+            'column' => 'Habitat',
+            'value' => trim($hab . ' ' . $veg)
+        );
+    }
+
     function GeocodeSource($geosou) {
         if ($geosou == 'compiler')
             $geosou = 'Data entry person';
+        elseif ($geosou == 'Automatically generated')
+            $geosou = 'Exchange data';
         else 
             $geosou = ucfirst($geosou);
         return array(
