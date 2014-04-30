@@ -34,16 +34,20 @@ class ImageMetadata extends Controller {
                         $this->input->post('extrafields')
                     );
                 
-                if ($this->input->post('format') == 'txt') {
-                    $this->output->enable_profiler(FALSE);
-                    $this->createCSV($this->data['imagerecords'], "\t", 'text/plain', 'txt');
-                    return TRUE;
+                if ($this->data['imagerecords']) {
+                    if ($this->input->post('format') == 'txt') {
+                        $this->output->enable_profiler(FALSE);
+                        $this->createCSV($this->data['imagerecords'], "\t", 'text/plain', 'txt');
+                        return TRUE;
+                    }
+                    elseif ($this->input->post('format') == 'csv') {
+                        $this->output->enable_profiler(FALSE);
+                        $this->createCSV($this->data['imagerecords']);
+                        return TRUE;
+                    }
                 }
-                elseif ($this->input->post('format') == 'csv') {
-                    $this->output->enable_profiler(FALSE);
-                    $this->createCSV($this->data['imagerecords']);
-                    return TRUE;
-                }
+                else 
+                    $this->data['message'] = 'There are no records that match the criteria';
             }
         }
         
@@ -69,8 +73,7 @@ class ImageMetadata extends Controller {
         $filename = 'images_' . date('Ymd_Hi');
         
         $csv = array();
-        if(empty($csv)) echo'There are no records that match your criteria';
-
+        
         $firstrow = array_keys($data[0]);
         array_shift($firstrow);
         foreach ($firstrow as $index=>$value) {
