@@ -69,8 +69,8 @@ class ImageMetadata extends Controller {
         $filename = 'images_' . date('Ymd_Hi');
         
         $csv = array();
+        if(empty($csv)) echo'There are no records that match your criteria';
 
-        if ($data) {
         $firstrow = array_keys($data[0]);
         array_shift($firstrow);
         foreach ($firstrow as $index=>$value) {
@@ -104,10 +104,7 @@ class ImageMetadata extends Controller {
         echo $csv;
         
     }
-    else {
-         $this->data['message'] = 'No images were uploaded by this user in this period or something like that';
-    }
-    }
+
     private function banner() {
         $banners = get_dir_file_info('./images/banners', TRUE);
         $banners = array_values($banners);
