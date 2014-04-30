@@ -24,7 +24,7 @@
         'style' => 'width: 100px;',
         'value' => ($this->input->post('startdate')) ? $this->input->post('startdate') : date('Y-m-d')
     );
-    echo form_label('Start date (yyyy-mm-dd):', 'startdate', array('style' => 'width: auto; margin-left: 20px'));
+    echo form_label('Image added between (yyyy-mm-dd):', 'startdate', array('style' => 'width: auto; margin-left: 20px'));
     echo form_input($data);
     
     echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -37,7 +37,7 @@
         'style' => 'width: 100px;',
         'value' => (isset($enddate) && $enddate) ? $enddate : FALSE
     );
-    echo form_label('End date (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 20px'));
+    echo form_label('and (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 20px'));
     echo form_input($data);
 ?>
 </p>
@@ -53,7 +53,7 @@
             'aia.CreativeCommons' => 'Licence',
         );
         
-        echo '<b>Missing values in:</b><br/>';
+        echo '<b>Filter by attachment records with missing values in:</b><br/>';
         foreach ($missing as $key => $value) {
             $options = array(
                 'name' => 'missing[]',

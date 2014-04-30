@@ -911,7 +911,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
+        $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17,24) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($this->collids)
@@ -941,7 +941,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
+        $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17,24) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($this->collids)
@@ -1342,7 +1342,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join("collectionobject co", "co.CollectionObjectID=cond.CollectionObjectID");   
         $this->db->join("agent a2", "co.CreatedByAgentID=a2.AgentID");
         $this->db->join("agent a3", "co.ModifiedByAgentID=a3.AgentID");
-        $this->db->where("cone.TreatedByAgentID IS NOT NULL AND (cone.TreatmentCompDate IS NULL OR cone.TreatmentReport IS NULL) AND DATE(co.TimestampModified)>='$startdate' AND cone.CreatedByAgentID=10624", FALSE, FALSE);
+        $this->db->where("cone.TreatedByAgentID IS NOT NULL AND (cone.TreatmentCompDate IS NULL AND cone.TreatmentReport IS NULL) AND DATE(co.TimestampModified)>='$startdate' AND cone.CreatedByAgentID=10624", FALSE, FALSE);
 
         if ($userid)
             $this->db->where("cone.CreatedByAgentID", $userid);
