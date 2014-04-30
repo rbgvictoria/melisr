@@ -261,3 +261,23 @@ table tr.even td {
     margin-top: 0px;
 }
 
+.message {
+    color: #ff0000;
+}
+
+.success {
+    color: #009900;
+}
+
+.image-records {
+    overflow: auto;
+}
+
+div.dataTables_info, div.dataTables_paginate {
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+#extrafields {
+    vertical-align: text-top;
+}

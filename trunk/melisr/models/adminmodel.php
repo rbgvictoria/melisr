@@ -89,6 +89,7 @@ class AdminModel extends Model {
         $schemaversion = array(
             '6.4.13' => '1.7',
             '6.5.03' => '1.8',
+            '6.5.04' => '1.9'
         );
         
         $updateArray = array(
