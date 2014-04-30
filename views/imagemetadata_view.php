@@ -24,7 +24,7 @@
         'style' => 'width: 100px;',
         'value' => ($this->input->post('startdate')) ? $this->input->post('startdate') : date('Y-m-d')
     );
-    echo form_label('Image added between (yyyy-mm-dd):', 'startdate', array('style' => 'width: auto; margin-left: 20px'));
+    echo form_label('Images added on or after (yyyy-mm-dd):', 'startdate', array('style' => 'width: auto; margin-left: 20px'));
     echo form_input($data);
     
     echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -37,7 +37,7 @@
         'style' => 'width: 100px;',
         'value' => (isset($enddate) && $enddate) ? $enddate : FALSE
     );
-    echo form_label('and (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 20px'));
+    echo form_label('Images added before (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 20px'));
     echo form_input($data);
 ?>
 </p>
