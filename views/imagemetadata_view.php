@@ -27,7 +27,7 @@
     echo form_label('Images added on or after (yyyy-mm-dd):', 'startdate', array('style' => 'width: auto; margin-left: 20px'));
     echo form_input($data);
     
-    echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+    echo '<br>';
     
 ?>
 <?php
@@ -37,7 +37,7 @@
         'style' => 'width: 100px;',
         'value' => (isset($enddate) && $enddate) ? $enddate : FALSE
     );
-    echo form_label('Images added before (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 20px'));
+    echo form_label('Images added before (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 222px; margin-right: 34px'));
     echo form_input($data);
 ?>
 </p>
