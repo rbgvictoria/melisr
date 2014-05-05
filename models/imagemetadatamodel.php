@@ -56,9 +56,9 @@ class ImageMetadataModel extends Model {
             $where = '(' . implode(' OR ', $where) . ')';
             $this->db->where($where, FALSE, FALSE);
         }
-        if ($missingdata) {
-            $this->db->where("(aia.Text1 IS NULL OR att.Remarks IS NULL OR (att.CopyrightHolder IS NULL AND aia.Photographer IS NULL)
-                OR (att.Credit IS NULL AND aia.Photographer IS NULL) OR aia.Photographer IS NULL OR (att.FileCreatedDate IS NULL AND
+        if ($insufficient) {
+            $this->db->where("(aia.Text1 IS NULL OR att.Remarks IS NULL OR (att.CopyrightHolder IS NULL AND aia.Text2 IS NULL)
+                OR (att.Credit IS NULL AND aia.Text2 IS NULL) OR aia.Text2 IS NULL OR (att.FileCreatedDate IS NULL AND
                 att.CopyrightDate IS NULL) OR att.FileCreatedDate IS NULL OR aia.CreativeCommons IS NULL)", FALSE, FALSE);
         }
         
