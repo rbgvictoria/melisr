@@ -41,6 +41,16 @@
     echo form_input($data);
 ?>
 </p>
+    <?=form_checkbox(array(
+        'name' => 'insufficient_metadata', 
+        'id' => 'insufficient_metadata', 
+        'value' => 1,
+        'checked' => $this->input->post('insufficient_metadata')
+    )); ?>
+    <?=form_label('Insufficent metadata', 'insufficient_metadata');?>
+<p>
+    
+</p>
 <p>
     <?php 
         $missing = array(
