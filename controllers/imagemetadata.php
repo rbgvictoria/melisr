@@ -31,7 +31,8 @@ class ImageMetadata extends Controller {
                         $this->input->post('enddate'), 
                         $this->input->post('user'),
                         $this->input->post('missing'),
-                        $this->input->post('extrafields')
+                        $this->input->post('extrafields'),
+                        $this->input->post('insufficient_metadata')
                     );
                 
                 if ($this->data['imagerecords']) {
