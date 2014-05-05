@@ -19,16 +19,16 @@ class ImageMetadataModel extends Model {
             return false;
     }
     
-    public function getImageRecords($startdate, $enddate=FALSE, $user=FALSE, $missingdata=FALSE, $extrafields=FALSE) {
+    public function getImageRecords($startdate, $enddate=FALSE, $user=FALSE, $missingdata=FALSE, $extrafields=FALSE, $insufficient=FALSE) {
         $colobjatts = array();
         $coleventatts = array();
         
         // Collection Object attachments
         $this->db->select("co.CollectionObjectID, co.CatalogNumber, att.TableID AS `Table`, att.MimeType, att.GUID, 
-            att.AttachmentLocation, att.Title, aia.ImageType, att.Remarks AS Subject, aia.Magnification,
+            att.AttachmentLocation, att.Title, aia.ImageType, aia.Text1 AS Category, att.Remarks AS Subject, aia.Magnification,
             att.DateImaged, att.CopyrightHolder, att.CopyrightDate, att.License AS Restrictions, att.Credit, 
             coa.Remarks AS Comments, aia.Text2 AS Photographer,
-            aia.Text1 AS Context, aia.CreativeCommons AS Licence,
+            aia.CreativeCommons AS Licence,
             GROUP_CONCAT(tag.Tag ORDER BY tag.Tag SEPARATOR '|') AS Tags,
             att.TimestampCreated AS Created, IF(ca.FirstName IS NOT NULL, CONCAT(ca.LastName, ', ', ca.FirstName), ca.LastName) AS CreatedBy,
             att.TimestampModified AS Modified, IF(ma.FirstName IS NOT NULL, CONCAT(ma.LastName, ', ', ma.FirstName), ma.LastName) AS modifiedBy", FALSE);
@@ -56,6 +56,12 @@ class ImageMetadataModel extends Model {
             $where = '(' . implode(' OR ', $where) . ')';
             $this->db->where($where, FALSE, FALSE);
         }
+        if ($missingdata) {
+            $this->db->where("(aia.Text1 IS NULL OR att.Remarks IS NULL OR (att.CopyrightHolder IS NULL AND aia.Photographer IS NULL)
+                OR (att.Credit IS NULL AND aia.Photographer IS NULL) OR aia.Photographer IS NULL OR (att.FileCreatedDate IS NULL AND
+                att.CopyrightDate IS NULL) OR att.FileCreatedDate IS NULL OR aia.CreativeCommons IS NULL)", FALSE, FALSE);
+        }
+        
         $this->db->group_by('co.CollectionObjectID');
         $this->db->group_by('att.AttachmentID');
         
@@ -67,10 +73,10 @@ class ImageMetadataModel extends Model {
 
         // Collecting Event attachments
         $this->db->select("co.CollectionObjectID, co.CatalogNumber, att.TableID AS `Table`, att.MimeType, att.GUID, 
-            att.AttachmentLocation, att.Title, aia.ImageType, att.Remarks AS Subject, aia.Magnification,
+            att.AttachmentLocation, att.Title, aia.ImageType, aia.Text1 AS Category, att.Remarks AS Subject, aia.Magnification,
             att.DateImaged, att.CopyrightHolder, att.CopyrightDate, att.License AS Restrictions, att.Credit, 
             cea.Remarks AS Comments, aia.Text2 AS Photographer,
-            aia.Text1 AS Context, aia.CreativeCommons AS Licence,
+            aia.CreativeCommons AS Licence,
             GROUP_CONCAT(tag.Tag ORDER BY tag.Tag SEPARATOR '|') AS Tags,
             att.TimestampCreated AS Created, IF(ca.FirstName IS NOT NULL, CONCAT(ca.LastName, ', ', ca.FirstName), ca.LastName) AS CreatedBy,
             att.TimestampModified AS Modified, IF(ma.FirstName IS NOT NULL, CONCAT(ma.LastName, ', ', ma.FirstName), ma.LastName) AS modifiedBy", FALSE);
@@ -329,12 +335,12 @@ class ImageMetadataModel extends Model {
                         }
                         
                         // Check if an Attachment Image Attribute is needed
-                        if ($row['Photographer'] || $row['Context'] || $row['Magnification'] || 
+                        if ($row['Photographer'] || $row['Category'] || $row['Magnification'] || 
                                 $row['Licence'] || $row['ImageType']) {
                             
                             $updateArray = array(
                                 'Text2' => ($row['Photographer']) ? $row['Photographer'] : NULL,
-                                'Text1' => ($row['Context']) ? $row['Context'] : NULL,
+                                'Text1' => ($row['Category']) ? $row['Category'] : NULL,
                                 'Magnification' => ($row['Magnification']) ? $row['Magnification'] : NULL,
                                 'ImageType' => ($row['ImageType']) ? $row['ImageType'] : NULL,
                                 'CreativeCommons' => ($row['Licence']) ? $row['Licence'] : NULL,
