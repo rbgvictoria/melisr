@@ -47,8 +47,9 @@
         'value' => 1,
         'checked' => $this->input->post('insufficient_metadata')
     )); ?>
-    <?=form_label('Insufficent metadata', 'insufficient_metadata');?>
+    <?=form_label('Check for all attachment records with insufficient metadata', 'insufficient_metadata',array('style' => 'width:auto;'));?>
 <p>
+<br/>
     
 </p>
 <p>
@@ -63,7 +64,7 @@
             'aia.CreativeCommons' => 'Licence',
         );
         
-        echo '<b>Filter by attachment records with missing values in:</b><br/>';
+        echo 'Filter by attachment records with missing values in:<br/><br/>';
         foreach ($missing as $key => $value) {
             $options = array(
                 'name' => 'missing[]',
@@ -78,6 +79,7 @@
         }
     ?>
 </p>
+<br/>
 <p>
     <?php
     $options = array(
@@ -93,6 +95,7 @@
     ?>
 
 </p>
+<br/>
 <p>
     <?php
         $options = array(
