@@ -101,8 +101,7 @@
         $options = array(
             'html'  => 'HTML table',
             'txt'    => 'TXT',
-            'csv'    => 'CSV',
-          );
+             );
         echo form_label('Output format:', 'format', array('style' => 'width: auto;'));
         echo form_dropdown('format', $options, 'html', 'id="format"');
     
