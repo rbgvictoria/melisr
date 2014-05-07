@@ -110,7 +110,7 @@
     <?=form_submit('submit', 'Get image metadata')?></p>
 <?=form_close(); ?>
 <br/>
-<p><?=anchor('imagemetadata/upload', 'Upload CSV file with image metadata')?></p>
+<p><?=anchor('imagemetadata/upload', 'Upload file with image metadata')?></p>
 
 <?php if (isset($message)): ?>
 <div class="message"><?=$message?></div>
