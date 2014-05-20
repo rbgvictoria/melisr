@@ -40,7 +40,7 @@ class ImageMetadataModel extends Model {
         $this->db->join('agent ma', 'att.ModifiedByAgentID=ma.AgentID', 'left');
         $this->db->join('attachmenttag tag', 'att.AttachmentID=tag.AttachmentID', 'left');
         $this->db->where('coa.CollectionObjectAttachmentID IS NOT NULL', FALSE, FALSE);
-        $this->db->like('att.MimeType', 'image', 'after');
+        $this->db->like('att.MimeType', FALSE, 'after');
         $this->db->where('att.TimestampCreated >', $startdate);
         if ($enddate) {
             $this->db->where("DATE(att.TimestampCreated) <= '$enddate'", FALSE, FALSE);
