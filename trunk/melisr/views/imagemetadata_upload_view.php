@@ -1,6 +1,6 @@
 <?php require_once('header.php'); ?>
 
-<h2>Upload image metadata</h2>
+<h2>Upload attachment metadata</h2>
 <?=form_open_multipart('imagemetadata/upload')?>
 
 <p>

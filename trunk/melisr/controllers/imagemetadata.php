@@ -15,7 +15,7 @@ class ImageMetadata extends Controller {
         $this->data['js'][] = 'jquery.dataTables.min.js';
         $this->data['js'][] = 'jquery.melisr.htmltableoptions.js';
         $this->data['bannerimage'] = $this->banner();
-        $this->data['title'] = 'MELISR | Image metadata';
+        $this->data['title'] = 'MELISR | Attachment metadata';
         $this->load->model('imagemetadatamodel');
     }
     
@@ -71,7 +71,7 @@ class ImageMetadata extends Controller {
     }
     
     private function createCSV($data, $delimiter = ',', $contenttype = 'text/csv', $extension = 'csv') {
-        $filename = 'images_' . date('Ymd_Hi');
+        $filename = 'attachments_' . date('Ymd_Hi');
         
         $csv = array();
         

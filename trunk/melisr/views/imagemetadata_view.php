@@ -1,6 +1,6 @@
 <?php require_once('header.php'); ?>
 
-<h2>Image metadata workbench</h2>
+<h2>Attachment metadata workbench</h2>
 <?=form_open('imagemetadata',array('enctype'=>'multipart/form-data'))?>
 
 <p>
@@ -24,7 +24,7 @@
         'style' => 'width: 100px;',
         'value' => ($this->input->post('startdate')) ? $this->input->post('startdate') : date('Y-m-d')
     );
-    echo form_label('Images added on or after (yyyy-mm-dd):', 'startdate', array('style' => 'width: auto; margin-left: 20px'));
+    echo form_label('Attachments added on or after (yyyy-mm-dd):', 'startdate', array('style' => 'width: auto; margin-left: 20px'));
     echo form_input($data);
     
     echo '<br>';
@@ -37,7 +37,7 @@
         'style' => 'width: 100px;',
         'value' => (isset($enddate) && $enddate) ? $enddate : FALSE
     );
-    echo form_label('Images added before (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 222px; margin-right: 34px'));
+    echo form_label('Attachments added before (yyyy-mm-dd):', 'enddate', array('style' => 'width: auto; margin-left: 222px; margin-right: 34px'));
     echo form_input($data);
 ?>
 </p>
@@ -106,10 +106,10 @@
         echo form_dropdown('format', $options, 'html', 'id="format"');
     
     ?>
-    <?=form_submit('submit', 'Get image metadata')?></p>
+    <?=form_submit('submit', 'Get attachment metadata')?></p>
 <?=form_close(); ?>
 <br/>
-<p><?=anchor('imagemetadata/upload', 'Upload file with image metadata')?></p>
+<p><?=anchor('imagemetadata/upload', 'Upload file with attachment metadata')?></p>
 
 <?php if (isset($message)): ?>
 <div class="message"><?=$message?></div>

@@ -34,7 +34,7 @@
             <a href="<?=site_url()?>/recordset">Record set creator</a> |
             <a href="<?=site_url()?>/genusstorage">Storage families</a> |
             <a href="<?=site_url()?>/fqcm">Fancy quality control machine</a> |
-            <a href="<?=site_url()?>/imagemetadata">Image metadata</a>
+            <a href="<?=site_url()?>/imagemetadata">Attachment metadata</a>
     </div>
     <div id="content">
 
