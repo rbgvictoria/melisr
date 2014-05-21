@@ -483,7 +483,7 @@ class ImageMetadataModel extends Model {
             $rsmaxrow = $rsmaxquery->row();
             $recordsetid = $rsmaxrow->NewID;
             
-            $recordsetname = 'Image metadata upload ' . date('Ymd Hi');
+            $recordsetname = 'Attachment metadata upload ' . date('Ymd Hi');
             
             $data = array(
                 'RecordSetID' => $recordsetid,
