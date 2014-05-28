@@ -1045,7 +1045,7 @@ EOD;
         $shippedto[] = $this->loaninfo['ShippedTo']['Address'];
         if ($this->loaninfo['ShippedTo']['Address2']) $shippedto[] = $this->loaninfo['ShippedTo']['Address2'];
         if ($this->loaninfo['ShippedTo']['Address3']) $shippedto[] = $this->loaninfo['ShippedTo']['Address3'];
-        if ($this->loaninfo['ShippedTo']['RoomOrBuilding']) $shippedto[] = $this->loaninfo['ShippedTo']['RoomOrBuilding'];
+        if ($this->loaninfo['ShippedTo']['Address4']) $shippedto[] = $this->loaninfo['ShippedTo']['Address4'];
         $shippedto[] = $this->loaninfo['ShippedTo']['City'] . ' ' .
                 $this->loaninfo['ShippedTo']['State'] . ' ' . $this->loaninfo['ShippedTo']['PostCode'];
         if ($this->loaninfo['ShippedTo']['Country'] != 'Australia')
