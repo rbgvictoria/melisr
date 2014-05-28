@@ -102,7 +102,7 @@ class ExchangeModel extends TransactionModel {
     }
 
     function getAddress($agentid) {
-        $this->db->select('Address5, Address, Address2, Address3, Address4, City, State, PostalCode, Country');
+        $this->db->select('Address4, Address, Address2, Address3, RoomOrBuilding, City, State, PostalCode, Country');
         $this->db->from('address');
         $this->db->where('AgentID', $agentid);
         $this->db->where('IsCurrent', 1);
@@ -111,11 +111,11 @@ class ExchangeModel extends TransactionModel {
             $row = $query->row();
 
             return array(
-                'Attn' => $row->Address5,
+                'Attn' => $row->Address4,
                 'Address' => $row->Address,
                 'Address2' =>$row->Address2,
                 'Address3' =>$row->Address3,
-                'Address4' =>$row->Address4,
+                'Address4' =>$row->RoomOrBuilding,
                 'City' => $row->City,
                 'State' => $row->State,
                 'PostCode' => $row->PostalCode,

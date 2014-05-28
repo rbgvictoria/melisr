@@ -66,7 +66,7 @@ class Loans extends Controller {
                     break;
                 case 3:
                 case 4:
-                    $this->addressLabelPDF($this->input->post('output'));
+                    $this->addressLabelPDF($this->input->post('output')); 
                     break;
                 case 5:
                     $newurl = base_url() . 'pdf/MEL_Conditions_of_Loan.pdf';
@@ -437,7 +437,7 @@ EOD;
         $shippedto[] = $this->loaninfo['ShippedTo']['Address'];
         if ($this->loaninfo['ShippedTo']['Address2']) $shippedto[] = $this->loaninfo['ShippedTo']['Address2'];
         if ($this->loaninfo['ShippedTo']['Address3']) $shippedto[] = $this->loaninfo['ShippedTo']['Address3'];
-        if ($this->loaninfo['ShippedTo']['Address4']) $shippedto[] = $this->loaninfo['ShippedTo']['Address4'];
+        if ($this->loaninfo['ShippedTo']['RoomOrBuilding']) $shippedto[] = $this->loaninfo['ShippedTo']['RoomOrBuilding'];
         $shippedto[] = $this->loaninfo['ShippedTo']['City'] . ' ' .
                 $this->loaninfo['ShippedTo']['State'] . ' ' . $this->loaninfo['ShippedTo']['PostCode'];
         if ($this->loaninfo['ShippedTo']['Country'] != 'Australia')
