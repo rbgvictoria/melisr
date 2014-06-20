@@ -147,7 +147,19 @@ class Hispid3ToCsv {
                 $data[$index][] = $this->GeocodeSource($unit['geosou']);
             
             if (isset($unit['det'])) 
-                $data[$index][] = $this->DeterminerRole($unit['det']);
+                $data[$index][] = $this->DetType($unit['det']);
+            
+            if (isset($unit['rkql'])) 
+                $data[$index][] = $this->QualifierRank($unit['rkql']);
+            
+            if (isset($unit['idql'])) 
+                $data[$index][] = $this->Qualifier($unit['idql']);
+            
+            if (isset($unit['poscul'])) 
+                $data[$index][] = $this->CultivatedStatus($unit['poscul']);
+            
+            if (isset($unit['posnat'])) 
+                $data[$index][] = $this->IntroducedStatus($unit['posnat']);
             
             if ((isset($unit['misc']) || isset($unit['fre'])) && $unit['insid'] == 'PERTH') {
                 $misc = (isset($unit['misc'])) ? trim($unit['misc']) : NULL;
@@ -185,6 +197,11 @@ class Hispid3ToCsv {
             );
             
             $data[$index][] = array(
+                'column' => 'PrepQuantity',
+                'value' => 1,
+            );
+            
+            $data[$index][] = array(
                 'column' => 'LocalityUniquefier',
                 'value' => $index + 1,
             );
@@ -193,14 +210,72 @@ class Hispid3ToCsv {
         return $data;
     }
     
-    function DeterminerRole($det) {
+    function DetType($det) {
         if ($det == 'conf.')
             $det = 'Conf.';
         else 
             $det = 'Det.';
         return array(
-            'column' => 'DeterminerRole',
+            'column' => 'DetType',
             'value' => $det,
+        );
+    }
+    
+    function QualifierRank($rkql) {
+        if ($rkql == 'F')
+            $rkql = 'family';
+        elseif ($rkql == 'G')
+                $rkql = 'genus';
+        elseif ($rkql == 'S')
+                $rkql = 'species';
+        else
+            $rkql = NULL;
+        return array(
+            'column' => 'QualifierRank',
+            'value' => $rkql,
+        );
+    }
+    
+    function Qualifier($idql) {
+        if ($idql == 'aff.')
+            $idql = 'aff.';
+        elseif ($idql == 'aff')
+                $idql = 'aff.';
+        elseif ($idql == 'cf.')
+                $idql = 'cf.';
+        elseif ($idql == 'cf')
+                $idql = 'cf.';
+        else
+            $idql = '?';
+        return array(
+            'column' => 'Qualifier',
+            'value' => $idql,
+        );
+    }
+
+    function CultivatedStatus($poscul) {
+        if ($poscul == 'Wild')
+            $poscul = 'Not cultivated';
+        else
+            $poscul = ($poscul);
+        return array(
+            'column' => 'CultivatedStatus',
+            'value' => $poscul,
+        );
+    }
+    
+        function IntroducedStatus($posnat) {
+        if ($posnat == 'Natural')
+            $posnat = 'Native';
+        elseif ($posnat == 'Naturalised')
+                $posnat = 'Not native';
+        elseif ($posnat == 'Unknown')
+                $posnat = 'Unknown';
+        else
+            $posnat = NULL;
+        return array(
+            'column' => 'IntroducedStatus',
+            'value' => $posnat,
         );
     }
     
@@ -221,6 +296,8 @@ class Hispid3ToCsv {
         if ($geosou == 'compiler')
             $geosou = 'Data entry person';
         elseif ($geosou == 'Automatically generated')
+            $geosou = 'Exchange data';
+        elseif ($geosou == 'automatically generated')
             $geosou = 'Exchange data';
         else 
             $geosou = ucfirst($geosou);
