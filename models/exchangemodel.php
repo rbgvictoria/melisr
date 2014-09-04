@@ -225,7 +225,7 @@ class ExchangeModel extends TransactionModel {
         if ($query->num_rows()) {
             $row = $query->row();
             return array(
-                'TypeStatus' => $row->TypeStatusName,
+                'TypeStatus' => ($row->TypeStatusName == 'Holotype') ? 'Isotype' : $row->TypeStatusName,
                 'Basionym' => $row->FullName
             );
         }
