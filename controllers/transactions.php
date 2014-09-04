@@ -101,10 +101,7 @@ class Transactions extends Controller {
                     $this->data['message'] = 'You are way ahead of yourself';
                     $this->load->view('message', $this->data);
                 }
-                
                 $this->loanpreparationsummary = $this->exchangemodel->getPreparationSummary($this->input->post('exchangeoutnumber'));
-                //print_r($this->loanpreparationsummary);
-                //return FALSE;
 
                 switch ($this->input->post('output')) {
                     case 6:
