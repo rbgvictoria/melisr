@@ -43,8 +43,8 @@ class Dehispidator extends Controller {
         $parsed = $this->hispid3tocsv->parseHispid3($hispid);
         if ($this->input->post('outputfields')) {
             $parsed = $this->hispid3tocsv->massageData($parsed);
-            $this->load->model('dehispidatormodel');
-            $parsed = $this->dehispidatormodel->addCurationOfficer($parsed);
+            //$this->load->model('dehispidatormodel');
+            //$parsed = $this->dehispidatormodel->addCurationOfficer($parsed);
             $csv = $this->hispid3tocsv->outputToCsv($parsed, $this->input->post('outputfields'));
         }
         else
