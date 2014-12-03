@@ -360,6 +360,7 @@ class LabelDataModel extends Model {
                 $labeldata['numdups'] = $numdups;
                 $labeldata['DuplicateInfo'] = $this->getDuplicateInfo($row->CollectionObjectID);
                 $labeldata['HortRefSet'] = $row->IsHortRefSet;
+                $labeldata['VicRefSet'] = $this->getVrsNumbers($row->CollectionObjectID);
                 
                 $vrsnumbers = $this->vrsNumber($row->CollectionObjectID);
                 
@@ -388,7 +389,7 @@ class LabelDataModel extends Model {
         } else return 'no records selected';
     }
     
-    function vrsNumber($colobj) {
+    private function vrsNumber($colobj) {
         $this->db->select('SampleNumber, Remarks');
         $this->db->from('preparation');
         $this->db->where('CollectionObjectID', $colobj);
@@ -408,6 +409,23 @@ class LabelDataModel extends Model {
         }
     }
 
+    private function getVrsNumbers($colobjid) {
+        $this->db->select("GROUP_CONCAT(CONCAT('VRS ', SampleNumber) ORDER BY SampleNumber SEPARATOR ', ') AS VrsNumbers", FALSE);
+        $this->db->from('preparation');
+        $this->db->where('PrepTypeID', 18);
+        $this->db->where('SampleNumber IS NOT NULL', FALSE, FALSE);
+        $this->db->where('CollectionObjectID', $colobjid);
+        $this->db->group_by('CollectionObjectID');
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            $row = $query->row();
+            return $row->VrsNumbers;
+        }
+        else
+            return FALSE;
+            
+    }
+    
     function altitude($min, $max, $unit) {
         $alt = $min;
         if ($max) $alt .= '–' . $max;

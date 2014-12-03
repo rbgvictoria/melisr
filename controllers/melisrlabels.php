@@ -1081,6 +1081,9 @@ class MelisrLabels extends Controller {
             if ($labeldata[$i]['DuplicateInfo']) 
                 $pdf->MultiCell($props['whtml'], 5, '<b>Dupl.:</b> ' . $labeldata[$i]['DuplicateInfo'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
             
+            if ($labeldata[$i]['VicRefSet']) 
+                $pdf->MultiCell($props['whtml'], 5, '<b>Vic. Ref. Set:</b> ' . $labeldata[$i]['VicRefSet'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+2, true, 0, true, true, 0, 'T', false);
+            
             $storedunder = $labeldata[$i]['StoredUnder'];
             if ($labeldata[$i]['HortRefSet'])
                 $storedunder = str_replace ('Main collection', 'Hort. Ref. Set', $storedunder);
