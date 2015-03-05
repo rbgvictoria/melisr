@@ -17,7 +17,7 @@ class DehispidatorModel extends Model {
         $this->load->database();
     }
     
-    public function addCurationOfficer($data) {
+    /*public function addCurationOfficer($data) {
         foreach ($data as $index=>$row) {
             $genus = FALSE;
             $unit = array();
@@ -34,7 +34,7 @@ JOIN genusstorage gs ON t.TaxonID=gs.TaxonID
 JOIN `storage` s ON gs.StorageID=s.StorageID
 WHERE t.Name='Diuris';
                 */
-                $this->db->select('s.Text1');
+               /* $this->db->select('s.Text1');
                 $this->db->from('taxon t');
                 $this->db->join('genusstorage gs', 't.TaxonID=gs.TaxonID');
                 $this->db->join('storage s', 'gs.StorageID=s.StorageID');
@@ -51,7 +51,7 @@ WHERE t.Name='Diuris';
             
         }
         return $data;
-    }
+    }*/
 
 }
 
