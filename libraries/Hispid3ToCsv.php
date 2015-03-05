@@ -56,154 +56,155 @@ class Hispid3ToCsv {
                     
                   }
             
-            // Add columns
-            if (isset($unit['isprk']) && isset($unit['isp'])) {
-                $infra = $this->parseInfraspecies($unit['isprk'], $unit['isp']);
-                $data[$index][] = $infra;
-            }
-            
-            if (isset($unit['cdat'])) {
-                $date = $this->mysqlDate($unit['cdat']);
-                $data[$index][] = array(
-                    'column' => 'CollectingDate',
-                    'value' => $date,
-                );
-            }
+                // Add columns
+                if (isset($unit['isprk']) && isset($unit['isp'])) {
+                    $infra = $this->parseInfraspecies($unit['isprk'], $unit['isp']);
+                    $data[$index][] = $infra;
+                }
 
-            if (isset($unit['vdat'])) {
-                $date = $this->mysqlDate($unit['vdat']);
-                $data[$index][] = array(
-                    'column' => 'DeterminationDate',
-                    'value' => $date,
-                );
-            }
-            
-            if (isset($unit['latdeg']) && isset($unit['latdir'])) {
-                $deg = $unit['latdeg'];
-                $min = (isset($unit['latmin'])) ? $unit['latmin'] : FALSE;
-                $sec = (isset($unit['latsec'])) ? $unit['latsec'] : FALSE;
-                $hem = $unit['latdir'];
-                $latitude = $this->latLngText($deg, $min, $sec, $hem);
-                $data[$index][] = array(
-                    'column' => 'LatitudeText',
-                    'value' => $latitude,
-                );
-            }
-            
-            if (isset($unit['londeg']) && isset($unit['londir'])) {
-                $deg = $unit['londeg'];
-                $min = (isset($unit['lonmin'])) ? $unit['lonmin'] : FALSE;
-                $sec = (isset($unit['lonsec'])) ? $unit['lonsec'] : FALSE;
-                $hem = $unit['londir'];
-                $longitude = $this->latLngText($deg, $min, $sec, $hem);
-                $data[$index][] = array(
-                    'column' => 'LongitudeText',
-                    'value' => $longitude,
-                );
-            }
-            
-            if (isset($unit['cnam'])) {
-                $primary = $unit['cnam'];
-                $addit = (isset($unit['cnam2'])) ? $unit['cnam2'] : FALSE;
-                $data[$index] = array_merge($data[$index], $this->dehispidateCollectors($primary, $addit));
-            }
-            
-            if (isset($unit['vnam']))
-                $data[$index] = array_merge($data[$index], $this->dehispidateDeterminers($unit['vnam']));
-            
-            if (isset($unit['alt'])) {
-                $data[$index][] = array(
-                    'column' => 'AltitudeUnit',
-                    'value' => 'metres',
-                );
-            }
-            
-            if (isset($unit['altacy'])) {
-                $data[$index][] = array(
-                    'column' => 'AltitudeUncertainty',
-                    'value' => $unit['altacy'] . ' m',
-                );
-            }
-            
-            if (isset($unit['geoacy'])) {
-                $data[$index][] = array(
-                    'column' => 'GeocodeUncertainty',
-                    'value' => $this->GeocodeUncertainty($unit['geoacy']),
-                );
-            }
-            
-            if (isset($unit['phe'])) {
-                $data[$index] = array_merge($data[$index], $this->parsePhenology($unit['phe']));
-            }
-            
-            if (isset($unit['desrep'])) {
-                $data[$index][] = $this->parseDuplicateString($unit['desrep']);
-            }
-            
-            if (isset($unit['geosou'])) 
-                $data[$index][] = $this->GeocodeSource($unit['geosou']);
-            
-            if (isset($unit['det'])) 
-                $data[$index][] = $this->DetType($unit['det']);
-            
-            if (isset($unit['rkql'])) 
-                $data[$index][] = $this->QualifierRank($unit['rkql']);
-            
-            if (isset($unit['idql'])) 
-                $data[$index][] = $this->Qualifier($unit['idql']);
-            
-            if (isset($unit['poscul'])) 
-                $data[$index][] = $this->CultivatedStatus($unit['poscul']);
-            
-            if (isset($unit['posnat'])) 
-                $data[$index][] = $this->IntroducedStatus($unit['posnat']);
-            
-            if ((isset($unit['misc']) || isset($unit['fre'])) && $unit['insid'] == 'PERTH') {
-                $misc = (isset($unit['misc'])) ? trim($unit['misc']) : NULL;
-                if ($misc && substr($misc, strlen($misc)-1) != '.')
-                        $misc .= '.';
-                $fre = (isset($unit['fre'])) ? ucfirst(trim($unit['fre'])) : NULL;
-                if ($fre && substr($fre, strlen($fre)-1) != '.')
-                        $fre .= '.';
-                $data[$index][] = array(
-                    'column' => 'CollectingNotes',
-                    'value' => trim($misc . ' ' . $fre)
-                );
-            }
-            elseif (isset($unit['fre'])) {
-                $fre = ucfirst(trim($unit['fre']));
-                if (substr($fre, strlen($fre)-1) != '.')
-                        $fre .= '.';
-                $data[$index][] = array(
-                    'column' => 'CollectingNotes',
-                    'value' => $fre
-                );
-            }
-            
-            if (isset($unit['hab']) || isset($unit['veg']))
-                $data[$index][] = $this->Habitat($unit);
+                if (isset($unit['cdat'])) {
+                    $date = $this->mysqlDate($unit['cdat']);
+                    $data[$index][] = array(
+                        'column' => 'CollectingDate',
+                        'value' => $date,
+                    );
+                }
 
-            $data[$index][] = array(
-                'column' => 'WBUpload',
-                'value' => 1,
-            );
-            
-            $data[$index][] = array(
-                'column' => 'PrepType',
-                'value' => 'Sheet',
-            );
-            
-            $data[$index][] = array(
-                'column' => 'PrepQuantity',
-                'value' => 1,
-            );
-            
-            $data[$index][] = array(
-                'column' => 'LocalityUniquefier',
-                'value' => $index + 1,
-            );
-        }
+                if (isset($unit['vdat'])) {
+                    $date = $this->mysqlDate($unit['vdat']);
+                    $data[$index][] = array(
+                        'column' => 'DeterminationDate',
+                        'value' => $date,
+                    );
+                }
+
+                if (isset($unit['latdeg']) && isset($unit['latdir'])) {
+                    $deg = $unit['latdeg'];
+                    $min = (isset($unit['latmin'])) ? $unit['latmin'] : FALSE;
+                    $sec = (isset($unit['latsec'])) ? $unit['latsec'] : FALSE;
+                    $hem = $unit['latdir'];
+                    $latitude = $this->latLngText($deg, $min, $sec, $hem);
+                    $data[$index][] = array(
+                        'column' => 'LatitudeText',
+                        'value' => $latitude,
+                    );
+                }
+
+                if (isset($unit['londeg']) && isset($unit['londir'])) {
+                    $deg = $unit['londeg'];
+                    $min = (isset($unit['lonmin'])) ? $unit['lonmin'] : FALSE;
+                    $sec = (isset($unit['lonsec'])) ? $unit['lonsec'] : FALSE;
+                    $hem = $unit['londir'];
+                    $longitude = $this->latLngText($deg, $min, $sec, $hem);
+                    $data[$index][] = array(
+                        'column' => 'LongitudeText',
+                        'value' => $longitude,
+                    );
+                }
+
+                if (isset($unit['cnam'])) {
+                    $primary = $unit['cnam'];
+                    $addit = (isset($unit['cnam2'])) ? $unit['cnam2'] : FALSE;
+                    $data[$index] = array_merge($data[$index], $this->dehispidateCollectors($primary, $addit));
+                }
+
+                if (isset($unit['vnam']))
+                    $data[$index] = array_merge($data[$index], $this->dehispidateDeterminers($unit['vnam']));
+
+                if (isset($unit['alt'])) {
+                    $data[$index][] = array(
+                        'column' => 'AltitudeUnit',
+                        'value' => 'metres',
+                    );
+                }
+
+                if (isset($unit['altacy'])) {
+                    $data[$index][] = array(
+                        'column' => 'AltitudeUncertainty',
+                        'value' => $unit['altacy'] . ' m',
+                    );
+                }
+
+                if (isset($unit['geoacy'])) {
+                    $data[$index][] = array(
+                        'column' => 'GeocodeUncertainty',
+                        'value' => $this->GeocodeUncertainty($unit['geoacy']),
+                    );
+                }
+
+                if (isset($unit['phe'])) {
+                    $data[$index] = array_merge($data[$index], $this->parsePhenology($unit['phe']));
+                }
+
+                if (isset($unit['desrep'])) {
+                    $data[$index][] = $this->parseDuplicateString($unit['desrep']);
+                }
+
+                if (isset($unit['geosou'])) 
+                    $data[$index][] = $this->GeocodeSource($unit['geosou']);
+
+                if (isset($unit['det'])) 
+                    $data[$index][] = $this->DetType($unit['det']);
+
+                if (isset($unit['rkql'])) 
+                    $data[$index][] = $this->QualifierRank($unit['rkql']);
+
+                if (isset($unit['idql'])) 
+                    $data[$index][] = $this->Qualifier($unit['idql']);
+
+                if (isset($unit['poscul'])) 
+                    $data[$index][] = $this->CultivatedStatus($unit['poscul']);
+
+                if (isset($unit['posnat'])) 
+                    $data[$index][] = $this->IntroducedStatus($unit['posnat']);
+
+                if ((isset($unit['misc']) || isset($unit['fre'])) && $unit['insid'] == 'PERTH') {
+                    $misc = (isset($unit['misc'])) ? trim($unit['misc']) : NULL;
+                    if ($misc && substr($misc, strlen($misc)-1) != '.')
+                            $misc .= '.';
+                    $fre = (isset($unit['fre'])) ? ucfirst(trim($unit['fre'])) : NULL;
+                    if ($fre && substr($fre, strlen($fre)-1) != '.')
+                            $fre .= '.';
+                    $data[$index][] = array(
+                        'column' => 'CollectingNotes',
+                        'value' => trim($misc . ' ' . $fre)
+                    );
+                }
+                elseif (isset($unit['fre'])) {
+                    $fre = ucfirst(trim($unit['fre']));
+                    if (substr($fre, strlen($fre)-1) != '.')
+                            $fre .= '.';
+                    $data[$index][] = array(
+                        'column' => 'CollectingNotes',
+                        'value' => $fre
+                    );
+                }
+
+                if (isset($unit['hab']) || isset($unit['veg']))
+                    $data[$index][] = $this->Habitat($unit);
+
+                $data[$index][] = array(
+                    'column' => 'WBUpload',
+                    'value' => 1,
+                );
+
+                $data[$index][] = array(
+                    'column' => 'PrepType',
+                    'value' => 'Sheet',
+                );
+
+                $data[$index][] = array(
+                    'column' => 'PrepQuantity',
+                    'value' => 1,
+                );
+
+                $data[$index][] = array(
+                    'column' => 'LocalityUniquefier',
+                    'value' => $index + 1,
+                );
+            }
         
+        }
         return $data;
     }
     
