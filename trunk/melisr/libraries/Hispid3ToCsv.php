@@ -53,11 +53,8 @@ class Hispid3ToCsv {
                 if (in_array($field['column'], array('loc', 'hab', 'cnot', 'misc'))) {
                     if (!in_array(substr($field['value'], strlen($field['value'])-1, 1), array('.', '?')))
                         $data[$index][$colind]['value'] .= '.';
-                }
                     
-                
-                
-            }
+                  }
             
             // Add columns
             if (isset($unit['isprk']) && isset($unit['isp'])) {
