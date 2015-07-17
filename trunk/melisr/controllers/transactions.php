@@ -710,6 +710,11 @@ EOD;
 
         $w = 30;
         $y = $pdf->GetY()-2;
+        if ($this->loaninfo['GiftAgents']) {
+            $pdf->MultiCell($w, 5, 'Attention:', 0, 'L', 0, 1, 25, $y, true, false, true);
+            $pdf->MultiCell(130-$w, 5, $this->loaninfo['GiftAgents'], 0, 'L', 0, 1, 30+$w, $y, true, false, true);
+            $y = $pdf->GetY()+1;
+        }
         $pdf->MultiCell($w, 5, 'Description:', 0, 'L', 0, 1, 25, $y, true, false, true);
         $description = $this->loaninfo['Description'];
         if (strpos($description, '||'))
@@ -720,6 +725,19 @@ EOD;
         $y = $pdf->GetY()+1;
         $pdf->MultiCell($w, 5, 'Quantity:', 0, 'L', 0, 1, 25, $y, true, false, true);
         $pdf->MultiCell(120-$w, 5, $this->Quantity(), 0, 'L', 0, 1, 30+$w, $y, true, false, true);
+        
+        $y = $pdf->GetY()+1;
+        $pdf->MultiCell($w, 5, 'Electronic data:', 0, 'L', 0, 1, 25, $y, true, false, true);
+        if ($this->LoanAgents) {
+            $when = $this->loaninfo['ShipmentDate'];
+            $what = $this->loaninfo['ExchangeFileName'];
+            $text = $what . ' emailed to ' . $this->LoanAgents;
+        }
+        else {
+            $text = 'Available on request';
+        }
+        $pdf->MultiCell(120-$w, 5, $text, 0, 'L', 0, 1, 30+$w, $y, true, false, true);
+        
 
         $y = $pdf->GetY()+1;
         $pdf->MultiCell($w, 5, 'Shipment details:', 0, 'L', 0, 1, 25, $y, true, false, true);
@@ -737,18 +755,6 @@ EOD;
         $paragraphs[] = <<<EOD
 Please verify the contents of this consignment against the attached specimen list and acknowledge
 receipt by returning the yellow copy of this form.
-EOD;
-        if ($this->LoanAgents) {
-            $when = $this->loaninfo['ShipmentDate'];
-            $what = $this->loaninfo['ExchangeFileName'];
-            $paragraphs[] = <<<EOD
-Electronic data for the specimens in this consignment was emailed to $this->LoanAgents on $when
-(filename: $what)
-EOD;
-}
-        else
-            $paragraphs[] = <<<EOD
-Electronic data for the specimens in this consignment is available on request. 
 EOD;
         $paragraphs[] = <<<EOD
 For queries relating to loans, exchange or donations, please email MEL at herbmel@rbg.vic.gov.au.

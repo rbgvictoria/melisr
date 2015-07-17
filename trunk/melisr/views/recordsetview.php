@@ -2,7 +2,7 @@
 
 <h2>Record set creator</h2>
 
-<?=form_open('recordset/create'); ?>
+<?=form_open(site_url() . '/recordset/create'); ?>
 <select name="specifyuser" id="specifyuser">
     <option value="0">(select username)</option>
     <?php foreach ($specifyusers as $user): ?>

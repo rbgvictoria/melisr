@@ -1,28 +1,28 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<!DOCTYPE html>
+<html lang="en-US">
 <head>
-	<title>
-            <?php if(isset($title)):?>
-            <?=$title?>
-            <?php else: ?>
-            MELISR
-            <?php endif; ?>
-        </title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<link rel="stylesheet" type="text/css" href="<?=base_url()?>css/default.css" />
-        <?php if (isset($css)): ?>
-        <?php foreach ($css as $style): ?>
-        <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/<?=$style?>"/>
-        <?php endforeach; ?>
+    <title>
+        <?php if(isset($title)):?>
+        <?=$title?>
+        <?php else: ?>
+        MELISR
         <?php endif; ?>
-        <script type="text/javascript" src="<?=base_url()?>js/jquery-1.4.2.min.js"></script>
-        <script type="text/javascript" src="<?=base_url()?>js/jquery.window.js"></script>
-        <?php if (isset($js)): ?>
-        <?php foreach ($js as $script): ?>
-        <script type="text/javascript" src="<?=base_url()?>js/<?=$script?>"></script>
-        <?php endforeach; ?>
-        <?php endif; ?>
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/default.css" />
+    <?php if (isset($css)): ?>
+    <?php foreach ($css as $style): ?>
+    <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/<?=$style?>"/>
+    <?php endforeach; ?>
+    <?php endif; ?>
+    <script type="text/javascript" src="<?=base_url()?>js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="<?=base_url()?>js/jquery.window.js"></script>
+    <?php if (isset($js)): ?>
+    <?php foreach ($js as $script): ?>
+    <script type="text/javascript" src="<?=base_url()?>js/<?=$script?>"></script>
+    <?php endforeach; ?>
+    <?php endif; ?>
 </head>
 
 <body>

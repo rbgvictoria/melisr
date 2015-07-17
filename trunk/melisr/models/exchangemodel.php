@@ -66,6 +66,7 @@ class ExchangeModel extends TransactionModel {
             $giftinfo['TrackingLabels'] = $row->Text1;
             $giftinfo['NumberOfPackages'] = $row->NumberOfPackages;
             $giftinfo['LoanAgents'] = $this->getLoanAgents($giftid);
+            $giftinfo['GiftAgents'] = $this->getGiftAgents($giftid);
             $giftinfo['ExchangeFileName'] = $row->ExchangeFileName;
             return $giftinfo;
         }
@@ -148,6 +149,32 @@ class ExchangeModel extends TransactionModel {
                 );
             }
             return $loanagents;
+        }
+        else
+            return FALSE;
+    }
+    
+    function getGiftAgents($giftid) {
+        $giftagents = FALSE;
+        $this->db->select('ga.Role, a.Title, a.MiddleInitial, a.FirstName, a.LastName');
+        $this->db->from('giftagent ga');
+        $this->db->join('agent a', 'ga.AgentID=a.AgentID');
+        $this->db->where('ga.GiftID', $giftid);
+        $this->db->where('ga.Role !=', 1);
+        $this->db->order_by('ga.Role');
+        $query = $this->db->get();
+        if ($query->num_rows) {
+            $loanagents = array();
+            foreach ($query->result() as $row) {
+                $name = array();
+                if ($row->MiddleInitial) $name[] = $row->MiddleInitial;
+                elseif ($row->FirstName) $name[] = $row->FirstName;
+                elseif ($row->Title) $name = $row->Title;
+                $name[] = $row->LastName;
+                $name = implode(' ', $name);
+                $giftagents[] = $name;
+            }
+            return implode('; ', $giftagents);
         }
         else
             return FALSE;

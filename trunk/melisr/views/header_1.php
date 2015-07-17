@@ -13,14 +13,22 @@
 	<link rel="stylesheet" type="text/css" href="<?=base_url()?>css/default.css" />
         <?php if (isset($css)): ?>
         <?php foreach ($css as $style): ?>
+        <?php if (substr($style, 0, 2) == '//' || substr($style, 0, 5) == 'http:'): ?>
+        <link rel="stylesheet" type="text/css" href="<?=$style?>"/>
+        <?php else: ?>
         <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/<?=$style?>"/>
+        <?php endif; ?>
         <?php endforeach; ?>
         <?php endif; ?>
-        <script type="text/javascript" src="<?=base_url()?>js/jquery-1.4.2.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script type="text/javascript" src="<?=base_url()?>js/jquery.window.js"></script>
         <?php if (isset($js)): ?>
         <?php foreach ($js as $script): ?>
+        <?php if (substr($script, 0, 2) == '//' || substr($script, 0, 5) == 'http:'): ?>
+        <script type="text/javascript" src="<?=$script?>"></script>
+        <?php else: ?>
         <script type="text/javascript" src="<?=base_url()?>js/<?=$script?>"></script>
+        <?php endif; ?>
         <?php endforeach; ?>
         <?php endif; ?>
 </head>

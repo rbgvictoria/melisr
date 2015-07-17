@@ -104,8 +104,8 @@ class FqcmModel extends Model {
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
-        $this->db->groupby("co.CatalogNumber", FALSE);
-        $this->db->having("COUNT(p.PrepTypeID)>1", FALSE);
+        $this->db->group_by("co.CatalogNumber");
+        $this->db->having("COUNT(p.PrepTypeID)>1");
 
         if ($this->collids)
             $this->db->where_in("co.CollectionObjectID", $this->collids);
@@ -121,10 +121,10 @@ class FqcmModel extends Model {
             return false;
     }
     
-       /** Looks for collection object records that are missing a primary
-        *  preparation, and only have preparation(s) that should not be 
-        *  assigned unique MEL numbers (Duplicate, Silica gel sample etc.)
-        */
+    /** Looks for collection object records that are missing a primary
+    *  preparation, and only have preparation(s) that should not be 
+    *  assigned unique MEL numbers (Duplicate, Silica gel sample etc.)
+    */
     public function noPrimaryPreparations($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -263,6 +263,94 @@ class FqcmModel extends Model {
         else
             return false;
     }
+    
+    public function duplicateDuplicatePreparations($startdate, $enddate=FALSE, $userid=FALSE, $type='duplicate') {
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,
+            DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,
+            DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from('collectionobject co');
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        
+        $this->db->join('preparation p', 'co.CollectionObjectID=p.CollectionObjectID');
+        $this->db->where("co.CollectionMemberID", 4);
+        $this->db->where("DATE(co.TimestampCreated) >=", $startdate);
+        if ($type == 'seed duplicate')
+            $this->db->where('p.PrepTypeID', 16);
+        else
+            $this->db->where('p.PrepTypeID', 15);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+        $this->db->group_by('co.CollectionObjectID');
+        $this->db->having('count(*)>1');
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function missingExHerbarium($startdate, $enddate=FALSE, $userid=FALSE) {
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,
+            DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,
+            DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from('collectionobject co');
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        
+        $this->db->join('preparation p', 'co.CollectionObjectID=p.CollectionObjectID');
+        $this->db->join('otheridentifier oi', "co.CollectionObjectID=oi.CollectionObjectID AND oi.Remarks='Ex herbarium'", 'left', FALSE);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+        $this->db->where("p.Text2 IS NOT NULL AND p.Text2!=''", FALSE, FALSE);
+        $this->db->where('oi.OtherIdentifierID IS NULL', FALSE, FALSE);
+        $this->db->group_by('co.CollectionObjectID');
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function missingExHerbariumCatalogNumber($startdate, $enddate=FALSE, $userid=FALSE) {
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,
+            DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,
+            DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from('collectionobject co');
+        $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
+        $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
+        
+        $this->db->join('otheridentifier oi', "co.CollectionObjectID=oi.CollectionObjectID AND oi.Remarks='Ex herbarium'", 'left', FALSE);
+        
+        if ($startdate)
+            $this->db->where("DATE(co.TimestampCreated)>=\"$startdate\"", FALSE, FALSE);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
+        if ($userid)
+            $this->db->where("co.CreatedByAgentID", $userid);
+        
+        $this->db->where("(oi.Institution IS NULL OR oi.Institution='')", FALSE, FALSE);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
 
     /* SELECT co.CatalogNumber,co.notifications AS Mixed,a1.LastName AS CreatedBy,LEFT(co.TimestampCreated,10) AS Created,a2.LastName AS EditedBy,LEFT(co.TimestampModified,10) AS Edited,p.PreparationID,p.Remarks
       FROM preparation p

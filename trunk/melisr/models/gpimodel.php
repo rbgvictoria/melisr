@@ -66,7 +66,7 @@ class GpiModel extends Model {
         $this->db->select('cea.Text6 AS CollectionDateOtherText', FALSE);
         //$this->db->select('country(l.GeographyID) AS CountryName', FALSE);
         $this->db->select('l.LocalityName AS Locality, l.GeographyID', FALSE);
-        $this->db->select("IF(l.MaxElevation, CONCAT(l.MinElevation, '–', l.MaxElevation), l.MinElevation) AS Altitude", FALSE);
+        $this->db->select("CONCAT_WS(' ', IF(l.MaxElevation, CONCAT(l.MinElevation, '-', l.MaxElevation), l.MinElevation), l.Text1) AS Altitude", FALSE);
         
         $this->db->from('collectionobject co');
         $this->db->join('collectingevent ce', 'co.CollectingEventID=ce.CollectingEventID');
@@ -97,8 +97,12 @@ class GpiModel extends Model {
                 if (!$unit->CollectionDateStartYear && !$unit->CollectionDateOtherText)
                     $unit->CollectionDateOtherText = 'Not on sheet';
                 $unit->CountryName = $this->getCountryOrState($row->GeographyID, 'country');
-                if ($unit->CountryName == 'Australia') 
+                if ($unit->CountryName == 'Australia') {
                     $unit->ISO2Letter = 'AU';
+                }
+                else {
+                    $unit->ISO2Letter = $this->getIsoCountryCode($unit->CountryName);
+                }
                 $state = $this->getCountryOrState($row->GeographyID, 'state');
                 if ($state)
                     $unit->Locality = $state . '. ';
@@ -106,6 +110,20 @@ class GpiModel extends Model {
                 $unit->Altitude = $row->Altitude;
                 $this->db->insert('gpi.unit', $unit);
             }
+        }
+    }
+    
+    public function getIsoCountryCode($country) {
+        $this->db->select('CountryCode');
+        $this->db->from('biocase.aux_iso_countries');
+        $this->db->where('Country', $country);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            $row = $query->row();
+            return $row->CountryCode;
+        }
+        else {
+            return NULL;
         }
     }
     
@@ -314,20 +332,24 @@ class GpiModel extends Model {
                 $name = explode(' ', $row->FullName);
 
                 $identification->Family = $this->getFamily($row->NodeNumber);
-                if ($row->Qualifier && ($row->QualifierRank=='Genus' || (!$row->QualifierRank && $row->TaxonTreeDefItemID == 12)))
+                if ($row->Qualifier && ($row->QualifierRank=='Genus' || (!$row->QualifierRank && $row->TaxonTreeDefItemID == 12))) {
                     $identification->GenusQualifier = $row->Qualifier;
-                else
+                }
+                else {
                     $identification->GenusQualifier = NULL;
+                }
                 $identification->Genus = (isset($name[0])) ? $name[0] : NULL;
                 $identification->InfraspecificRank = NULL;
                 $identification->InfraspecificEpithet = NULL;
                 $identification->Author = str_replace(' & ', ' &amp; ', $row->Author);
 
-                if ($row->Qualifier && ($row->QualifierRank=='Species' || (!$row->QualifierRank && $row->TaxonTreeDefItemID == 13)))
+                if ($row->Qualifier && ($row->QualifierRank=='Species' || (!$row->QualifierRank && $row->TaxonTreeDefItemID == 13))) {
                     $identification->SpeciesQualifier = $row->Qualifier;
-                else
+                }
+                else {
                     $identification->SpeciesQualifier = NULL;
-                $identification->Species = (isset($name[1])) ? $name[1] : NULL;
+                }
+                $identification->Species = (isset($name[1]) && $name[1]) ? $name[1] : NULL;
 
                 if (count($name) == 4 && in_array($name[2], array('subsp.', 'var.', 'subvar.', 'f.', 'subf.'))) {
                     $identification->InfraspecificRank = $name[2];
@@ -501,6 +523,7 @@ class GpiModel extends Model {
                 $numerrors = count($errors['NotAType'])
                         + count($errors['TypeStatusEqualsCurrent'])
                         + count($errors['NotABasionym'])
+                        + count($errors['NoSpecies'])
                         + count($errors['NoAuthor'])
                         + count($errors['NoProtologue']);
 
@@ -663,6 +686,7 @@ class GpiModel extends Model {
         }
         $errors['NotABasionym'] = $this->notABasionym($batchno);
         $errors['NoAuthor'] = $this->noAuthor($batchno);
+        $errors['NoSpecies'] = $this->noSpecificEpithet($batchno);
         $errors['NoProtologue'] = $this->noProtologue($batchno);
         return $errors;
     }
@@ -753,6 +777,20 @@ class GpiModel extends Model {
         $this->db->from('gpi.unit u');
         $this->db->join('gpi.identification i', 'u.UnitID=i.UnitID');
         $this->db->where("u.DataSetID=$batchno AND (i.Author IS NULL OR i.Author='') AND i.TypeStatus!='-'", FALSE, FALSE);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach($query->result() as $row)
+                $ret[] = $row->SpDeterminationID;
+        }
+        return $ret;
+    }
+    
+    private function noSpecificEpithet($batchno) {
+        $ret = array();
+        $this->db->select('u.SpCollectionObjectID, i.SpDeterminationID');
+        $this->db->from('gpi.unit u');
+        $this->db->join('gpi.identification i', 'u.UnitID=i.UnitID');
+        $this->db->where("u.DataSetID=$batchno AND (i.Species IS NULL OR i.Species='') AND i.TypeStatus!='-'", FALSE, FALSE);
         $query = $this->db->get();
         if ($query->num_rows()) {
             foreach($query->result() as $row)

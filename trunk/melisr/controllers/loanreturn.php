@@ -21,12 +21,12 @@ class LoanReturn extends Controller {
         $this->data['bannerimage'] = $this->banner();
         $this->data['title'] = 'MELISR | Loan return';
         //$this->data['js'][] = 'jquery-ui-1.10.2.custom.min.js';
-        $this->data['js'][] = 'jquery.dataTables.min.js';
+        $this->data['js'][] = '//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js';
         $this->data['js'][] = 'jquery.melisr.htmltableoptions.js';
         $this->data['js'][] = 'jquery.loans.js';
         $this->data['js'][] = 'jquery.transfer.js';
         //$this->data['css'][] = 'jquery-ui-1.10.2.custom.css';
-        $this->data['css'][] = 'datatables.css';
+        $this->data['css'][] = '//cdn.datatables.net/1.10.7/css/jquery.dataTables.css';
     }
 
     function index() {
