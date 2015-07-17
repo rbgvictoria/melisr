@@ -3,7 +3,7 @@
 <h2>Batch <?=$BatchNo?></h2>
 
 <?=form_open(site_url() . "/gpi/create_error_record_set/batch/$BatchNo", array('style' => 'display: inline-block'))?>
-<?php $errortypes = array('NotAType', 'TypeStatusEqualsCurrent', 'NotABasionym', 'NoAuthor', 'NoProtologue'); ?>
+<?php $errortypes = array('NotAType', 'TypeStatusEqualsCurrent', 'NotABasionym', 'NoSpecies', 'NoAuthor', 'NoProtologue'); ?>
 
 <?php foreach ($errortypes as $type): ?>
     <?php if (isset($Errors[$type])): ?>
@@ -17,6 +17,9 @@
                 break;
             case 'NotABasionym':
                 echo '<h3>Basionym with parenthetical authors (so not a basionym, or authorship incorrect)</h3>';
+                break;
+            case 'NoSpecies':
+                echo '<h3>Typified name without specific epithet</h3>';
                 break;
             case 'NoAuthor':
                 echo '<h3>Name without author</h3>';

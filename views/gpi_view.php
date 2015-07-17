@@ -30,10 +30,14 @@ the first row, will break the script.</p>
             <th>Delete batch</th>
             <th>Marked in MELISR</th>
         </tr>
+    <?php $counts=array(); ?>
     <?php foreach ($DataSets as $set): ?>
+        <?php $counts[] = $set['NumRecords']; ?>
         <tr>
-            <td><?=$set['BatchNo']?></td><td><?=$set['DateUploaded']?></td>
-            <td><?=$set['NumRecords']?></td><td><a href="<?=site_url()?>/gpi/show_errors/batch/<?=$set['BatchNo']?>"
+            <td><?=$set['BatchNo']?></td>
+            <td><?=$set['DateUploaded']?></td>
+            <td><?=$set['NumRecords']?></td>
+            <td><a href="<?=site_url()?>/gpi/show_errors/batch/<?=$set['BatchNo']?>"
                 title="Show errors"><?=$set['NumErrors']?></a></td>
             <td><a href="<?=site_url()?>/gpi/get_xml/<?=$set['BatchNo']?>/gpi"
                 title="get XML (GPI Schema)">XML (GPI)</a></td>
@@ -41,17 +45,27 @@ the first row, will break the script.</p>
                 title="get XML (with BioCASe wrapper)">XML (BioCASe)</a></td>
             <td><a href="<?=site_url()?>/gpi/get_xml/<?=$set['BatchNo']?>/csv"
                 title="get CSV">CSV</a></td>
-                <td><a href="<?=site_url()?>/gpi/delete_batch/<?=$set['BatchNo']?>">Delete</a></td>
+            <td><a href="<?=site_url()?>/gpi/delete_batch/<?=$set['BatchNo']?>">Delete</a></td>
             <td>
                 <?php if($set['NumMarked']==$set['NumRecords']): ?>
                 Marked
                 <?php else: ?>
                 <a href="<?=site_url()?>/gpi/mark_in_melisr/<?=$set['BatchNo']?>">Mark in MELISR</a>
                 <?php endif; ?>
-                
             </td>
         </tr>
     <?php endforeach; ?>
+        <tr class="total">
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td style="font-weight:bold;"><?=array_sum($counts);?></td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
     </table>
 <?php endif; ?>
 

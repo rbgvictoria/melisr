@@ -67,8 +67,6 @@ class Gpi extends Controller {
         }
         fclose($handle);
         if ($units) {
-            //header('Content-type: text/xml; charset=UTF-8');
-            //echo $this->lapimodel->getMetadata($units);
             $batchno = substr($filename, 6, strpos($filename, '.')-strpos($filename, '_')-1);
             $this->gpimodel->insertDataSet($batchno);
             $this->gpimodel->insertUnits($units, $batchno);

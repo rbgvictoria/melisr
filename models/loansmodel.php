@@ -235,7 +235,7 @@ class LoansModel extends TransactionModel {
         $this->db->select('count(lp.LoanPreparationID) AS Amount', false);
         $this->db->from('loanpreparation lp');
         $this->db->join('preparation p', 'lp.PreparationID=p.PreparationID');
-        $this->db->where_in('p.PrepTypeID', array(15, 16, 17, 18));
+        $this->db->where_in('p.PrepTypeID', array(15, 16, 17, 18, 7, 27, 24));
         $query = $this->db->get();
         $row = $query->row();
         

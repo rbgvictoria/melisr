@@ -146,6 +146,14 @@ class Fqcm extends Controller {
                     $this->data['TreatedByNotNullOtherTreatmentFieldsNull'] = $this->fqcmmodel->treatedByNotNullOtherTreatmentFieldsNull($startdate, FALSE, $request['user']);    
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'SeverityOrCauseNotNullButAssessedByNull')
                     $this->data['SeverityOrCauseNotNullButAssessedByNull'] = $this->fqcmmodel->severityOrCauseNotNullButAssessedByNull($startdate, FALSE, $request['user']);    
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'DuplicateDuplicatePreparations')
+                    $this->data['DuplicateDuplicatePreparations'] = $this->fqcmmodel->duplicateDuplicatePreparations($startdate, FALSE, $request['user'], 'duplicate');    
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'DuplicateSeedDuplicatePreparations')
+                    $this->data['DuplicateSeedDuplicatePreparations'] = $this->fqcmmodel->duplicateDuplicatePreparations($startdate, FALSE, $request['user'], 'seed duplicate');    
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingExHerbarium')
+                    $this->data['MissingExHerbarium'] = $this->fqcmmodel->missingExHerbarium($startdate, FALSE, $request['user']);    
+                if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingExHerbariumCatalogNumber')
+                    $this->data['MissingExHerbariumCatalogNumber'] = $this->fqcmmodel->missingExHerbariumCatalogNumber($startdate, FALSE, $request['user']);    
             }
             elseif ($this->input->post('submit_localities')) {
                 $this->data['SharedLocalities'] = $this->fqcmmodel->sharedLocalities($startdate, FALSE, $this->input->post('user'));               
@@ -167,7 +175,6 @@ class Fqcm extends Controller {
     }
     
     function createRecordSet() {
-        $this->data['specifyusers'] = $this->recordsetmodel->getSpecifyUsers();
         if (!$this->input->post('user') || !$this->input->post('recordset') || !$this->input->post('recsetitems')) {
             $this->data['message'] = 'Not all fields have been filled in<br/>Record set cannot be created';
             $this->load->view('message', $this->data);
@@ -186,6 +193,10 @@ class Fqcm extends Controller {
             }
         }
         
+    }
+    
+    function taxonnames() {
+        $this->load->view('fqcm_taxa_view', $this->data);
     }
 
 }

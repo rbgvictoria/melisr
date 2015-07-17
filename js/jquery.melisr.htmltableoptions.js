@@ -1,17 +1,11 @@
 $(document).ready(function() {
-	$('#loantable, #loanpreptable').dataTable( {
-		"bPaginate": false,
-		"bLengthChange": false,
-		"bFilter": false,
-		"bSort": true,
-		"bInfo": false,
-		"bAutoWidth": false,
-		"sPaginationType": "full_numbers",
-		//"sDom": '<"top"lip><"table"rt>',
-		"bSortClasses": false  // different color for sort columns
-	} );
-    
-	$('.image-records').dataTable( {
+	$('#loantable, #loanpreptable').DataTable({
+            paging: false,
+            searching: false,
+            order: [[0, 'desc']]
+        });
+        
+	$('.image-records').DataTable( {
 		"sPaginationType": "full_numbers",
         "bAutoWidth": false
 	} );

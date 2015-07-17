@@ -539,7 +539,7 @@ class LabelDataModel extends Model {
         $select = "SELECT p.Remarks
             FROM preparation p
             JOIN collectionobject co ON p.CollectionObjectID=co.CollectionObjectID
-            WHERE co.CollectionObjectID IN ($colobjects) AND p.PrepTypeID IN (1, 8, 10, 13) AND !isnull(p.Remarks)";
+            WHERE co.CollectionObjectID IN ($colobjects) AND p.PrepTypeID IN (1, 2, 3, 4, 13) AND !isnull(p.Remarks)";
         $query = $this->db->query($select);
         if ($query->num_rows() > 0) {
             $labelarray = array();
@@ -1331,7 +1331,7 @@ class LabelDataModel extends Model {
     function getMultisheetInfo($collectionobjectid) {
         $select = "SELECT Remarks FROM preparation
             WHERE CollectionObjectID=$collectionobjectid
-            AND PreptypeID IN (1, 2, 3, 4)";
+            AND PreptypeID IN (1, 2, 3, 4, 13)";
         $query = $this->db->query($select);
         if ($query->num_rows() > 0) {
             $row = $query->row();

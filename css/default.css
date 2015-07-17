@@ -69,7 +69,7 @@ h4 {
 
 label {
     display: inline-block;
-    width: 75px;
+    width: 100px;
     margin-right: 10px;
 }
 
@@ -280,4 +280,45 @@ div.dataTables_info, div.dataTables_paginate {
 
 #extrafields {
     vertical-align: text-top;
+}
+
+/* DNA sequences
+------------------------------------*/
+.marker-not-in-picklist {
+    background-color: #ffb266;
+}
+
+label.required::after {
+    color:  red;
+    font-weight: bold;
+    content: "*";
+    display: inline;
+}
+
+tr.info {
+  background-color: rgba(51, 153, 255, 0.5);
+}
+
+tr.warning {
+  background-color: rgba(255, 128, 0, 0.5);
+}
+
+tr.error {
+  background-color: rgba(255, 0, 0, 0.5);
+}
+
+td.td-center {
+    text-align: center;
+}
+
+td.td-right {
+    text-align: right;
+}
+
+i.fa.fa-check.green {
+  color: #4c9900;
+}
+
+i.fa.fa-remove.red {
+  color: #ff0000;
 }

@@ -1,6 +1,6 @@
 <?php
 
-class InsectDamageModel extends Model {
+class DestroyerModel extends Model {
     
     public function __construct() {
         parent::Model();
@@ -73,6 +73,7 @@ class InsectDamageModel extends Model {
         $this->db->select('AgentID');
         $this->db->from('agent');
         $this->db->where("CONCAT(LastName, ', ', FirstName)='$fullname'", FALSE, FALSE);
+        $this->db->or_where('LastName', $fullname);
         $query = $this->db->get();
         if ($query->num_rows()) {
             $row = $query->row();
@@ -113,6 +114,21 @@ class InsectDamageModel extends Model {
     
     public function insertRecordSetItem($insertArray) {
         $this->db->insert('recordsetitem', $insertArray);
+    }
+    
+    public function getPickListItems($picklistid) {
+        $ret = array();
+        $this->db->select('Title');
+        $this->db->from('picklistitem');
+        $this->db->where('PickListID', $picklistid);
+        $this->db->order_by('Title');
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $ret[] = $row->Title;
+            }
+        }
+        return $ret;
     }
 }
 

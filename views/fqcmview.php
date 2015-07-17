@@ -744,6 +744,80 @@
 <?php endif; ?>
 <?php endif; ?>
 
+<?php if (isset($DuplicateDuplicatePreparations)): ?>
+<?php if ($DuplicateDuplicatePreparations): ?>
+<h4>Multiple <i>Duplicate</i> preparations (<?=count($DuplicateDuplicatePreparations)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour2" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($DuplicateDuplicatePreparations as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($DuplicateSeedDuplicatePreparations)): ?>
+<?php if ($DuplicateSeedDuplicatePreparations): ?>
+<h4>Multiple <i>Seed duplicate</i> preparations (<?=count($DuplicateSeedDuplicatePreparations)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour2" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($DuplicateSeedDuplicatePreparations as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
 <?php if (isset($PartMissingFromMultisheetMessage)): ?>
 <?php if ($PartMissingFromMultisheetMessage): ?>
 <h4>The part is missing from the multisheet message in these records (<?=count($PartMissingFromMultisheetMessage)?>):</h4>
@@ -1017,6 +1091,80 @@
         <th style="width: 14%">Edited on</th>
     </tr>
     <?php foreach ($MissingStorage as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($MissingExHerbarium)): ?>
+<?php if ($MissingExHerbarium): ?>
+<h4>Duplicate lacking <i>Ex Herbarium</i> data (<?=count($MissingExHerbarium)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour2" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($MissingExHerbarium as $prep): ?>
+    <tr>
+        <td style="width: 4%">
+            <?php
+                $value = $prep['CollectionObjectID'];
+                $opts = array(
+                    'name' => 'recsetitems[]',
+                    'value' => $value,
+                    'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                );
+            ?>
+            <?=form_checkbox($opts)?>
+        </td>
+        <td><?=$prep ['CatalogNumber']?></td>
+        <td><?=$prep['CreatedBy']?></td>
+        <td><?=$prep['Created']?></td>
+        <td><?=$prep['EditedBy']?></td>
+        <td><?=$prep['Edited']?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>
+<?php endif; ?>
+
+<?php if (isset($MissingExHerbariumCatalogNumber)): ?>
+<?php if ($MissingExHerbariumCatalogNumber): ?>
+<h4>Duplicate lacking <i>Ex Herbarium</i> catalogue number (<?=count($MissingExHerbariumCatalogNumber)?>):</h4>
+<div><a href="#" class="selectall">select/clear all</a></div>
+<table class="dberrors headingcolour2" style="width: 100%">
+    <tr>
+        <th style="width: 4%">&nbsp;</th>
+        <th style="width: 18%">Catalogue number</th>
+        <th style="width: 25%">Created by</th>
+        <th style="width: 14%">Created on</th>
+        <th style="width: 25%">Edited by</th>
+        <th style="width: 14%">Edited on</th>
+    </tr>
+    <?php foreach ($MissingExHerbariumCatalogNumber as $prep): ?>
     <tr>
         <td style="width: 4%">
             <?php
@@ -1738,7 +1886,7 @@
 
 <?php if (isset($GroupAgentsWithoutIndividuals)): ?>
 <?php if ($GroupAgentsWithoutIndividuals): ?>
-<h4>These group agents haven't had any individuals added to the group (<?=count($GroupAgentsWithoutIndividuals)?>):</h4>
+<h4>These group agents haven't had any individuals added to the group, or haven't been given a last name (<?=count($GroupAgentsWithoutIndividuals)?>):</h4>
 <table class="dberrors headingcolour5" style="width: 100%">
     <tr>
         <th style="width: 4%">&nbsp;</th>

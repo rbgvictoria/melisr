@@ -167,6 +167,7 @@ class BorrowerModel extends Model {
                 'CollectionMemberID' => 32769,
                 'CollectionID' => 32769,
                 'CatalogNumber' => $catalognumber,
+                'AltCatalogNumber' => $catalognumber,
                 'CreatedByAgentID' => $specifyuser,
             );
             
