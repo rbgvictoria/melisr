@@ -104,6 +104,21 @@ class RecordSet extends Controller {
             $this->load->view('recordsetview', $this->data);
         }
     }
+    
+    function manage() {
+        $this->data['recordSetUsers'] = $this->recordsetmodel->getRecordSetUsers();
+        $this->load->view('managerecordsetview', $this->data);
+    }
+    
+    function delete_users_recordsets($userID) {
+        $sets = $this->recordsetmodel->getRecordSetsForUser($userID);
+        if ($sets) {
+            foreach ($sets as $set) {
+                $this->recordsetmodel->deleteRecordSet($set->RecordSetID);
+            }
+        }
+        redirect('recordset/manage');
+    }
 
 }
 

@@ -295,8 +295,25 @@ class MelisrLabels extends Controller {
             $html = array();
             $html[] = "<style>td#tname {padding-bottom: 40px;}</style>";
             $html[] = '<table>';
-            $html[] = "<tr><td id=tname colspan=\"2\">$ldata[FormattedName]</td></tr>";
-            $html[] = "<tr><td>$ldata[Collector] $ldata[CollectingNumber]</td>";
+            $html[] = "<tr><td id=\"tname\" colspan=\"2\">$ldata[FormattedName]</td></tr>";
+            $collector = FALSE;
+            if ($ldata['Collector']) {
+                $arr = explode(';', $ldata['Collector']);
+                switch (count($arr)) {
+                    case 1:
+                        $collector = $arr[0];
+                        break;
+
+                    case 2:
+                        $collector = $arr[0] . ' & ' . $arr[1];
+                        break;
+
+                    default:
+                        $collector = $arr[0] . ' & al.';
+                        break;
+                }
+            }
+            $html[] = "<tr><td>$collector $ldata[CollectingNumber]</td>";
             $html[] = "<td align=\"right\">" . $ldata['State'] . "</td></tr>";
             $html[] = "<tr><td>MEL $ldata[MelNumber]</td>";
             $html[] = "<td align=\"right\">$ldata[SpiritNumber] $ldata[JarSize]</td></tr>";

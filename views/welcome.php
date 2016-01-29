@@ -99,10 +99,10 @@
     <br />
     <?=form_radio(array(
         'name' => 'labeltype',
-        'id' => 'lt18',
+        'id' => 'lt5',
         'value' => '5',
         'checked' => false
-    )); ?>&nbsp;<?=form_label('Fungi and lichen packet label, 2 per page', 'lt18', array('style' => 'width: 620px')); ?>
+    )); ?>&nbsp;<?=form_label('Fungi and lichen packet label, 2 per page', 'lt5', array('style' => 'width: 620px')); ?>
     <br/>
     <?=form_radio(array(
         'name' => 'labeltype',

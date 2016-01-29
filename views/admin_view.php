@@ -57,6 +57,7 @@
     $options = array(
         '6.4.13' => '6.4.13',
         '6.5.03' => '6.5.03',
+        '6.6.00' => '6.6.00'
     );
     echo form_dropdown('version', $options, $SpVersion['AppVersion']);
     echo form_submit('change', 'Change');

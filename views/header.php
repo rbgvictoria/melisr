@@ -27,7 +27,7 @@
 
 <body>
 <div id="container">
-    <div id="banner"><img src="http://203.55.15.78/melisr/images/banners/<?=$bannerimage;?>" alt="Harvey is watching you" /></div>
+    <div id="banner"><img src="http://melisr.rbg.vic.gov.au/melisr/images/banners/<?=$bannerimage;?>" alt="Harvey is watching you" /></div>
     <div id="menu">
             <a href="<?=site_url()?>/melisrlabels">Labels</a> |
             <a href="<?=site_url()?>/numbers">Numbers</a> |

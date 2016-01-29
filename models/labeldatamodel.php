@@ -1096,7 +1096,7 @@ class LabelDataModel extends Model {
     
     function getGeographyString($geographyid) {
         if($geographyid) {
-            $select = "SELECT g.`Name`, d.`Name` AS AreaType, d.`RankID`, g.`ParentID`
+            $select = "SELECT coalesce(g.CommonName, g.`Name`) AS `Name`, d.`Name` AS AreaType, d.`RankID`, g.`ParentID`
                 FROM geography g
                 JOIN geographytreedefitem d ON g.`GeographyTreeDefItemID`=d.`GeographyTreeDefItemID`
                 WHERE g.GeographyID=$geographyid";
@@ -1107,7 +1107,7 @@ class LabelDataModel extends Model {
             $rankid = $row->RankID;
             $parentid = $row->ParentID;
             while($rankid>100) {
-                $select = "SELECT g.`Name`, d.`Name` AS AreaType, d.`RankID`, g.`ParentID`
+                $select = "SELECT coalesce(g.CommonName, g.`Name`) as `Name`, d.`Name` AS AreaType, d.`RankID`, g.`ParentID`
                     FROM geography g
                     JOIN geographytreedefitem d ON g.`GeographyTreeDefItemID`=d.`GeographyTreeDefItemID`
                     WHERE g.GeographyID=$parentid";

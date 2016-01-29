@@ -113,7 +113,7 @@ class RecordSetModel extends Model {
             VALUES (NOW(), NOW(), 0, 4, 1, '$recordsetname', 0, $agentid, $specifyuser, $agentid)";
         $this->db->query($insert);
     }
-
+    
     function findAgentID ($specifyuser) {
         $this->db->select('AgentID');
         $this->db->from('agent');
@@ -352,6 +352,38 @@ class RecordSetModel extends Model {
         return str_replace('&', '&amp;', $string);
     }
     
+    function getRecordSetUsers() {
+        $this->db->select("u.SpecifyUserID, u.Name AS Username, IF(a.MiddleInitial IS NOT NULL, 
+            CONCAT_WS(' ', a.MiddleInitial, a.LastName), a.LastName) AS AgentName, 
+            count(*) AS NumberOfRecordSets", FALSE);
+        $this->db->from('specifyuser u');
+        $this->db->join('agent a', 'u.SpecifyUserID=a.SpecifyUserID', 'left');
+        $this->db->join('recordset r', 'u.SpecifyUserID=r.SpecifyUserID');
+        $this->db->where('r.Type', 0);
+        $this->db->group_by('UserName');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+    
+    function getRecordSetsForUser($specifyUserID) {
+        $this->db->select('RecordSetID');
+        $this->db->from('recordset');
+        $this->db->where('SpecifyUserID', $specifyUserID);
+        $this->db->where('Type', 0);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function deleteRecordSet($recordSetID) {
+        $this->deleteRecordSetItems($recordSetID);
+        $this->db->where('RecordSetID', $recordSetID);
+        $this->db->delete('recordset');
+    }
+    
+    function deleteRecordSetItems($recordSetID) {
+        $this->db->where('RecordSetID', $recordSetID);
+        $this->db->delete('recordsetitem');
+    }
 }
 
 ?>

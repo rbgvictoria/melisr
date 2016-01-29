@@ -101,6 +101,7 @@ class Transactions extends Controller {
                     $this->data['message'] = 'You are way ahead of yourself';
                     $this->load->view('message', $this->data);
                 }
+                //print_r($this->loaninfo);
                 $this->loanpreparationsummary = $this->exchangemodel->getPreparationSummary($this->input->post('exchangeoutnumber'));
 
                 switch ($this->input->post('output')) {
@@ -225,10 +226,7 @@ class Transactions extends Controller {
         // start loan cover letter
         $pdf->AddPage();
 
-        $image_file = base_url() . 'images/loans_paperwork_background.png';
-        //$pdf->Image($image_file, 163, 0, 30, 0, 'PNG', '', 'T', true, 300, '', false, false, 0, false, false, false);
-        $pdf->Image('images/loans_paperwork_background.png', 163, 0, 30, 0, '', '', 'T', true, 300, '', false, false, 0, false, false, false);
-        
+        $pdf->Image('images/mel-letterhead.jpg', 25, 0, '', '', '', '', 'T', true, 300, '', false, false, 0, false, false, false);
         
         $x = 20;
         $pdf->MultiCell(120, 5, $this->loaninfo['ShipmentDate'], 0, 'L', 0, 1, $x, 12, true, false, true);
@@ -302,9 +300,9 @@ EOD;
  * */
  
         $paragraphs[] = <<<EOD
-Data for the specimens in this loan is available through <i>Australia’s Virtual Herbarium</i> (AVH, <a href="http://avh.ala.org.au">http://avh.ala.org.au</a>). 
+Data for the specimens in this loan is available through <i>Australia’s Virtual Herbarium</i> (AVH, <a href="http://avh.chah.org.au">http://avh.chah.org.au</a>). 
 Access the data directly at:<br/><a href="http://avh.ala.org.au/occurrences/search?q=loan_identifier:$loannumber&fq=collection_uid:co55">http://avh.ala.org.au/occurrences/search?q=loan_identifier:$loannumber&fq=collection_uid:co55</a>, 
-or go to Advanced search and select ‘National Herbarium of Victoria’ under Specimen – Herbarium and enter '$loannumber' in Herbarium transactions – Loan number.
+or go to Advanced search and select ‘National Herbarium of Victoria’ under Herbarium and enter '$loannumber' in Loan number.
 EOD;
         
         $paragraphs[] = <<<EOD
@@ -312,14 +310,11 @@ For queries relating to loans, exchange or donations, please email MEL at herbme
 EOD;
         $pdf->SetY($pdf->GetY()-2);
         foreach ($paragraphs as $para)
-            $pdf->Multicell(135, 5, $para, 0, 'J', 0, 1, $x, $pdf->GetY()+1, true, false, true);
+            $pdf->Multicell(135, 5, $para, 0, 'L', 0, 1, $x, $pdf->GetY()+1, true, false, true);
 
         $pdf->MultiCell(135, 5, $this->loaninfo['ShippedBy'] . ' on behalf of the Collections Manager', 0, 'L', 0, 1, $x, $pdf->GetY()+3, true, false, true);
 
         $y = 236;
-        //$image_file = base_url() . 'images/scissors.png';
-        //$pdf->Image($image_file, 22, $y-2.5, 5, 5, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
-        //$pdf->MultiCell(127, 5, '<hr/>', 0, 'L', 0, 1, 25.5, $y, true, false, true);
         $pdf->MultiCell(140, 5, '<hr/>', 0, 'L', 0, 1, $x-2.5, $y, true, false, true);
         $y = $pdf->GetY()-1;
         $pdf->MultiCell(45, 5, 'Number of parcels: ' . $this->loaninfo['NumberOfPackages'], 0, 'L', 0, 1, $x, $y, true, false, true);
@@ -337,80 +332,6 @@ EOD;
         $pdf->MultiCell(15, 5, 'Date: ', 0, 'L', 0, 1, $x+90, $y, true, false, true);
         $pdf->MultiCell(25, 5, '<hr/>', 0, 'L', 0, 1, $x+100, $y+4, true, false, true);
 
-        $pdf->setY(0);
-        $x = 165;
-        $pdf->SetFont('helvetica', '', 7);
-        
-        $letterh = <<<EOD
-        <div style="color:#999999">National Herbarium of Victoria (MEL)<br />Private Bag 2000<br />
-            South Yarra<br />
-            Victoria 3141<br />
-            Australia
-        </div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, 60, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">CITES<br />AU 026</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Telephone<br />(03) 9252 2300</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Facsimile<br />(03) 9252 2413</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Email<br />herbmel@rbg.vic.gov.au</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Web<br/ >www.rbg.vic.gov.au/science</div>
-EOD;
-        $pdf->MultiCell(31, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">The Royal Botanic Gardens Board (Victoria)</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+111, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Patron<br />Dame Elisabeth Murdoch</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Incorporating:</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+5, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Royal Botanic Gardens Melbourne</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">National Herbarium of Victoria</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Royal Botanic Gardens Cranbourne</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Australian Research Centre for Urban Ecology</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        // move pointer to last page
         $pdf->lastPage();
 
         // ---------------------------------------------------------
@@ -455,9 +376,7 @@ EOD;
         // start loan cover letter
         $pdf->AddPage();
 
-        $image_file = base_url() . 'images/loans_paperwork_background.png';
-        //$pdf->Image($image_file, 163, 0, 30, 0, 'PNG', '', 'T', true, 300, '', false, false, 0, false, false, false);
-        $pdf->Image('images/loans_paperwork_background.png', 163, 0, 30, 0, '', '', 'T', true, 300, '', false, false, 0, false, false, false);
+        $pdf->Image('images/mel-letterhead.jpg', 25, 0, '', '', '', '', 'T', true, 300, '', false, false, 0, false, false, false);
         
         
         $x = 20;
@@ -476,18 +395,6 @@ EOD;
         $y = $pdf->GetY()+1;
         $pdf->MultiCell($w, 5, 'Sent for study by:', 0, 'L', 0, 1, $x, $y, true, false, true);
         $pdf->MultiCell(130-$w, 5, $this->loaninfo['LoanAgents'], 0, 'L', 0, 1, $x+$w+5, $y, true, false, true);
-
-/*        $y = $pdf->GetY()+1;
-        $pdf->MultiCell($w, 5, 'Description:', 0, 'L', 0, 1, $x, $y, true, false, true);
-        $description = $this->loaninfo['Description'];
-        if (strpos($description, '||'))
-            $description = substr($description, 0, strpos($description, '||'));
-        $description = trim($description);
-        $pdf->MultiCell(130-$w, 5, $description, 0, 'L', 0, 1, $x+$w+5, $y, true, false, true);
-
-        $y = $pdf->GetY()+1;
-        $pdf->MultiCell($w, 5, 'Due date:', 0, 'L', 0, 1, $x, $y, true, false, true);
-        $pdf->MultiCell(130-$w, 5, $this->loaninfo['CurrentDueDate'], 0, 'L', 0, 1, $x+$w+5, $y, true, false, true);*/
 
         $y = $pdf->GetY()+1;
         $pdf->MultiCell($w, 5, 'Shipment details:', 0, 'L', 0, 1, $x, $y, true, false, true);
@@ -535,7 +442,7 @@ EOD;
 
         $pdf->SetY($pdf->GetY()-2);
         foreach ($paragraphs as $para)
-            $pdf->Multicell(135, 5, $para, 0, 'J', 0, 1, $x, $pdf->GetY()+1, true, false, true);
+            $pdf->Multicell(135, 5, $para, 0, 'L', 0, 1, $x, $pdf->GetY()+1, true, false, true);
 
         $pdf->MultiCell(135, 5, $this->loaninfo['ShippedBy'] . '<br/>on behalf of the Collections Manager', 0, 'L', 0, 1, $x, 220, true, false, true);
 
@@ -560,85 +467,6 @@ EOD;
         $pdf->MultiCell(15, 5, 'Date: ', 0, 'L', 0, 1, $x+90, $y, true, false, true);
         $pdf->MultiCell(25, 5, '<hr/>', 0, 'L', 0, 1, $x+100, $y+4, true, false, true);
 
-        $pdf->setY(0);
-        $x = 165;
-        $pdf->SetFont('helvetica', '', 7);
-        
-        $letterh = <<<EOD
-        <div style="color:#999999">National Herbarium of Victoria (MEL)<br />Private Bag 2000<br />
-            South Yarra<br />
-            Victoria 3141<br />
-            Australia
-        </div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, 60, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">CITES<br />AU 026</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Telephone<br />(03) 9252 2300</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Facsimile<br />(03) 9252 2413</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Email<br />herbmel@rbg.vic.gov.au</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Web<br/ >www.rbg.vic.gov.au/science</div>
-EOD;
-        $pdf->MultiCell(31, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">The Royal Botanic Gardens Board (Victoria)</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+111, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Patron<br />Dame Elisabeth Murdoch</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Incorporating:</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+5, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Royal Botanic Gardens Melbourne</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">National Herbarium of Victoria</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Royal Botanic Gardens Cranbourne</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Australian Research Centre for Urban Ecology</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        // move pointer to last page
-        $pdf->lastPage();
-
-        // ---------------------------------------------------------
-
-        //Close and output PDF document
         $pdf->Output('nonmelloan.pdf', 'I');
     }
 
@@ -695,10 +523,7 @@ EOD;
         // start loan cover letter
         $pdf->AddPage();
 
-        $image_file = base_url() . 'images/loans_paperwork_background.png';
-        //$pdf->Image($image_file, 163, 0, 30, 0, 'PNG', '', 'T', true, 300, '', false, false, 0, false, false, false);
-        $pdf->Image('images/loans_paperwork_background.png', 163, 0, 30, 0, '', '', 'T', true, 300, '', false, false, 0, false, false, false);
-
+        $pdf->Image('images/mel-letterhead.jpg', 25, 0, '', '', '', '', 'T', true, 300, '', false, false, 0, false, false, false);
 
         $pdf->MultiCell(120, 5, $this->loaninfo['ShipmentDate'], 0, 'L', 0, 1, 25, 15, true, false, true);
         $pdf->MultiCell(120, 5, $this->loan->ShippedTo, 0, 'L', 0, 1, 25, 22, true, false, true);
@@ -726,17 +551,19 @@ EOD;
         $pdf->MultiCell($w, 5, 'Quantity:', 0, 'L', 0, 1, 25, $y, true, false, true);
         $pdf->MultiCell(120-$w, 5, $this->Quantity(), 0, 'L', 0, 1, 30+$w, $y, true, false, true);
         
-        $y = $pdf->GetY()+1;
-        $pdf->MultiCell($w, 5, 'Electronic data:', 0, 'L', 0, 1, 25, $y, true, false, true);
-        if ($this->LoanAgents) {
-            $when = $this->loaninfo['ShipmentDate'];
-            $what = $this->loaninfo['ExchangeFileName'];
-            $text = $what . ' emailed to ' . $this->LoanAgents;
+        if ($this->loaninfo['ExchangeType'] != 'shipping material') {
+            $y = $pdf->GetY()+1;
+            $pdf->MultiCell($w, 5, 'Electronic data:', 0, 'L', 0, 1, 25, $y, true, false, true);
+            if ($this->LoanAgents) {
+                $when = $this->loaninfo['ShipmentDate'];
+                $what = $this->loaninfo['ExchangeFileName'];
+                $text = $what . ' emailed to ' . $this->LoanAgents;
+            }
+            else {
+                $text = 'Available on request';
+            }
+            $pdf->MultiCell(120-$w, 5, $text, 0, 'L', 0, 1, 30+$w, $y, true, false, true);
         }
-        else {
-            $text = 'Available on request';
-        }
-        $pdf->MultiCell(120-$w, 5, $text, 0, 'L', 0, 1, 30+$w, $y, true, false, true);
         
 
         $y = $pdf->GetY()+1;
@@ -766,9 +593,6 @@ EOD;
         $pdf->MultiCell(125, 5, $this->loaninfo['ShippedBy'] . ' on behalf of the Collections Manager', 0, 'L', 0, 1, 25, $pdf->GetY()+8, true, false, true);
 
         $y = 231;
-        //$image_file = base_url() . 'images/scissors.png';
-        //$pdf->Image($image_file, 22, $y-2.5, 5, 5, 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
-        //$pdf->MultiCell(127, 5, '<hr/>', 0, 'L', 0, 1, 25.5, $y, true, false, true);
         $pdf->MultiCell(130, 5, '<hr/>', 0, 'L', 0, 1, 22.5, $y, true, false, true);
         $y = $pdf->GetY()-1;
         $pdf->MultiCell(45, 5, 'Number of parcels: ' . $this->loaninfo['NumberOfPackages'], 0, 'L', 0, 1, 25, $y, true, false, true);
@@ -786,85 +610,6 @@ EOD;
         $pdf->MultiCell(15, 5, 'Date: ', 0, 'L', 0, 1, 115, $y, true, false, true);
         $pdf->MultiCell(25, 5, '<hr/>', 0, 'L', 0, 1, 125, $y+4, true, false, true);
 
-        $pdf->setY(0);
-        $x = 165;
-        $pdf->SetFont('helvetica', '', 7);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">National Herbarium of Victoria (MEL)<br />Private Bag 2000<br />
-            South Yarra<br />
-            Victoria 3141<br />
-            Australia
-        </div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, 60, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">CITES<br />AU 026</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Telephone<br />(03) 9252 2300</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Facsimile<br />(03) 9252 2413</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Email<br />herbmel@rbg.vic.gov.au</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Web<br/ >www.rbg.vic.gov.au/science</div>
-EOD;
-        $pdf->MultiCell(31, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">The Royal Botanic Gardens Board (Victoria)</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+111, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Patron<br />Dame Elisabeth Murdoch</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Incorporating:</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+5, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Royal Botanic Gardens Melbourne</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">National Herbarium of Victoria</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Royal Botanic Gardens Cranbourne</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        $letterh = <<<EOD
-        <div style="color:#999999">Australian Research Centre for Urban Ecology</div>
-EOD;
-        $pdf->MultiCell(30, 5, $letterh, 0, 'L', 0, 1, $x, $pdf->getY()+1, true, false, true);
-
-        // move pointer to last page
-        $pdf->lastPage();
-
-        // ---------------------------------------------------------
-
-        //Close and output PDF document
         $pdf->Output('exchange.pdf', 'I');
     }
 
@@ -1020,7 +765,7 @@ EOD;
             $y = 40;
         }
         else {
-            $x = 165;
+            $x = 117;
             $y = 30;
         }
 

@@ -163,7 +163,7 @@ class Gpi extends Controller {
   </search>
 </request>
 QUERY;
-            $command = "curl --data \"query=" . urlencode($query) . "\" http://203.55.15.78/biocase/pywrapper.cgi?dsa=mel_gpi";
+            $command = "curl --data \"query=" . urlencode($query) . "\" http://melisr.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_gpi";
             
             $result = `$command`;
             
