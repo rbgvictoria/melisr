@@ -250,7 +250,7 @@ QUERY;
   </search>
 </request>
 QUERY;
-            $command = "curl --data \"query=" . urlencode($query) . "\" http://203.55.15.78/biocase/pywrapper.cgi?dsa=mel_gpi";
+            $command = "curl --data \"query=" . urlencode($query) . "\" http://melisr.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_gpi";
 
             $result = `$command`;
             
@@ -286,7 +286,7 @@ QUERY;
                 $newdoc->appendChild($node);
 
                 $docstring = $newdoc->saveXML();
-                $docstring = str_replace('african:', '', $docstring);
+                $docstring = str_replace('ns0:', '', $docstring);
 
                 $search = "<DataSet xmlns:african=\"http://plants.jstor.org/XSD/AfricanTypesv2.xsd\">";
                 $repl = "<DataSet xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://plants.jstor.org/XSD/AfricanTypesv2.xsd\">";
@@ -305,12 +305,6 @@ QUERY;
                 //$this->data['message'] .= "<pre>$query</pre>";
                 $this->load->view('message', $this->data);
             }
-            
-            
-            
-            
-            
-            
         }
         elseif ($this->input->post('update') && $this->input->post('melnos')) {
             $melnos = explode("\n", $this->input->post('melnos'));
