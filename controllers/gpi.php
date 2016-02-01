@@ -13,7 +13,7 @@
  * 
  * Controller for GPI application. Application loads a CSV file with MEL numbers,
  * then grabs the required metadata from MELISR and stores it in the right format
- * in the gpi database. Some quality quality checks are done on whether a basionym
+ * in the gpi database. Some quality checks are done on whether a basionym
  * is really a basionym, if every unit has a current determination as well as a
  * type status designation and on presence of authors for scientific names. There
  * is an option to fix the errors in MELISR and then reload the corresponding records
