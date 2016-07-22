@@ -1123,8 +1123,8 @@ class MelisrLabels extends Controller {
                     $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
                     $pdf->MultiCell(40, 5, '<div style="font-size: 7pt">MEL specimen stored under:<br/>'.$storedunder . '</div>', 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $barcode_pos['y'][$y]+1, true, false, true);
                     $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $labelfooter_pos['y'][$y]+3, true, 0, true, true, 0, 'T', false);
-                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, 12, 0.1, $barcodestyle, 'N');
-                    $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $labelfooter_pos['y'][$y], true, false, true);
+                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y]-1, 55, 12, 0.1, $barcodestyle, 'N');
+                    $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $labelfooter_pos['y'][$y]+2, true, false, true);
                 }
                 else {
                     if ($labeldata[$i]['Continent'])

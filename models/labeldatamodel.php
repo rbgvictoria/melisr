@@ -755,7 +755,7 @@ class LabelDataModel extends Model {
         $endDateArray = explode(' ', $enddate);
         //print_r($endDateArray);
         if ($startdateprecision != $enddateprecision) // start and end date precisions are unequal
-            $daterange = "$startdate–$enddate"; // 4 June 1984–1985
+            $daterange = "{$startdate}–{$enddate}"; // 4 June 1984–1985
         elseif ($startdateprecision == 1) { // full dates
             if ($startDateArray[2] == $endDateArray[2]) { // same year
                 if ($startDateArray[1] == $endDateArray[1]) // same month

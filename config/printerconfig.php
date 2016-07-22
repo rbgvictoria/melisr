@@ -306,7 +306,18 @@
                 'xpos' => 7.5, //99,
                 'height' => 127,
                 'width' => 203,
-            )
+            ),
+            array(// multisheet label Vic. Ref. Set [24]
+                'numx'  =>  3,
+                'numy'  =>  10,
+                'labelheight' => 25.5,
+                'labelwidth' => 68.2,
+                'wheader' => 57,
+                'yheader' => 26,
+                'whtml' =>  57,
+                'yhtml' =>  30,
+                'xpos'  =>  7,
+            ),
        )
     );
 ?>

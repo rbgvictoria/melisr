@@ -193,7 +193,7 @@
         'id' => 'lt9',
         'value' => '9',
         'checked' => false
-    )); ?>&nbsp;<?=form_label('Multisheet label', 'lt9', array('style' => 'width: 200px')); ?>
+    )); ?>&nbsp;<?=form_label('Multi-sheet label', 'lt9', array('style' => 'width: 200px')); ?>
     <br/>
     <?=form_radio(array(
         'name' => 'labeltype',
@@ -249,6 +249,15 @@
         'checked' => false,
         'style' => ''
     )); ?>&nbsp;<?=form_label('Vic. Ref. Set barcode', 'lt20', 
+            array('style' => 'width: 240px;')); ?>
+    <br/>
+    <?=form_radio(array(
+        'name' => 'labeltype',
+        'id' => 'lt24',
+        'value' => '24',
+        'checked' => false,
+        'style' => ''
+    )); ?>&nbsp;<?=form_label('Vic. Ref. Set multi-sheet labels', 'lt24', 
             array('style' => 'width: 240px;')); ?>
 
     <?=form_fieldset_close();?>
