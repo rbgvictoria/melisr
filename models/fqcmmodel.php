@@ -215,13 +215,16 @@ class FqcmModel extends Model {
          */
     public function partMissingFromMultisheetMessage($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
-        $this->db->select("co.CollectionObjectID, co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->select("co.CollectionObjectID, co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,
+            DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,
+            DATE(co.TimestampModified) AS Edited, p.Remarks", FALSE);
         $this->db->from("collectionobject co");
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID", "left");
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.Remarks IS NOT NULL AND p.Remarks !='' AND p.Remarks NOT LIKE '%A%'AND DATE(co.TimestampCreated) >=", $startdate);
+        $this->db->where('p.PrepTypeID !=', 18);
+        $this->db->where("p.Remarks IS NOT NULL AND p.Remarks !='' AND DATE(co.TimestampCreated) >=", $startdate);
 
         if ($this->collids)
             $this->db->where_in("co.CollectionObjectID", $this->collids);
@@ -231,7 +234,22 @@ class FqcmModel extends Model {
 
         $query = $this->db->get();
         if ($query->num_rows()) {
-            return $query->result_array();
+            $ret = array();
+            foreach ($query->result() as $row) {
+                preg_match_all('/(MEL ?\d{1,7})([[:alpha:]]?)/', $row->Remarks, $matches);
+                if (count($matches) < 3) {
+                    $ret[] = (array) $row;
+                }
+                else {
+                    foreach ($matches[2] as $part) {
+                        if (!$part) {
+                            $ret[] = (array) $row;
+                            break;
+                        }
+                    }
+                }
+            }
+            return $ret;
         }
         else
             return false;
