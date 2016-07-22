@@ -106,6 +106,7 @@ class MelisrLabels extends Controller {
                 switch ($type) {
                     case $type < 6: // our (more or less) standard labels
                     case 17:
+                    case 23:
                     case 19:
                     case 21:
                         $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
@@ -221,6 +222,7 @@ class MelisrLabels extends Controller {
                         $this->printVrsBarcodeLabelRecordSet($config, $barcodes, $start-1);
                         break;
                     case 12: // spirit cards
+                    case 22: // spirit cards
                         $labeldata = $this->labeldatamodel->getLabelDataNew($records, $part, FALSE, $type);
                         //$labeldata = $this->spiritCardHtml($labeldata, $type);
                         $this->printLabelNew($labeldata, $config, $start-1);
@@ -736,7 +738,7 @@ class MelisrLabels extends Controller {
         for ($i = 0; $i<$numy; $i++)
         $labeldimensions['labelbody_pos']['y'][] = $config['yhtml'] + $i*$labeldimensions['labelheight'];
 
-        if ((($type < 7 || $type > 9) && $type < 14) || $type == 16 || $type == 18 || $type == 19 || $type == 20) {
+        if ((($type < 7 || $type > 9) && $type < 14) || in_array($type, array(16, 18, 19, 20, 21, 22))) {
             $labeldimensions['barcode_pos'] = array();
             $labeldimensions['barcode_pos']['x'] = array();
             for ($i = 0; $i<$numx; $i++)
@@ -753,10 +755,12 @@ class MelisrLabels extends Controller {
             for ($i = 0; $i<$numy; $i++)
             $labeldimensions['barcodetext_pos']['y'][] = $config['ybarcodetext'] + $i*$labeldimensions['labelheight'];
 
-            if (isset($config['footeroffsety']))
+            if (isset($config['footeroffsety'])) {
                 $offset = $config['footeroffsety'];
-            else
+            }
+            else {
                 $offset = 15;
+            }
             
             $labeldimensions['labelfooter_pos'] = array();
             $labeldimensions['labelfooter_pos']['x'] = array();
@@ -901,11 +905,19 @@ class MelisrLabels extends Controller {
         set_time_limit (600);
         // create new PDF document
         
-        if (isset($props['orientation']))
-            $pdf = new TCPDF($props['orientation'], 'mm', 'A4', true, 'UTF-8', false);
-        else 
-            $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
-
+        $format = 'A4';
+        if (isset($props['format'])) {
+            $format = $props['format'];
+        }
+        
+        $orientation = 'P';
+        if (isset($props['orientation'])) {
+            $orientation = $props['orientation'];
+        }
+        
+        $pdf = new TCPDF($orientation, 'mm', $format, true, 'UTF-8', false);
+        
+        
         // set document information
         $pdf->SetCreator(PDF_CREATOR);
         $pdf->SetAuthor('Niels Klazenga');
@@ -1106,45 +1118,47 @@ class MelisrLabels extends Controller {
                 $storedunder = str_replace ('Main collection', 'Hort. Ref. Set', $storedunder);
             if($props['footerpositionabsolute']) {
                 if ($dup) {
+                    
                     $footer = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
                     $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
                     $pdf->MultiCell(40, 5, '<div style="font-size: 7pt">MEL specimen stored under:<br/>'.$storedunder . '</div>', 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $barcode_pos['y'][$y]+1, true, false, true);
                     $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $labelfooter_pos['y'][$y]+3, true, 0, true, true, 0, 'T', false);
                     $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y], 55, 12, 0.1, $barcodestyle, 'N');
-                    $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $barcodetext_pos['y'][$y], true, false, true);
+                    $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $labelfooter_pos['y'][$y], true, false, true);
                 }
                 else {
                     if ($labeldata[$i]['Continent'])
                         $storedunder .= ' (' . $labeldata[$i]['Continent'] . ')';
-                    $footer = array();
                     
-                    if ($this->input->post('labeltype') != 19 && $this->input->post('labeltype') != 21)
-                        $footer[] = '<div style="font-size: 7pt">' . $storedunder . '</div>';
-                    $footer[] = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
-                    $footer = implode('', $footer);
+                    if ($this->input->post('labeltype') != 19 && $this->input->post('labeltype') != 21) {
+                        $storage = '<div style="font-size: 7pt">' . $storedunder . '</div>';
+                        $pdf->MultiCell(90, 5, $storage, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $labelfooter_pos['y'][$y]-3.5, true, 0, true, true, 0, 'T', false);
+                    }
+                    $footer = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
                     $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $labelfooter_pos['y'][$y], true, 0, true, true, 0, 'T', false);
                 }
             }
             else {
-                $y = $pdf->GetY()+5;
+                $yy = $pdf->GetY()+5;
                 if ($dup) {
                     $footer = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
                     $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
-                    $pdf->MultiCell(40, 5, '<div style="font-size: 7pt">MEL specimen stored under:<br/>'.$storedunder, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $y+1, true, false, true);
-                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $y, 55, 12, 0.1, $barcodestyle, 'N');
-                    $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $y+11, true, false, true);
-                    $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $y+11.5, true, 0, true, true, 0, 'T', false);
+                    $pdf->MultiCell(40, 5, '<div style="font-size: 7pt">MEL specimen stored under:<br/>'.$storedunder, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $yy+1, true, false, true);
+                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $yy, 55, 12, 0.1, $barcodestyle, 'N');
+                    $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $yy+11, true, false, true);
+                    $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $yy+11.5, true, 0, true, true, 0, 'T', false);
                 }
                 else {
                     if ($labeldata[$i]['Continent'])
                         $storedunder .= ' (' . $labeldata[$i]['Continent'] . ')';
-                    $footer = array();
                     
-                    if ($this->input->post('labeltype') != 19 && $this->input->post('labeltype') != 21)
-                        $footer[] = '<div style="font-size: 7pt">' . $storedunder . '</div>';
-                    $footer[] = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
-                    $footer = implode('', $footer);
-                    $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $y, true, 0, true, true, 0, 'T', false);
+                    if ($this->input->post('labeltype') != 19 && $this->input->post('labeltype') != 21) {
+                        $storage = '<div style="font-size: 7pt">' . $storedunder . '</div>';
+                        $pdf->MultiCell(90, 5, $storage, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $yy, true, 0, true, true, 0, 'T', false);
+                        $yy = $pdf->GetY()-2;
+                    }
+                    $footer = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
+                    $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $yy, true, 0, true, true, 0, 'T', false);
                 }
             }
             

@@ -162,10 +162,24 @@
     <br/>
     <?=form_radio(array(
         'name' => 'labeltype',
+        'id' => 'lt22',
+        'value' => '22',
+        'checked' => false
+    )); ?>&nbsp;<?=form_label('Spirit collection card (mail area printer)', 'lt22', array('style' => 'width: 400px')); ?>
+    <br/>
+    <?=form_radio(array(
+        'name' => 'labeltype',
         'id' => 'lt17',
         'value' => '17',
         'checked' => false
     )); ?>&nbsp;<?=form_label('Carpological collection card', 'lt17', array('style' => 'width: 200px')); ?>
+    <br/>
+    <?=form_radio(array(
+        'name' => 'labeltype',
+        'id' => 'lt23',
+        'value' => '23',
+        'checked' => false
+    )); ?>&nbsp;<?=form_label('Carpological collection card (mail area printer)', 'lt23', array('style' => 'width: 400px')); ?>
     <br/>
     <?=form_radio(array(
         'name' => 'labeltype',

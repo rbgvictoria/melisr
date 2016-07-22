@@ -258,7 +258,7 @@ class LabelDataModel extends Model {
         $this->db->where('d.isCurrent', 1);
         if (!$part)
             $this->db->where("substring(co.CatalogNumber, 8)='A'");
-        if ($type == 12) {
+        if (in_array($type, array(12, 22))) {
             $this->db->join('preparation p', 'co.CollectionObjectID=p.CollectionObjectID');
             $this->db->where('p.PrepTypeID', 2);
         }
@@ -296,26 +296,6 @@ class LabelDataModel extends Model {
                 $labeldata['Host'] = $row->Host;
                 $labeldata['AssociatedTaxa'] = $row->AssociatedTaxa;
 
-                /*
-                $labeldata['Habitat'] = array();
-                if($row->Habitat) $labeldata['Habitat'][] = 'Habitat: ' . $row->Habitat;
-                if($row->Substrate) $labeldata['Habitat'][] = 'Substrate: ' . $row->Substrate;
-                if($row->Host) $labeldata['Habitat'][] = 'Host: ' . $row->Host;
-                if($row->AssociatedTaxa) $labeldata['Habitat'][] = 'Associated taxa: ' . trim($row->AssociatedTaxa);
-
-                for ($i = 0; $i < count($labeldata['Habitat']); $i++) {
-                    $labeldata['Habitat'][$i] = trim($labeldata['Habitat'][$i]);
-                    //echo $labeldata['Habitat'][$i] . '|' . substr($labeldata['Habitat'][$i], strlen($labeldata['Habitat'][$i])-1, 1) . "|<br/>\n";
-                    if (substr($labeldata['Habitat'][$i], strlen($labeldata['Habitat'][$i])-1, 1) != '.')
-                        $labeldata['Habitat'][$i] .= '.';
-                    
-                    //echo $labeldata['Habitat'][$i] . '|' . substr($labeldata['Habitat'][$i], strlen($labeldata['Habitat'][$i])-1, 1) . "|<br/>\n";
-                    
-                }
-
-                $labeldata['Habitat'] = implode(' ', $labeldata['Habitat']);
-                
-                 */
                 $labeldata['Provenance'] = $row->Provenance;
 
                 if ($row->Habit) {
@@ -353,9 +333,9 @@ class LabelDataModel extends Model {
                 $labeldata['DeterminedBy'] = ($row->DeterminerID) ? $this->getAgentName($row->DeterminerID) : FALSE;
                 $labeldata['DeterminedDate'] = ($row->DeterminedDate) ? $this->getProperDate($row->DeterminedDate, $row->DeterminedDatePrecision) : FALSE;
 
-                if ($type == 12)
+                if (in_array($type, array(12, 22))) {
                     $labeldata['SpiritInfo'] = $this->getSpiritInfo ($row->CollectionObjectID);
-                
+                }
                 $numdups = $this->getNumberOfDuplicates($row->CollectionObjectID, $type);
                 $labeldata['numdups'] = $numdups;
                 $labeldata['DuplicateInfo'] = $this->getDuplicateInfo($row->CollectionObjectID);
