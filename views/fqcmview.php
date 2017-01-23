@@ -49,6 +49,18 @@
     echo form_submit('createrecordset', 'Create record set');
 ?>
 
+<?=form_submit('catnostring', 'Create catalogue number string'); ?>
+<?php if (isset($catnostring)): ?>
+<p>
+<?=form_textarea(array(
+    'cols' => 123,
+    'rows' => 6,
+    'value' => $catnostring,
+    'name' => FALSE
+)); ?>
+</p>
+<?php endif; ?>
+
 <p>&nbsp;</p>
 
 <?php

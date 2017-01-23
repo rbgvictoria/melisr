@@ -41,7 +41,11 @@ class Fqcm extends Controller {
         }    
         $this->data['request'] = $request;
         
-        if ($request['startdate']) {
+        if ($this->input->post('catnostring')) {
+            $this->createCatalogNumberString();
+        }
+        
+        if (isset($request['startdate']) && $request['startdate']) {
             $startdate = $request['startdate'];
             if ($startdate < '2011-02-04' ) $startdate = '2011-02-04';
             $this->data['startdate'] = $startdate;
@@ -192,7 +196,13 @@ class Fqcm extends Controller {
                 $this->fqcmmodel->createRecordSetItems($recordsetid, $this->input->post('recsetitems'));
             }
         }
-        
+    }
+    
+    function createCatalogNumberString() {
+        if ($this->input->post('recsetitems')) {
+            $data = $this->fqcmmodel->catalogNumberString($this->input->post('recsetitems'));
+            $this->data['catnostring'] = implode(',', $data);
+        }
     }
     
     function taxonnames() {

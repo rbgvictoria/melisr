@@ -48,6 +48,7 @@ class FqcmModel extends Model {
         if ($userid) {
             $this->db->where("(CreatedByAgentID=$userid OR ModifiedByAgentID=$userid)", FALSE, FALSE);
         }
+        $this->db->where('CollectionID', 4);
         $query=$this->db->get();
         if ($query->num_rows()) {
             foreach ($query->result() as $row) {
@@ -1739,6 +1740,20 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
             return $ret;
         }
         else return FALSE;
+    }
+    
+    public function catalogNumberString($ids) {
+        $ret = array();
+        $this->db->select('CatalogNumber');
+        $this->db->from('collectionobject');
+        $this->db->where_in('CollectionObjectID', $ids);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $ret[] = $row->CatalogNumber;
+            }
+        }
+        return $ret;
     }
 
     //public function partlyAtomisedHabitat($startdate, $enddate=FALSE, $userid=FALSE) {
