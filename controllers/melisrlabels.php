@@ -446,8 +446,8 @@ class MelisrLabels extends Controller {
             $typestatus = '<b>' . $doubtfulflag . strtoupper($labeldata[$i]['Status']) . '</b> of ' . $labeldata[$i]['Basionym'] . $labeldata[$i]['Protologue'];
             $pdf->MultiCell(185, 5, $typestatus, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 0, 'T', false);
             $posy = $pdf->getY();
-            $pdf->MultiCell(28, 5, '<b>' . $labeldata[$i]['MELNumber'] . '</b>', 0, 'L', 0, 1, $labelbody_pos['x'][$x], $posy, true, 0, true, true, 0, 'T', false);       
-            $pdf->write1DBarcode($labeldata[$i]['MELNumber'], 'C39', $labelbody_pos['x'][$x]+28, $posy, 55, 6, 0.1, $barcodestyle, 'N');
+            $pdf->MultiCell(32, 5, '<b>' . $labeldata[$i]['MELNumber'] . '</b>', 0, 'L', 0, 1, $labelbody_pos['x'][$x], $posy, true, 0, true, true, 0, 'T', false);       
+            $pdf->write1DBarcode($labeldata[$i]['MELNumber'], 'C39', $labelbody_pos['x'][$x]+32, $posy, 55, 6, 0.1, $barcodestyle, 'N');
             $pdf->MultiCell(94, 5, strtoupper($labeldata[$i]['Family']), 0, 'R', 0, 1, $labelbody_pos['x'][$x]+91, $posy, true, 0, true, true, 0, 'T', false); 
             if ($labeldata[$i]['Multisheet'])
             $pdf->MultiCell(185, 5, '<span style="font-size: 9pt;">' . $labeldata[$i]['Multisheet'] . '</span>', 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->getY(), true, 0, true, true, 0, 'T', false);       

@@ -57,7 +57,7 @@ class Transactions extends Controller {
             return FALSE;
         }
         
-        if ($this->input->post('output') < 6) {
+        if ($this->input->post('output') < 6 || in_array($this->input->post('output'), array(16, 19))) { // loans
             if ($this->input->post('loannumber')) {
                 if(!$this->loaninfo = $this->loansmodel->getLoanInfo($this->input->post('loannumber'))) {
                     $this->data['message'] = 'You are way ahead of yourself';
@@ -82,6 +82,8 @@ class Transactions extends Controller {
                         break;
                     case 3:
                     case 4:
+                    case 16:
+                    case 17:
                         $this->addressLabelPDF($this->input->post('output'));
                         break;
                     case 5:
@@ -95,7 +97,7 @@ class Transactions extends Controller {
                 $this->load->view('message', $this->data);
             }
         }
-        elseif ($this->input->post('output') < 10) { // gifts
+        elseif ($this->input->post('output') < 10 || in_array($this->input->post('output'), array(17, 20))) { // gifts
             if ($this->input->post('exchangeoutnumber')) {
                 if(!$this->loaninfo = $this->exchangemodel->getInfo($this->input->post('exchangeoutnumber'))) {
                     $this->data['message'] = 'You are way ahead of yourself';
@@ -129,7 +131,7 @@ class Transactions extends Controller {
                 $this->load->view('message', $this->data);
             }
         }
-        elseif ($this->input->post('output') < 12) {
+        elseif (in_array($this->input->post('output'), array(10, 11, 18, 21))) {
             if ($this->input->post('institution')) {
                 $this->loaninfo = $this->exchangemodel->getAddressLabelInfo($this->input->post('institution'));
                 $this->addressLabelPDF($this->input->post('output'));
@@ -139,7 +141,7 @@ class Transactions extends Controller {
                 $this->load->view('message', $this->data);
             }
         }
-        elseif ($this->input->post('output') > 11) { // non MEL loans
+        elseif ($this->input->post('output') > 11 ) { // non MEL loans
             if ($this->input->post('nonmelloan')) {
                 if(!$this->loaninfo = $this->nonmelloanmodel->getNonMelLoanInfo($this->input->post('nonmelloan'))) {
                     $this->data['message'] = 'You are way ahead of yourself';
@@ -151,6 +153,8 @@ class Transactions extends Controller {
                         break;
                     case 14:
                     case 15:
+                    case 22:
+                    case 23:
                         $this->addressLabelPDF($this->input->post('output'));
                         break;
 
@@ -728,7 +732,85 @@ EOD;
     }
 
     function addressLabelPDF($outputformat) {
-        $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+        if (in_array($outputformat, array(16, 17, 18, 22))) {
+            $format = array(220, 110);
+        }
+        elseif (in_array($outputformat, array(19, 20, 21, 23))) {
+            $format = array(213, 99);
+        }
+        else {
+            $format = 'A4';
+        }
+        $pdf = new TCPDF('L', 'mm', $format, true, 'UTF-8', false);
+
+        // set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Niels Klazenga');
+        $pdf->SetTitle('Address Label');
+        $pdf->SetSubject('Address Label');
+
+        //set margins
+        $pdf->SetTopMargin(7.5);
+
+        //set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, 0);
+
+        // remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // ---------------------------------------------------------
+
+        // set font
+        if (in_array($outputformat, array(3, 8, 10, 14, 16, 17, 18)))
+            $pdf->SetFont('helvetica', '', 12);
+        else 
+            $pdf->SetFont('helvetica', '', 14);
+        // set cell padding
+        $pdf->setCellPaddings(0, 0, 0, 0);
+        // set cell margins
+        $pdf->setCellMargins(0, 0, 0, 0);
+
+        $pdf->addPage();
+
+        if (in_array($outputformat, array(16, 17, 18))) {
+            $x = 60;
+            $y = 40;
+        }
+        elseif (in_array($outputformat, array(19, 20, 21))) {
+            $x = 30;
+            $y = 30;
+        }
+        elseif (in_array($outputformat, array(3, 8, 10, 14))) {
+            $x = 135;
+            $y = 40;
+        }
+        else {
+            $x = 117;
+            $y = 30;
+        }
+
+        $this->Address();
+        $pdf->MultiCell(100, 5, $this->loan->ShippedTo, 0, 'L', 0, 1, $x, $y, true, false, true);
+
+
+        // move pointer to last page
+        $pdf->lastPage();
+
+        // ---------------------------------------------------------
+
+        //Close and output PDF document
+        $pdf->Output('addresslabel.pdf', 'I');
+    }
+
+    function addressLabelPDFNew($outputformat) {
+        if (in_array($outputformat, array(3, 8, 10, 14))) {
+            $format = array(220, 110);
+        }
+        else {
+            $format = array(213, 99);
+        }
+        $pdf = new TCPDF('L', 'mm', $format, true, 'UTF-8', false);
 
         // set document information
         $pdf->SetCreator(PDF_CREATOR);
@@ -761,11 +843,11 @@ EOD;
         $pdf->addPage();
 
         if (in_array($outputformat, array(3, 8, 10, 14))) {
-            $x = 135;
+            $x = 60;
             $y = 40;
         }
         else {
-            $x = 117;
+            $x = 50;
             $y = 30;
         }
 
@@ -781,7 +863,6 @@ EOD;
         //Close and output PDF document
         $pdf->Output('addresslabel.pdf', 'I');
     }
-
 
     function Address() {
         $shippedto = array();

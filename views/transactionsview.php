@@ -25,8 +25,14 @@
     <?=form_radio(array('name' => 'output', 'id' => 'output_option3', 'value' => 3))?>
     <?=form_label('Envelope', 'output_option3',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option16', 'value' => 16))?>
+    <?=form_label('Envelope (Mailroom printer)', 'output_option16',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
     <?=form_radio(array('name' => 'output', 'id' => 'output_option4', 'value' => 4))?>
     <?=form_label('Parcel label', 'output_option4',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option19', 'value' => 19))?>
+    <?=form_label('Parcel label (Mailroom printer)', 'output_option19',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <br />
     <?=form_radio(array('name' => 'output', 'id' => 'output_option5', 'value' => 5))?>
     <?=form_label('Conditions of loan', 'output_option5',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
@@ -55,8 +61,14 @@
     <?=form_radio(array('name' => 'output', 'id' => 'output_option8', 'value' => 8))?>
     <?=form_label('Envelope', 'output_option8',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option17', 'value' => 17))?>
+    <?=form_label('Envelope (Mailroom printer)', 'output_option17',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
     <?=form_radio(array('name' => 'output', 'id' => 'output_option9', 'value' => 9))?>
     <?=form_label('Parcel label', 'output_option9',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option20', 'value' => 20))?>
+    <?=form_label('Parcel label (Mailroom printer)', 'output_option20',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <?=form_fieldset_close()?>
     <br />
     <?=form_fieldset('<b>Non-MEL loans</b>')?>
@@ -68,8 +80,14 @@
     <?=form_radio(array('name' => 'output', 'id' => 'output_option14', 'value' => 14))?>
     <?=form_label('Envelope', 'output_option14',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option22', 'value' => 22))?>
+    <?=form_label('Envelope (Mailroom printer)', 'output_option22',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
     <?=form_radio(array('name' => 'output', 'id' => 'output_option15', 'value' => 15))?>
     <?=form_label('Parcel label', 'output_option15',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option23', 'value' => 23))?>
+    <?=form_label('Parcel label (Mailroom printer)', 'output_option23',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <?=form_fieldset_close()?>
     <br />
     <?=form_fieldset('<b>Address labels</b>')?>
@@ -84,8 +102,14 @@
     <?=form_radio(array('name' => 'output', 'id' => 'output_option10', 'value' => 10))?>
     <?=form_label('Envelope', 'output_option10',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option18', 'value' => 18))?>
+    <?=form_label('Envelope (Mailroom printer)', 'output_option18',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
     <?=form_radio(array('name' => 'output', 'id' => 'output_option11', 'value' => 11))?>
     <?=form_label('Parcel label', 'output_option11',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
+    <br />
+    <?=form_radio(array('name' => 'output', 'id' => 'output_option21', 'value' => 21))?>
+    <?=form_label('Parcel label (Mailroom printer)', 'output_option21',  array('style' => 'position: relative; top: -4px; width: 200px'))?>
     <?=form_fieldset_close()?>
     <br />
     <?=form_submit('submit', 'Submit')?>
