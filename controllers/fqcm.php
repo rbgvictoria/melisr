@@ -114,8 +114,8 @@ class Fqcm extends Controller {
                     $this->data['IncorrectAgentAsCollector'] = $this->fqcmmodel->incorrectAgentAsCollector($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'DodgyPart')
                     $this->data['DodgyPart'] = $this->fqcmmodel->dodgyPart($startdate, FALSE, $request['user']);
-                if (!isset($request['fqcr']) || $request['fqcr'] == 'PossiblyDodgyPart')
-                    $this->data['PossiblyDodgyPart'] = $this->fqcmmodel->possiblyDodgyPart($startdate, FALSE, $request['user']);
+                /*if (!isset($request['fqcr']) || $request['fqcr'] == 'PossiblyDodgyPart')
+                    $this->data['PossiblyDodgyPart'] = $this->fqcmmodel->possiblyDodgyPart($startdate, FALSE, $request['user']);*/
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'AlternativeNameInCurrentDetermination')
                     $this->data['AlternativeNameInCurrentDetermination'] = $this->fqcmmodel->alternativeNameInCurrentDetermination($startdate, FALSE, $request['user']);
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'PrimaryCollectorNotFirst')
@@ -154,10 +154,10 @@ class Fqcm extends Controller {
                     $this->data['DuplicateDuplicatePreparations'] = $this->fqcmmodel->duplicateDuplicatePreparations($startdate, FALSE, $request['user'], 'duplicate');    
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'DuplicateSeedDuplicatePreparations')
                     $this->data['DuplicateSeedDuplicatePreparations'] = $this->fqcmmodel->duplicateDuplicatePreparations($startdate, FALSE, $request['user'], 'seed duplicate');    
-                if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingExHerbarium')
+                /*if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingExHerbarium')
                     $this->data['MissingExHerbarium'] = $this->fqcmmodel->missingExHerbarium($startdate, FALSE, $request['user']);    
                 if (!isset($request['fqcr']) || $request['fqcr'] == 'MissingExHerbariumCatalogNumber')
-                    $this->data['MissingExHerbariumCatalogNumber'] = $this->fqcmmodel->missingExHerbariumCatalogNumber($startdate, FALSE, $request['user']);    
+                    $this->data['MissingExHerbariumCatalogNumber'] = $this->fqcmmodel->missingExHerbariumCatalogNumber($startdate, FALSE, $request['user']);*/    
             }
             elseif ($this->input->post('submit_localities')) {
                 $this->data['SharedLocalities'] = $this->fqcmmodel->sharedLocalities($startdate, FALSE, $this->input->post('user'));               

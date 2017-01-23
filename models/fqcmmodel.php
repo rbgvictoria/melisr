@@ -184,7 +184,7 @@ class FqcmModel extends Model {
     
         /** Looks for preparations for which the quantity is higher than
          *  it should be, primary preparations with a quantity higher than 1, 
-         *  or any preparations with a quanitity of 0 or null.
+         *  or any preparations with a null value, and anything other than a Silica gel preparation that has a value of 0.
          */
     public function inappropriateQuantityInPreparation($startdate, $enddate=FALSE, $userid=FALSE) {
         $ret = array();
@@ -194,7 +194,7 @@ class FqcmModel extends Model {
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("((p.CountAmt > 1 AND p.PrepTypeID IN (1,3,4,8,10,12,13,14)) OR (p.CountAmt IS NULL OR p.CountAmt = 0))", FALSE, FALSE);
+        $this->db->where("((p.CountAmt > 1 AND p.PrepTypeID IN (1,3,4,8,10,12,13,14)) OR (p.CountAmt IS NULL ) OR (p.PrepTypeID != 7 AND p.CountAmt=0))", FALSE, FALSE);
         $this->db->where("DATE(co.TimestampModified) >=", $startdate);
         
         if ($this->collids)
@@ -1048,7 +1048,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.PrepTypeID NOT IN (1,3,4,8,10,12,13,14,15,16,17,24) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
+        $this->db->where("p.PrepTypeID NOT IN (1,3,4,5,8,10,12,13,14,15,16,17,24) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($this->collids)
