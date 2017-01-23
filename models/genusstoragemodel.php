@@ -39,6 +39,8 @@ class GenusStorageModel extends Model {
         $this->db->from('taxon t');
         $this->db->join('genusstorage gs', 't.TaxonID=gs.TaxonID', 'left');
         $this->db->join('agent a', 't.CreatedByAgentID=a.AgentID');
+        //$this->db->join('determination d', 't.TaxonID=d.TaxonID');
+        //$this->db->where('d.CollectionMemberID', 4);
         $this->db->where('gs.GenusStorageID');
         $this->db->where('t.TaxonTreeDefItemID', 12);
         $query = $this->db->get();
