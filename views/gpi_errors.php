@@ -113,6 +113,10 @@
 <?=form_open(site_url() . "/gpi/delete_hybrid_dets/batch/$BatchNo", array('style' => 'display: inline-block'))?>
     <?=form_submit('submit', 'Delete hybrid determinations')?>
 <?=form_close()?>
+&nbsp;
+<?=form_open(site_url() . "/gpi/delete_non_types/batch/$BatchNo", array('style' => 'display: inline-block'))?>
+    <?=form_submit('submit', 'Delete non types')?>
+<?=form_close()?>
 </div>
 <?php if (isset($message)): ?>
 <div style="color: #ff0000; font-weight: bold; display: inline-block; margin-left: 15px"><?=$message?></div>

@@ -26,7 +26,7 @@ the first row, will break the script.</p>
 <h3>Uploaded data sets:</h3>
     <table>
         <tr><th>Batch no.</th><th>Date uploaded</th>
-            <th>Records</th><th>Issues</th><th colspan="3">Output</th>
+            <th>Records</th><th>Issues</th><th>Parts</th><th colspan="3">Output</th>
             <th>Delete batch</th>
             <th>Marked in MELISR</th>
         </tr>
@@ -39,6 +39,14 @@ the first row, will break the script.</p>
             <td><?=$set['NumRecords']?></td>
             <td><a href="<?=site_url()?>/gpi/show_errors/batch/<?=$set['BatchNo']?>"
                 title="Show errors"><?=$set['NumErrors']?></a></td>
+            <td>
+                <?php if ($set['NumParts'] > 0): ?>
+                    <?=anchor(site_url() . '/gpi/show_parts/batch/' . $set['BatchNo'], $set['NumParts']); ?>
+                <?php else: ?>
+                    <?=$set['NumParts']?>
+                <?php endif; ?>
+            
+            </td>
             <td><a href="<?=site_url()?>/gpi/get_xml/<?=$set['BatchNo']?>/gpi"
                 title="get XML (GPI Schema)">XML (GPI)</a></td>
             <td><a href="<?=site_url()?>/gpi/get_xml/<?=$set['BatchNo']?>/biocase"
@@ -59,6 +67,7 @@ the first row, will break the script.</p>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td style="font-weight:bold;"><?=array_sum($counts);?></td>
+            <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>

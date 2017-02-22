@@ -42,6 +42,26 @@ class GpiModel extends Model {
         $object->DateSupplied = date('Y-m-d');
         $this->db->insert('gpi.dataset', $object);
     }
+    
+    public function getCatalogNumbers($units) {
+        $catnos = array();
+        foreach ($units as $unit) {
+            $catnos[] = str_pad($unit, 7, '0', STR_PAD_LEFT) . 'A';
+        }
+        $this->db->select('co.CatalogNumber');
+        $this->db->from('collectionobject co');
+        $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID');
+        $this->db->where('d.YesNo1', 1);
+        $this->db->where_in('co.AltCatalogNumber', $units);
+        $this->db->where("SUBSTRING(co.CatalogNumber, 8)!='A'", FALSE, FALSE);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $catnos[] = $row->CatalogNumber;
+            }
+        }
+        return $catnos;
+    }
 
     /**
      * insertUnits Function
@@ -53,7 +73,8 @@ class GpiModel extends Model {
     public function insertUnits($units, $datasetid) {
         $this->db->select("$datasetid AS DataSetID");
         $this->db->select('co.CollectionObjectID as SpCollectionObjectID', FALSE);
-        $this->db->select("CONCAT('MEL', CAST(SUBSTRING(co.CatalogNumber, 1, 7) AS unsigned)) AS MelNumber", FALSE);
+        $this->db->select("CONCAT('MEL', CAST(SUBSTRING(co.CatalogNumber, 1, 7) AS unsigned), 
+            if(substring(co.CatalogNumber, 8)!='A', substring(co.CatalogNumber, 8), '')) AS MelNumber", FALSE);
         $this->db->select('DATE(co.TimestampModified) AS DateLastModified', FALSE);
         $this->db->select('collectorstring(ce.CollectingEventID, 1) AS Collectors', FALSE);
         $this->db->select('ce.StationFieldNumber AS CollectorNumber', FALSE);
@@ -526,12 +547,14 @@ class GpiModel extends Model {
                         + count($errors['NoSpecies'])
                         + count($errors['NoAuthor'])
                         + count($errors['NoProtologue']);
+                $numParts = count($this->getParts($row->BatchNo));
 
                 $datasets[] = array(
                     'BatchNo' => $row->BatchNo,
                     'DateUploaded' => $row->DateUploaded,
                     'NumRecords' => $row->NumRecords,
                     'NumErrors' => $numerrors,
+                    'NumParts' => $numParts,
                     'NumMarked' => $row->NumMarked
                 );
             }
@@ -614,6 +637,27 @@ class GpiModel extends Model {
             $this->db->delete('gpi.identification');
         }
     }
+    
+    public function deleteNonTypes($batchno) {
+        $this->db->select('UnitID');
+        $this->db->from('gpi.unit');
+        $this->db->where('DataSetID', $batchno);
+        $this->db->where("UnitID NOT IN (
+                SELECT u.UnitID
+                FROM gpi.unit u
+                JOIN gpi.identification i ON u.UnitID=i.UnitID
+                WHERE i.StoredUnderName='TRUE' AND u.DatasetID=$batchno
+            )", FALSE, FALSE);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            $unitIDs = array();
+            foreach ($query->result() as $row) {
+                $unitIDs[] = $row->UnitID;
+            }
+            $this->db->where_in('UnitID', $unitIDs);
+            $this->db->delete(array('gpi.identification', 'gpi.unit'));
+        }
+    }
 
     public function createErrorRecordSet($batchno, $recsetname, $spuser, $recsetitems) {
         $this->db->select('co.CollectionObjectID');
@@ -689,6 +733,21 @@ class GpiModel extends Model {
         $errors['NoSpecies'] = $this->noSpecificEpithet($batchno);
         $errors['NoProtologue'] = $this->noProtologue($batchno);
         return $errors;
+    }
+    
+    public function getParts($batchno) {
+        $parts = array();
+        $this->db->select('MelNumber');
+        $this->db->from('gpi.unit');
+        $this->db->where('DataSetID', $batchno);
+        $this->db->where("MelNumber REGEXP '[A-Z]{1}$'", FALSE, FALSE);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $parts[] = $row->MelNumber;
+            }
+        }
+        return $parts;
     }
 
     public function showErrors($batchno) {

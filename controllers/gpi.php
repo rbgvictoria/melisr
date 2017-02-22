@@ -39,7 +39,7 @@ class Gpi extends Controller {
         $this->load->helper('form');
         $this->load->helper('file');
         $this->load->helper('url');
-        $this->output->enable_profiler(TRUE);
+        $this->output->enable_profiler(FALSE);
         $this->data['bannerimage'] = $this->banner();
         $this->data['title'] = 'MELISR | GPI';
         $this->load->model('gpimodel');
@@ -61,18 +61,19 @@ class Gpi extends Controller {
             $n++;
             if ($row[0] && $n > 1) {
                 $catno = trim(substr($row[0], 4));
-                $catno = str_pad($catno, 7, '0', STR_PAD_LEFT) . 'A';
+                //$catno = str_pad($catno, 7, '0', STR_PAD_LEFT) . 'A';
                 $units[] = $catno;
             }
         }
         fclose($handle);
         if ($units) {
+            $catnos = $this->gpimodel->getCatalogNumbers($units);
             $batchno = substr($filename, 6, strpos($filename, '.')-strpos($filename, '_')-1);
             $this->gpimodel->insertDataSet($batchno);
-            $this->gpimodel->insertUnits($units, $batchno);
-            $this->gpimodel->insertIdentifications($units);
+            $this->gpimodel->insertUnits($catnos, $batchno);
+            $this->gpimodel->insertIdentifications($catnos);
         }
-        $this->index();
+        redirect('gpi');
     }
 
     function show_errors($t, $batchno) {
@@ -80,6 +81,12 @@ class Gpi extends Controller {
         $this->data['Errors'] = $this->gpimodel->showErrors($batchno);
         $this->data['SpecifyUsers'] = $this->gpimodel->getSpecifyUsers();
         $this->load->view('gpi_errors', $this->data);
+    }
+    
+    function show_parts($t, $batchno) {
+        $this->data['BatchNo'] = $batchno;
+        $this->data['parts'] = $this->gpimodel->getParts($batchno);
+        $this->load->view('gpi_parts', $this->data);
     }
 
     function create_error_record_set($t, $batchno) {
@@ -129,6 +136,16 @@ class Gpi extends Controller {
         }
         else
             $this->index();
+    }
+    
+    public function delete_non_types($t, $batchno) {
+        if ($batchno) {
+            $this->gpimodel->deleteNonTypes($batchno);
+            redirect('gpi/show_errors/batch/' . $batchno);
+        }
+        else {
+            redirect('gpi');
+        }
     }
 
     function banner() {
@@ -223,7 +240,7 @@ QUERY;
     
     public function delete_batch($batch) {
         $this->gpimodel->deleteBatch($batch);
-        $this->index();
+        redirect('gpi');
     }
     
     function recordsxml () {
