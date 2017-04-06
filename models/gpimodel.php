@@ -222,7 +222,7 @@ class GpiModel extends Model {
                 $identification->Genus = (isset($name[0])) ? $name[0] : NULL;
                 $identification->InfraspecificRank = NULL;
                 $identification->InfraspecificEpithet = NULL;
-                $identification->Author = str_replace(' & ', ' &amp; ', $row->Author);
+                $identification->Author = $row->Author;
 
                 if ($row->Qualifier && ($row->QualifierRank=='Species' || (!$row->QualifierRank && $row->TaxonTreeDefItemID == 13)))
                     $identification->SpeciesQualifier = $row->Qualifier;
@@ -362,7 +362,7 @@ class GpiModel extends Model {
                 $identification->Genus = (isset($name[0])) ? $name[0] : NULL;
                 $identification->InfraspecificRank = NULL;
                 $identification->InfraspecificEpithet = NULL;
-                $identification->Author = str_replace(' & ', ' &amp; ', $row->Author);
+                $identification->Author = $row->Author;
 
                 if ($row->Qualifier && ($row->QualifierRank=='Species' || (!$row->QualifierRank && $row->TaxonTreeDefItemID == 13))) {
                     $identification->SpeciesQualifier = $row->Qualifier;
