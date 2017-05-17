@@ -1,0 +1,301 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 10/04/2017, 12:50:43 PM
+    Author     : nklazenga
+*/
+
+#userinfo {
+    width: 900px;
+    text-align: right;
+    margin-top: 48px;
+    padding-right: 10px;
+}
+
+#menu, #footer {
+    margin-top: 0px;
+    padding-left: 10px;
+    height: 18px;
+    width: 900px;
+    background-color: #000;
+    color: #fff;
+}
+
+#menu a {
+    text-decoration: none;
+    color: white;
+}
+
+#content {
+    padding: 5px 10px 25px 10px;
+    background-color: #ffffff;
+}
+
+h2 {
+    color: #aaa;
+    letter-spacing: -1px;
+}
+
+h4 {
+    color: #666666;
+}
+
+label {
+    display: inline-block;
+    width: 100px;
+    margin-right: 10px;
+}
+
+.submit {
+    width: 50%;
+    text-align: right;
+    margin-top: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    border-right-style: solid;
+    border-left-style: solid;
+    border-bottom-style: solid;
+    border-top-style: solid;
+    border-right-width: 1px;
+    border-left-width: 1px;
+    border-bottom-width: 1px;
+    border-top-width: 1px;
+    border-right-color: #cccccc;
+    border-left-color: #cccccc;
+    border-bottom-color: #cccccc;
+    border-top-color: #cccccc;
+}
+
+td, th {
+    border-right-style: solid;
+    border-left-style: solid;
+    border-bottom-style: solid;
+    border-top-style: solid;
+    border-right-width: 1px;
+    border-left-width: 1px;
+    border-bottom-width: 1px;
+    border-top-width: 1px;
+    border-right-color: #cccccc;
+    border-left-color: #cccccc;
+    border-bottom-color: #cccccc;
+    border-top-color: #cccccc;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+th {
+    background-color: #cccccc;
+}
+
+table tr.even td {
+    background-color: #eeeeee;
+}
+
+.spacer {
+    clear: both;
+}
+
+#fieldset_printer {
+    width: 200px;
+    float: right;
+}
+
+#fieldset_type {
+    clear: both;
+}
+
+#fieldset_printer, #fieldset_records {
+    height: 140px;
+}
+
+#fieldset_records div {
+    line-height: 200%;
+}
+
+.headingcolour th {
+    background-color: #003399;
+    color: #ffffff;    
+}
+
+.headingcolour1 th {
+    background-color: #3399ff;
+    color: #ffffff;    
+}
+
+.headingcolour2 th {
+    background-color: #ff6666;
+    color:#ffffff;    
+}
+
+.headingcolour3 th {
+    background-color: #009933;
+    color: #ffffff;    
+}
+
+.headingcolour4 th {
+    background-color: #ff9900;
+    color: #ffffff;    
+}
+
+.headingcolour5 th {
+    background-color: #6600cc;
+    color: #ffffff;    
+}
+
+.headingcolour6 th {
+    background-color: #009999;
+    color: #ffffff;    
+}
+
+.headingcolour7 th {
+    background-color: #EB20F3;
+    color: #ffffff;    
+}
+
+/* pagination links */
+.links {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.links span span.nolink {
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    padding: 3px 5px 3px 5px;
+    margin: 2px 2px 2px 2px;
+    background-color: #ffffff;
+    text-decoration: none;
+    color: #cccccc;
+    font-weight: bold;
+}
+
+.links span a {
+    border: 1px solid #000000;
+    border-radius: 5px;
+    padding: 3px 5px 3px 5px;
+    margin: 2px 2px 2px 2px;
+    background-color: #ffffff;
+    text-decoration: none;
+    color: #000000;
+    font-weight: bold;
+}
+
+.links a:hover {
+    background-color: #ffff00;
+}
+
+.update {
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+/* Borrower */
+#workarea {
+    
+}
+
+#numbers {
+    float: left;
+    width: 424px;
+    margin-right: 5px;
+    border: solid 1px #ccc;
+    padding: 10px;
+}
+
+#workarea_col2 {
+    float: right;
+    width: 436px;
+}
+
+#workarea_col2>div {
+    padding: 10px;
+    border: solid 1px #ccc;
+    margin-bottom: 10px;
+}
+
+#loanpreparations {
+    clear: both;
+    padding: 10px 10px;
+}
+
+#workarea h3 {
+    margin: 0;
+}
+
+#return textarea[name="returncomment"] {
+    width: 280px;
+}
+
+#workarea_col2 .submit {
+    width: 100%;
+    text-align: right;
+    margin-top: 0px;
+}
+
+.message {
+    color: #ff0000;
+}
+
+.success {
+    color: #009900;
+}
+
+.image-records {
+    overflow: auto;
+}
+
+div.dataTables_info, div.dataTables_paginate {
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+#extrafields {
+    vertical-align: text-top;
+}
+
+/* DNA sequences
+------------------------------------*/
+.marker-not-in-picklist {
+    background-color: #ffb266;
+}
+
+label.required::after {
+    color:  red;
+    font-weight: bold;
+    content: "*";
+    display: inline;
+}
+
+tr.info {
+  background-color: rgba(51, 153, 255, 0.5);
+}
+
+tr.warning {
+  background-color: rgba(255, 128, 0, 0.5);
+}
+
+tr.error {
+  background-color: rgba(255, 0, 0, 0.5);
+}
+
+td.td-center {
+    text-align: center;
+}
+
+td.td-right {
+    text-align: right;
+}
+
+i.fa.fa-check.green {
+  color: #4c9900;
+}
+
+i.fa.fa-remove.red {
+  color: #ff0000;
+}
+

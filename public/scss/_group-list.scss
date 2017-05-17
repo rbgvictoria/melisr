@@ -1,0 +1,41 @@
+/* 
+    Created on : 06/11/2016, 10:37:21 PM
+    Author     : nklazenga
+*/
+
+.group-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 25px;
+    display: none;
+    
+    @media (min-width: $screen-md-min) {
+        display: block;
+    }
+    
+    &>li {
+        margin: 5px 0;
+        padding-bottom: 8px;
+        
+        
+        .group-name {
+            display: inline-block;
+        }
+        
+        &.active {
+            background-color: #dddddd;
+            a {
+                font-weight: bold;
+            }
+        }
+    }
+}
+
+.group-select {
+    display: block;
+    
+    @media (min-width: $screen-md-min) {
+        display: none;
+    }
+}
+

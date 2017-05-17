@@ -1,0 +1,5 @@
+CatalogNumber,SampleNumber,PreparedBy,PreparedDate,Sequencer,Project,BOLDSampleID,BOLDBarcodeID,TaxonName,rbcL,matK,rpL32-trnL,ITS,ETS
+AD 108301,iAF71,,,,,,,Sphenopus divaricatus,,,,,
+CANB 240688,iAP19,,,,,,,Poa muricata,KJ599196,KJ599312,KJ599424,KJ598976,KJ599085
+MEL 0576090,iAG13,,,,,,,Poa drummondiana,,,,,
+MEL 1582280,iAD33,,,,,,,Dactylis glomerata,KJ599165,KJ599276,KJ599389,KJ598940,KJ599051
