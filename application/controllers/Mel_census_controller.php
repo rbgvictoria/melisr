@@ -27,11 +27,28 @@ class Mel_census_controller extends CI_Controller {
     public function __construct() 
     {
         parent::__construct();
+        $this->load->model('mel_census_model');
+        $this->load->helper('json');
+        $this->data = [];
+        $this->data['js'][] = 'jquery.melcensus.js';
     }
     
     public function index()
     {
-        
+        $this->data['majorGroups'] = $this->mel_census_model->getStorageGroups(2);
+        $this->load->view('mel_census_view', $this->data);
+    }
+    
+    public function subgroups($groupId)
+    {
+        $data = $this->mel_census_model->getStorageGroups($groupId);
+        echo json_output($data);
+    }
+    
+    public function taxa($storageId)
+    {
+        $data = $this->mel_census_model->getTaxa($storageId);
+        echo json_output($data);
     }
     
     

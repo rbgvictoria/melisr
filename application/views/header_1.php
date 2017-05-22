@@ -25,6 +25,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="<?=base_url()?>bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="<?=base_url()?>bower_components/jspath/jspath.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.js"></script>
     <?php if (isset($js)): ?>
     <?php foreach ($js as $script): ?>
@@ -92,6 +93,7 @@
                             <li><a href="<?=site_url()?>recordset/manage">Manage record sets</a></li>
                           </ul>
                         </li>
+                        <li><a href="<?=site_url()?>melcensus">MEL Census</a></li>
                         <li class="dropdown">
                           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">More <span class="caret"></span></a>
                           <ul class="dropdown-menu" role="menu">
