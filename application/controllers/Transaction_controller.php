@@ -303,10 +303,16 @@ EOD;
         $paragraphs[] = <<<EOD
 For queries relating to loans, exchange or donations, please email MEL at herbmel@rbg.vic.gov.au.
 EOD;
+        
+        $paragraphs[] = <<<EOD
+<span style="color:#ff0000;font-weight:bold;">NOTE: Before returning loan, please contact MEL for current Biosecurity documentation.</span>
+EOD;
+        
         $pdf->SetY($pdf->GetY()-2);
-        foreach ($paragraphs as $para)
+        foreach ($paragraphs as $para) {
             $pdf->Multicell(135, 5, $para, 0, 'L', 0, 1, $x, $pdf->GetY()+1, true, false, true);
-
+        }
+        
         $pdf->MultiCell(135, 5, $this->loaninfo['ShippedBy'] . ' on behalf of the Collections Manager', 0, 'L', 0, 1, $x, $pdf->GetY()+3, true, false, true);
 
         $y = 236;

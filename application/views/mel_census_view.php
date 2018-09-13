@@ -23,6 +23,7 @@ require_once 'header_1.php';
 <div class="container">
     <div class="row">
         <div class="col-lg-12">
+            <?php require_once 'includes/melcensus_links.php'; ?>
             <h1>MEL Census</h1>
             
             <div class="form-horizontal">

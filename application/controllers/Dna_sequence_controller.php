@@ -74,7 +74,6 @@ class Dna_sequence_controller extends CI_Controller {
     for some of the columns.</p>
 EOT;
         }
-        
         $this->load->view('dnasequence_view', $this->data);
         
     }
@@ -313,6 +312,13 @@ EOT;
                     }
                 }
                 
+                $sequencer = FALSE;
+                if (isset($row['Sequencer']) && $row['Sequencer']) {
+                    $sequencer = $row['Sequencer'];
+                }
+                elseif ($this->input->post('sequencer_default')) {
+                    $sequencer = $this->input->post('sequencer_default');
+                }
                 $sequencer_id = NULL;
                 if ($sequencer) {
                     $sequencer_id = $this->dnasequencemodel->getPreparedByID($sequencer);
@@ -322,14 +328,6 @@ EOT;
                 $bold_sample_id = (isset($row['BOLDSampleID']) && $row['BOLDSampleID']) ? $row['BOLDSampleID'] : NULL;
                     
                 if (isset($row['sequences']) && $row['sequences']) {
-                    $sequencer = FALSE;
-                    if (isset($row['Sequencer']) && $row['Sequencer']) {
-                        $sequencer = $row['Sequencer'];
-                    }
-                    elseif ($this->input->post('sequencer_default')) {
-                        $sequencer = $this->input->post('sequencer_default');
-                    }
-                    
                     $seqinfo = $this->sequences($row['CatalogNumber'], $colobjid, $collectionid, $row['SampleNumber'], $row['sequences'], $sequencer_id, $bold_barcode_id, $bold_sample_id);
                     $reportRow = array_merge($reportRow, $seqinfo);
                     

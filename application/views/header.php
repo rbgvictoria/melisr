@@ -24,6 +24,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="<?=base_url()?>bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="<?=base_url()?><?=autoVersion('js/jquery.melisr.js'); ?>"></script>
     <?php if (isset($js)): ?>
     <?php foreach ($js as $script): ?>
     <script type="text/javascript" src="<?=base_url()?><?= autoVersion('js/' . $script)?>"></script>
@@ -81,7 +82,7 @@
                 </nav>
 
 
-                <div class="col-lg-12">
+                <div class="col-md-6">
                     <div id="header">
                         <div id="logo">
                             <a href='http://www.rbg.vic.gov.au'>
@@ -92,6 +93,9 @@
                             <a href="<?=base_url()?>">MELISR</a>
                         </div>
                     </div>
+                </div>
+                <div class="col-md-6">
+                    <div id="counter">Counter</div>
                 </div>
             </div><!--/.row -->
         </div><!--/.container -->

@@ -1,4 +1,5 @@
 <?php
+
 class LoanPDF extends TCPDF {
     var $headerHtml;
     var $footerHtml;

@@ -79,7 +79,7 @@ $(function() {
 });
 
 var autocomplete = function() {
-        $('[name=taxonName]').autocomplete({
+    $('[name=taxonName]').autocomplete({
         source: location.href + '/taxon_name_autocomplete',
         minLength: 2,
         focus: function( event, ui ) {

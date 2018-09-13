@@ -216,30 +216,6 @@
                     <label>
                         <?=form_radio(array(
                             'name' => 'labeltype',
-                            'id' => 'lt13',
-                            'value' => '13',
-                            'checked' => false
-                        )); ?>
-                        Duplicate label for seed collections, 4 per page
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <?=form_radio(array(
-                            'name' => 'labeltype',
-                            'id' => 'lt14',
-                            'value' => '14',
-                            'checked' => false
-                        )); ?>
-                        Duplicate label for seed collections, 2 per page
-                    </label>
-                </div>
-                    </div> <!-- /.col- -->
-                    <div class="col-lg-6">
-                <div class="radio">
-                    <label>
-                        <?=form_radio(array(
-                            'name' => 'labeltype',
                             'id' => 'lt8',
                             'value' => '8',
                             'checked' => false
@@ -247,6 +223,8 @@
                         Spirit jar label
                     </label>
                 </div>
+                    </div> <!-- /.col- -->
+                    <div class="col-lg-6">
                 <div class="radio">
                     <label>
                         <?=form_radio(array(
@@ -366,12 +344,6 @@
                 <label>
                 <?=form_radio(['name' => 'labeltype','value' => '20']); ?>
                     Vic. Ref. Set barcode
-                </label>
-            </div>
-            <div class="radio">
-                <label>
-                <?=form_radio(['name' => 'labeltype', 'value' => '24']); ?>
-                    Vic. Ref. Set multi-sheet labels
                 </label>
             </div>
                 <?=form_fieldset_close();?>

@@ -1018,7 +1018,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,14,15,16,17,24) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
+        $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,15,16,17,24) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
         if ($this->collids)

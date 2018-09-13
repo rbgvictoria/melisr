@@ -207,7 +207,7 @@ class Label_data_model extends CI_Model {
         } else return 'no records selected';
     }
 
-    function getLabelDataNew($colobjects, $part=FALSE, $multiple=FALSE, $type=FALSE) {
+    function getLabelDataNew($colobjects, $part=FALSE, $multiple=FALSE, $type=FALSE, $collectionId=4, $prepType=false, $sampleNumbers=[]) {
         $this->db->select('co.CollectionObjectID,
               co.CatalogNumber,
               co.AltCatalogNumber,
@@ -254,6 +254,7 @@ class Label_data_model extends CI_Model {
         $this->db->join('collectingeventattribute cea', 'ce.CollectingEventAttributeID=cea.CollectingEventAttributeID', 'left');
         $this->db->join('locality l', 'ce.LocalityID=l.LocalityID', 'left');
         $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID', 'left');
+        $this->db->where('co.CollectionID', $collectionId);
         $this->db->where_in('co.CollectionObjectID', $colobjects);
         $this->db->where('d.isCurrent', 1);
         if (!$part)
@@ -1047,7 +1048,7 @@ class Label_data_model extends CI_Model {
     }
 
     function getFormattedCollectorString($collectingeventid, $isprimary=1) {
-        $collector = array();
+        $collector = [];
         $select = "SELECT a.LastName, a.FirstName
             FROM collector c
             JOIN agent a ON c.AgentID=a.AgentID
@@ -1059,8 +1060,9 @@ class Label_data_model extends CI_Model {
             $coll .= ($row->FirstName) ? ', ' . $row->FirstName : '';
             $collector[] = $coll;
         }
-        if (count($collector) > 0)
+        if (count($collector) > 0) {
             return implode('; ', $collector);
+        }
         elseif ($isprimary  == 1) {
             $select = "SELECT ceo.Text1
                 FROM collectingevent ce
@@ -1069,8 +1071,11 @@ class Label_data_model extends CI_Model {
             $query = $this->db->query($select);
             if ($query->num_rows() > 0) {
                 $row = $query->row();
-                return $row->Text1;
-            } else return FALSE;
+                return $row->Text1 ?: '[Unknown]';
+            } 
+            else {
+                return '[Unknown]';
+            }
         }
     }
     

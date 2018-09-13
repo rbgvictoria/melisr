@@ -114,7 +114,7 @@ class Borrower_model extends CI_Model {
     }
     
     public function addLoanPreps($melrefno, $specifyuser, $preptype, $barcodes) {
-        $catalognumbers = explode("\n", trim($barcodes));
+        $catalognumbers = preg_split('/\r\n|\r|\n/', trim($barcodes));
         foreach ($catalognumbers as $catalognumber) {
             $collectionobjectid = $this->addCollectionObjectRecord($catalognumber, $specifyuser);
             $preparationid = $this->addPreparationRecord($collectionobjectid, $preptype, $specifyuser);
@@ -247,7 +247,7 @@ class Borrower_model extends CI_Model {
     
     public function findLoanPrepsToReturn($loanid, $catalognumbers) {
         $ret = array();
-        $catalognumbers = explode("\n", trim($catalognumbers));
+        $catalognumbers = preg_split('/\r\n|\r|\n/', trim($catalognumbers));
         $this->db->select('lp.LoanPreparationID');
         $this->db->from('collectionobject co');
         $this->db->join('preparation p', 'co.CollectionObjectID=p.CollectionObjectID');

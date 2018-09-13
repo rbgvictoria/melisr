@@ -30,13 +30,49 @@ class Mel_census_controller extends CI_Controller {
         $this->load->model('mel_census_model');
         $this->load->helper('json');
         $this->data = [];
-        $this->data['js'][] = 'jquery.melcensus.js';
     }
     
     public function index()
     {
+        $this->data['js'][] = 'jquery.melcensus.js';
         $this->data['majorGroups'] = $this->mel_census_model->getStorageGroups(2);
         $this->load->view('mel_census_view', $this->data);
+    }
+    
+    public function label($type)
+    {
+        $this->data['css'][] = 'jqueryui.autocomplete.css';
+        $this->data['js'][] = 'jquery.melcensus.label.js';
+        if ($type == 'cupboard') {
+            $this->cupboardLabel();
+        }
+        elseif ($type == 'strawboard') {
+            $this->strawboardLabel();
+        }
+    }
+    
+    protected function cupboardLabel()
+    {
+        if ($this->input->post('data')) {
+            $data = json_decode($this->input->post('data'));
+            $labels = $data->labels;
+            $this->load->library('CupboardLabelPDF');
+            $this->cupboardlabelpdf->render($labels);
+        }
+        else {
+            $this->load->view('cupboard_label_view', $this->data);
+        }
+    }
+    
+    protected function strawboardLabel()
+    {
+        if ($this->input->post('data')) {
+            $data = json_decode($this->input->post('data'));
+            $labels = $data->labels;
+            $this->load->library('StrawboardLabelPDF');
+            $this->strawboardlabelpdf->render($labels);
+        }
+        $this->load->view('strawboard_label_view', $this->data);
     }
     
     public function subgroups($groupId)
@@ -50,6 +86,19 @@ class Mel_census_controller extends CI_Controller {
         $data = $this->mel_census_model->getTaxa($storageId);
         echo json_output($data);
     }
+    
+    public function autocomplete_storage_group()
+    {
+        $data = $this->mel_census_model->getStorageGroupSuggestions(urldecode($this->input->get('term')));
+        echo json_output($data);
+    }
+    
+    public function autocomplete_taxon_name()
+    {
+        $data = $this->mel_census_model->getTaxonSuggestions(urldecode($this->input->get('term')), $this->input->get('storageId'));
+        echo json_output($data);
+    }
+    
     
     
 }

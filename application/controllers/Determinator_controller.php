@@ -135,21 +135,33 @@ class Determinator_controller extends CI_Controller {
     
     private function labelProperties()
     {
+        /*[
+            'numx'  =>  3,
+            'numy'  =>  10,
+            'labelheight' => 26.7,
+            'labelwidth' => 67.8,
+            'wheader' => 56,
+            'yheader' => 20,
+            'whtml' =>  56,
+            'yhtml' =>  24,
+            'xpos'  =>  9,
+            
+        ];*/
             $props = [
                 'numx' => 3,
                 'numy' => 10,
-                'xpos' => 7,
-                'headerWidth' => 57,
+                'xpos' => 9,
+                'headerWidth' => 56,
                 'headerX' => null,
-                'headerY' => 23,
+                'headerY' => 19,
                 'htmlWidth' => 57,
-                'htmlY' => 28,
+                'htmlY' => 24,
                 'dimensions' => [
-                    'labelheight' => 25.3,
-                    'labelwidth' => 68.2,
+                    'labelheight' => 26.7,
+                    'labelwidth' => 67.8,
                     
                 ],
-                'footerOffsetY' => 40
+                'footerOffsetY' => 37
             ];
             $props['dimensions']['labelheader_pos'] = [];
             $props['dimensions']['labelheader_pos']['x'] = [];
@@ -237,27 +249,24 @@ class Determinator_controller extends CI_Controller {
 
             if($j % $numlabels == 0) $pdf->AddPage();
 
-            if ($labelheader_pos) {
-                $pdf->MultiCell($props['headerWidth'], 1, $labelheader, 0, 'C', 0, 1, $labelheader_pos['x'][$x], $labelheader_pos['y'][$y], true, false, true);
-            }
-            $pdf->MultiCell($props['htmlWidth'], 12, $labeldata[$i]['taxonName'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 12, 'M', true);
-            $text = $labeldata[$i]['identifierRole'] . ' ' .$labeldata[$i]['identifiedBy'] . ', ' . $labeldata[$i]['dateIdentified'];
+            $pdf->SetY($labelheader_pos['y'][$y]);
+            $pdf->MultiCell($props['headerWidth'], 1, $labelheader, 0, 'C', 0, 1, $labelheader_pos['x'][$x], $pdf->GetY(), true, false, true);
+            $pdf->MultiCell($props['htmlWidth'], 4, $labeldata[$i]['taxonName'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, true, 12, 'M', true);
             
             if ($labeldata[$i]['note']) {
-                $pdf->SetY($props['dimensions']['labelfooter_pos']['y'][$y] - 3);
-                /*$pdf->MultiCell($props['htmlWidth'], 5, $text , 0, 'L', 0, 1, 
-                        $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, 
-                        true, 0, 'T', false);*/
-                $pdf->MultiCell($props['htmlWidth'], 5, $labeldata[$i]['note'] , 
-                        0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY(), 
-                        true, 0, true, true, 0, 'T', false);
+                $pdf->MultiCell($props['htmlWidth'], 4, $labeldata[$i]['note'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, true, 0, 'T', false);
             }
-            //else {
-                $pdf->SetY($props['dimensions']['labelfooter_pos']['y'][$y]);
-                $pdf->MultiCell($props['htmlWidth'], 5, $text , 0, 'L', 0, 1, 
-                        $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, 
-                        true, 0, 'T', false);
-            //}
+            
+            $identifiedBy = $labeldata[$i]['identifiedBy'];
+            if ($identifiedBy == 'MEL -- National Herbarium of Victoria') {
+                $identifiedBy = 'MEL';
+            }
+            $text = $labeldata[$i]['identifierRole'] . ' ' . $identifiedBy . ', ' . $labeldata[$i]['dateIdentified'];
+            
+            $pdf->SetY($props['dimensions']['labelfooter_pos']['y'][$y]);
+            $pdf->MultiCell($props['htmlWidth'], 5, $text , 0, 'L', 0, 1, 
+                    $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, 
+                    true, 0, 'T', false);
         }   
         // move pointer to last page
         $pdf->lastPage();

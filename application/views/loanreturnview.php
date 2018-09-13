@@ -44,8 +44,8 @@
                     </label>
                     <div class="col-md-8">
                         <select name="allpreps" id="allpreps" class="form-control">
-                            <option value="0">Preparations in this batch</option>
-                            <option value="1" selected="true">All preparations in loan</option>
+                            <option value="0" selected="true">Preparations in this batch</option>
+                            <option value="1">All preparations in loan</option>
                             <option value="2">Outstanding preparations</option>
                         </select>
                     </div>
@@ -155,14 +155,15 @@
                     <div class="col-md-6">
                         <?php
                             $options = array(
-                              '' => '',
-                              '2' => 'Alison',
-                              '13' => 'Catherine',
-                              '6' => 'Helen',
-                              '1' => 'Niels',
-                              '7' => 'Nimal',
-                              '8' => 'Rita', 
-                              '5' => 'Wayne',
+                                '' => '',
+                                '80' => 'Aaron',
+                                '72' => 'Alison',
+                                '13' => 'Catherine',
+                                '6' => 'Helen',
+                                '1' => 'Niels',
+                                '7' => 'Nimal',
+                                '8' => 'Rita', 
+                                '78' => 'Wayne',
                             );
                         ?>
                         <?=form_dropdown('specifyuser', $options, $this->input->post('specifyuser'), 'id="specifyuser" class="form-control"');?>`            

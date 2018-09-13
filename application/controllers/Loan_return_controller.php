@@ -17,7 +17,7 @@ class Loan_return_controller extends CI_Controller {
         $this->load->helper('file');
         $this->load->helper('url');
         $this->load->model('Loan_return_model', 'loanreturnmodel');
-        $this->output->enable_profiler(false);
+        $this->output->enable_profiler();
         $this->data['title'] = 'MELISR | Loan return';
         $this->data['js'][] = 'jquery.melisr.htmltableoptions.js';
         $this->data['js'][] = 'jquery.loans.js';

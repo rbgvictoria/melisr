@@ -63,6 +63,14 @@ class Admin_controller extends CI_Controller {
         $this->data['lastUpdated'] = $this->adminmodel->biocaseLastUpdated();
         $this->load->view('admin_view', $this->data);
     }
+    
+    public function numrecs()
+    {
+        $this->load->model('Count_model', 'count_model');
+        $data = $this->count_model->getNumberOfRecords();
+        $this->load->helper('json');
+        echo json_output($data);
+    }
 
 }
 ?>

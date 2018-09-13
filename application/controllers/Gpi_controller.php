@@ -41,6 +41,7 @@ class Gpi_controller extends CI_Controller {
         $this->load->model('Gpi_model', 'gpimodel');
         $this->load->library('Hispid5ToCsv');
         $this->session->unset_userdata(['error', 'warning', 'success']);
+        $this->data['js'][] = 'jquery.fileupload.js';
     }
 
     function index() {
@@ -188,9 +189,10 @@ class Gpi_controller extends CI_Controller {
   </search>
 </request>
 QUERY;
-            $command = "curl --data \"query=" . urlencode($query) . "\" http://melisr.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_gpi";
+            $command = "curl --data \"query=" . urlencode($query) . "\" http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_gpi";
             
             $result = `$command`;
+            
             
             $orgdoc = new DOMDocument('1.0', 'UTF-8');
             $orgdoc->loadXML($result);
@@ -222,7 +224,7 @@ QUERY;
                 $newdoc->appendChild($node);
 
                 $docstring = $newdoc->saveXML();
-                $docstring = str_replace('ns0:', '', $docstring);
+                $docstring = str_replace(['ns0:', 'african:'], '', $docstring);
 
                 $search = "<DataSet xmlns:african=\"http://plants.jstor.org/XSD/AfricanTypesv2.xsd\">";
                 $repl = "<DataSet xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://plants.jstor.org/XSD/AfricanTypesv2.xsd\">";

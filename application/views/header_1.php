@@ -22,9 +22,9 @@
     <?php endforeach; ?>
     <?php endif; ?>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script type="text/javascript" src="<?=base_url()?>bower_components/bootstrap-sass/assets/javascripts/bootstrap.min.js"></script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script type="text/javascript" src="<?=base_url()?>bower_components/jspath/jspath.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.js"></script>
     <?php if (isset($js)): ?>
@@ -101,6 +101,7 @@
                             <li><a href="<?=site_url()?>destroyer">Damage reporter</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="<?=site_url()?>vrs">Vic. Ref. Set</a></li>
+                            <li><a href="<?=site_url()?>vcsb">Victorian Conservation Seed Bank</a></li>
                           </ul>
                         </li>
                       </ul>

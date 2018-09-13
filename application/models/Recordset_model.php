@@ -17,13 +17,15 @@ class Recordset_model extends CI_Model {
         $this->load->database();
     }
 
-    function getCollectionObjectRecordSets() {
-        $select = "SELECT r.RecordSetID, r.Name, u.Name AS SpecifyUser
-            FROM recordset r
-            JOIN specifyuser u ON r.SpecifyUserID=u.SpecifyUserID
-            WHERE `Type`=0
-            ORDER BY r.Name, SpecifyUser";
-        $query = $this->db->query($select);
+    function getCollectionObjectRecordSets($collectionId=4) {
+        $this->db->select('r.RecordSetID, r.Name, u.Name AS SpecifyUser');
+        $this->db->from('recordset r');
+        $this->db->join('specifyuser u', 'r.SpecifyUserID=u.SpecifyUserID');
+        $this->db->where('CollectionMemberID', $collectionId);
+        $this->db->where('Type', 0);
+        $this->db->order_by('r.Name');
+        $this->db->order_by('SpecifyUser');
+        $query = $this->db->get();
         return $query->result_array();
     }
 

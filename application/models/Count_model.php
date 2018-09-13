@@ -130,6 +130,15 @@ class Count_model extends CI_Model {
             return $ret;
         }
     }
+    
+    public function getNumberOfRecords($collectionId=4)
+    {
+        $this->db->select('count(*) as numRecords', false);
+        $this->db->from('collectionobject');
+        $this->db->where('CollectionID', $collectionId);
+        $query = $this->db->get();
+        return $query->row();
+    }
 }
 
 ?>

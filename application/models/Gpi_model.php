@@ -45,7 +45,12 @@ class Gpi_model extends CI_Model {
     public function getCatalogNumbers($units) {
         $catnos = array();
         foreach ($units as $unit) {
-            $catnos[] = str_pad($unit, 7, '0', STR_PAD_LEFT) . 'A';
+            if (preg_match('/[A-Z]$/', $unit)) {
+                $catnos[] = str_pad(substr($unit, 0, strlen($unit)-1), 7, '0', STR_PAD_LEFT) . substr($unit, -1);
+            }
+            else {
+                $catnos[] = str_pad($unit, 7, '0', STR_PAD_LEFT) . 'A';
+            }
         }
         $this->db->select('co.CatalogNumber');
         $this->db->from('collectionobject co');

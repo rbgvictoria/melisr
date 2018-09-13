@@ -129,7 +129,12 @@ i.fa.fa-remove.red {
 
 /* detslips 
 ***************************************/
-.taxon-name-autocomplete-list, .agent-autocomplete-list {
+.taxon-name-autocomplete-list, .agent-autocomplete-list, .melcensus-autocomplete {
     max-height: 250px;
     overflow-y: auto;
+}
+
+#counter {
+    color: $brand-dark-background;
+    padding-top: 30px;
 }

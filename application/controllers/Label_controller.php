@@ -398,7 +398,7 @@ class Label_controller extends CI_Controller {
         $pdf->SetMargins(5, 7.5, 5);
 
         //set auto page breaks
-        $pdf->SetAutoPageBreak(TRUE, 3);
+        $pdf->SetAutoPageBreak(true, 3);
 
         // remove default header/footer
         $pdf->setPrintHeader(false);
@@ -433,14 +433,14 @@ class Label_controller extends CI_Controller {
                 $doubtfulflag = '';
 
             $typestatus = '<b>' . $doubtfulflag . strtoupper($labeldata[$i]['Status']) . '</b> of ' . $labeldata[$i]['Basionym'] . $labeldata[$i]['Protologue'];
-            $pdf->MultiCell(185, 5, $typestatus, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 0, 'T', false);
-            $posy = $pdf->getY();
+            $pdf->MultiCell(180, 5, $typestatus, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 0, 'T', false);
+            $posy = $pdf->GetY();
             $pdf->MultiCell(32, 5, '<b>' . $labeldata[$i]['MELNumber'] . '</b>', 0, 'L', 0, 1, $labelbody_pos['x'][$x], $posy, true, 0, true, true, 0, 'T', false);       
             $pdf->write1DBarcode($labeldata[$i]['MELNumber'], 'C39', $labelbody_pos['x'][$x]+32, $posy, 55, 6, 0.1, $barcodestyle, 'N');
-            $pdf->MultiCell(94, 5, strtoupper($labeldata[$i]['Family']), 0, 'R', 0, 1, $labelbody_pos['x'][$x]+91, $posy, true, 0, true, true, 0, 'T', false); 
+            $pdf->MultiCell(94, 5, strtoupper($labeldata[$i]['Family']), 0, 'R', 0, 1, $labelbody_pos['x'][$x]+86, $posy, true, 0, true, true, 0, 'T', false); 
             if ($labeldata[$i]['Multisheet'])
-            $pdf->MultiCell(185, 5, '<span style="font-size: 9pt;">' . $labeldata[$i]['Multisheet'] . '</span>', 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->getY(), true, 0, true, true, 0, 'T', false);       
-            $pdf->MultiCell(16, 5, '<span style="font-size: 30pt; font-weight: bold">' . $labeldata[$i]['AuOrForeign'] . '</span>', 0, 'L', 0, 1, $labelbody_pos['x'][$x]+190, $labelbody_pos['y'][$y]-1, true, 0, true, true, 0, 'T', false);       
+            $pdf->MultiCell(180, 5, '<span style="font-size: 9pt;">' . $labeldata[$i]['Multisheet'] . '</span>', 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->getY(), true, 0, true, true, 0, 'T', false);       
+            $pdf->MultiCell(16, 5, '<span style="font-size: 30pt; font-weight: bold">' . $labeldata[$i]['AuOrForeign'] . '</span>', 0, 'L', 0, 1, $labelbody_pos['x'][$x]+185, $labelbody_pos['y'][$y]-1, true, 0, true, true, 0, 'T', false);       
         }   
         // move pointer to last page
         $pdf->lastPage();
@@ -699,7 +699,7 @@ class Label_controller extends CI_Controller {
             $labeldimensions['labelheight'] = 105;
             $labeldimensions['labelwidth'] = 148.5;
         } else {
-            $labeldimensions['labelheight'] = (isset($config['labelheight'])) ? $config['labelheight'] : 297/$numy;
+            $labeldimensions['labelheight'] = (isset($config['labelheight'])) ? $config['labelheight'] : 290/$numy;
             $labeldimensions['labelwidth'] = (isset($config['labelwidth'])) ? $config['labelwidth'] : 210/$numx;
         }
         $xpos = (isset($config['xpos']) && $config['xpos']) ? $config['xpos'] : 7.5;
@@ -724,9 +724,9 @@ class Label_controller extends CI_Controller {
             $labeldimensions['labelbody_pos']['x'][] = $xpos + $i*$labeldimensions['labelwidth'];
             }
         $labeldimensions['labelbody_pos']['y'] = array();
-        for ($i = 0; $i<$numy; $i++)
-        $labeldimensions['labelbody_pos']['y'][] = $config['yhtml'] + $i*$labeldimensions['labelheight'];
-
+        for ($i = 0; $i<$numy; $i++) {
+            $labeldimensions['labelbody_pos']['y'][] = $config['yhtml'] + $i*$labeldimensions['labelheight'];
+        }
         if ((($type < 7 || $type > 9) && $type < 14) || in_array($type, array(16, 18, 19, 20, 21, 22))) {
             $labeldimensions['barcode_pos'] = array();
             $labeldimensions['barcode_pos']['x'] = array();
@@ -987,7 +987,7 @@ class Label_controller extends CI_Controller {
             if ($labeldata[$i]['DuplicateInfo']) 
                 $pdf->MultiCell($props['whtml'], 5, '<b>Dupl.:</b> ' . $labeldata[$i]['DuplicateInfo'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+1, true, 0, true, true, 0, 'T', false);
             
-            if ($labeldata[$i]['VicRefSet']) 
+            if ($labeldata[$i]['VicRefSet'] && !in_array($this->input->post('labeltype'), [19, 21])) 
                 $pdf->MultiCell($props['whtml'], 5, '<b>Vic. Ref. Set:</b> ' . $labeldata[$i]['VicRefSet'], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY()+2, true, 0, true, true, 0, 'T', false);
             
             $storedunder = $labeldata[$i]['StoredUnder'];
@@ -995,12 +995,11 @@ class Label_controller extends CI_Controller {
                 $storedunder = str_replace ('Main collection', 'Hort. Ref. Set', $storedunder);
             if($props['footerpositionabsolute']) {
                 if ($dup) {
-                    
                     $footer = '<div style="font-size: 7pt">Printed from MELISR, ' . date('d M. Y') . '</div>';
                     $melnumber = 'MEL ' . $labeldata[$i]['MelNumber'];
-                    $pdf->MultiCell(40, 5, '<div style="font-size: 7pt">MEL specimen stored under:<br/>'.$storedunder . '</div>', 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $barcode_pos['y'][$y]+1, true, false, true);
+                    $pdf->MultiCell(40, 5, '<div style="font-size: 7pt">MEL specimen stored under:<br/>'.$storedunder . '</div>', 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $barcode_pos['y'][$y]-1.5, true, false, true);
                     $pdf->MultiCell(90, 5, $footer, 0, 'L', 0, 1, $labelfooter_pos['x'][$x], $labelfooter_pos['y'][$y]+3, true, 0, true, true, 0, 'T', false);
-                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y]-1, 55, 12, 0.1, $barcodestyle, 'N');
+                    $pdf->write1DBarcode($melnumber, 'C39', $barcode_pos['x'][$x], $barcode_pos['y'][$y]-3.5, 55, 12, 0.1, $barcodestyle, 'N');
                     $pdf->MultiCell(55, 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, $barcodetext_pos['x'][$x], $labelfooter_pos['y'][$y]+2, true, false, true);
                 }
                 else {
@@ -1224,7 +1223,7 @@ class Label_controller extends CI_Controller {
         $pdf->SetSubject('MEL Label');
 
         //set margins
-        $pdf->SetMargins(5, 7.5, 5);
+        $pdf->SetMargins(10, 7.5, 10);
 
         //set auto page breaks
         $pdf->SetAutoPageBreak(TRUE, 3);
@@ -1254,8 +1253,9 @@ class Label_controller extends CI_Controller {
 
             if($j%$numlabels == 0) $pdf->AddPage();
 
-            if ($labelheader_pos)
+            if ($labelheader_pos) {
                 $pdf->MultiCell($props['wheader'], 1, $labelheader, 0, 'C', 0, 1, $labelheader_pos['x'][$x], $labelheader_pos['y'][$y], true, false, true);
+            }
             $pdf->MultiCell($props['whtml'], 5, $labeldata[$i], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 0, 'T', false);
         }   
         // move pointer to last page

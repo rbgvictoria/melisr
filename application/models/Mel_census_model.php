@@ -259,5 +259,90 @@ EOT;
         }
     }
     
+    public function getStorageGroupSuggestions($term)
+    {
+        $ret = [];
+        $node = $this->getNode();
+        $this->db->select('StorageID, Name');
+        $this->db->from('storage');
+        $this->db->where('NodeNumber >', $node->NodeNumber);
+        $this->db->where('HighestChildNodeNumber <=', $node->HighestChildNodeNumber);
+        $this->db->like('Name', $term, 'both');
+        $this->db->order_by('Name');
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result();
+        }
+        return $ret;
+    }
+    
+    public function getTaxonSuggestions($term, $storageId)
+    {
+        $ret = [];
+        if (strpos($term, ' ') === false) {
+            $sql = "SELECT t.Name
+                FROM taxon t
+                JOIN genusstorage g ON t.FullName=g.Name OR substring(t.FullName, 1, locate(' ', t.FullName)-1)=g.Name
+                WHERE g.StorageID=$storageId AND t.Name LIKE '$term%' AND t.FullName LIKE '$term%'
+                GROUP BY t.Name";
+        }
+        else {
+            $sql = "SELECT t.FullName AS Name
+                FROM taxon t
+                JOIN genusstorage g ON substring(t.FullName, 1, locate(' ', t.FullName)-1)=g.Name
+                WHERE g.StorageID=$storageId AND t.FullName LIKE '$term%'
+                GROUP BY t.FullName";
+        }
+        $query = $this->db->query($sql);
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $ret[] = $row->Name;
+            }
+        }
+        return $ret;
+    }
+    
+    public function getGenusSuggestions($term, $storageID)
+    {
+        $ret = [];
+        $this->db->select('Name');
+        $this->db->from('genusstorage');
+        $this->db->where('StorageID', $storageID);
+        $this->db->like('Name', $term, 'after');
+        $this->db->group_by('Name');
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $ret[] = $row->Name;
+            }
+        }
+        return $ret;
+    }
+    
+    public function getInfraGenusSuggestions($term, $genus)
+    {
+        $ret = [];
+        $sql = "SELECT t.FullName
+            FROM taxon t
+            JOIN determination d ON t.TaxonID=d.DeterminationID
+            WHERE (d.IsCurrent=true OR d.YesNo1=true) AND d.CollectionMemberID=4
+              AND t.FullName LIKE '$genus $term%'";
+        $query = $this->db->query($sql);
+        if ($query->num_rows()) {
+            foreach ($query->result() as $row) {
+                $ret[] = substr($row->FullName, strlen($genus) + 1);
+            }
+        }
+        return $ret;
+    }
+    
+    protected function getNode()
+    {
+        $this->db->select('NodeNumber, HighestChildNodeNumber');
+        $this->db->from('storage');
+        $this->db->where('StorageId', 2);
+        $query = $this->db->get();
+        return $query->row();
+    }
     
 }

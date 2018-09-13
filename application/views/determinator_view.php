@@ -46,7 +46,7 @@ require_once 'header.php'; ?>
                         </div>
                         <div class="form-group">
                             <div class="col-lg-12">
-                                <input type="text" name="note" class="form-control" placeholder="Optionally enter a (very) short note" maxlength="40" />
+                                <input type="text" name="note" class="form-control" placeholder="Optionally enter a short note" />
                             </div>
                         </div>
                         <div class="form-group">
@@ -54,6 +54,7 @@ require_once 'header.php'; ?>
                                 <select name="identifierRole" class="form-control">
                                     <option value="Det.">Det.</option>
                                     <option value="Conf.">Conf.</option>
+                                    <option value="Annot.">Annot.</option>
                                 </select>
                             </div>
                             <div class="col-lg-6">

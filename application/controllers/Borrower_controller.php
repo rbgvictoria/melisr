@@ -9,7 +9,7 @@ class Borrower_controller extends CI_Controller {
         $this->load->helper('file');
         $this->load->helper('url');
         $this->load->model('Borrower_model', 'borrowermodel');
-        $this->output->enable_profiler(false);
+        $this->output->enable_profiler(true);
         $this->data['js'][] = 'jquery.melisr.htmltableoptions.js';
         $this->data['js'][] = 'jquery.borrower.js';
         $this->data['title'] = 'MELISR | Non MEL loans';

@@ -9,8 +9,8 @@
             the MEL numbers should start from the second row. Starting the MEL numbers in the first row will not break the script, but metadata
             for the record with that MEL number will not be retrieved. Anything other than MEL numbers in the first column, apart from
             the first row, will break the script.</p>
-            <form action="<?=site_url()?>" method="post" enctype="multipart/form-data"
-                  class="form-hprizontal">
+            <form action="<?=site_url()?>gpi/upload" method="post" enctype="multipart/form-data"
+                  class="form">
                 <div class="form-group">
                     <div class="col-md-9">
                         <div class="input-group">
