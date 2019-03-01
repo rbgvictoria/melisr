@@ -78,7 +78,7 @@ class Audit_model extends CI_Model {
             $this->db->where('Action', $searchparams['action']-1);
         if (isset($searchparams['user']))
             $this->db->where('CreatedByAgentID', $searchparams['user']);
-        $this->db->order_by('TimestampCreated, SpAuditLogID');
+        $this->db->order_by('TimestampCreated DESC, SpAuditLogID DESC');
         if ($limit)
             $this->db->limit($limit, $offset);
         

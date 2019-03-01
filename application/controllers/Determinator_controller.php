@@ -75,7 +75,7 @@ class Determinator_controller extends CI_Controller {
         
         $labeldata = [];
         foreach ($data->detslips as $rec) {
-            $taxonName = $this->taxonName($rec->taxonID);
+            $taxonName = $rec->blankTaxonNameAllowed ? '' : $this->taxonName($rec->taxonID);
             $agentName = $this->agentName($rec->identifiedByID);
             if ($rec->day) {
                 $detDate = $rec->day . ' ' . $this->month($rec->month) . ' ' . $rec->year;
@@ -90,10 +90,16 @@ class Determinator_controller extends CI_Controller {
             for ($i = 0; $i < $rec->number; $i++) {
                 $label = [];
                 $label['taxonName'] = $taxonName;
-                $label['identifierRole'] = $rec->identifierRole;
+                $label['identifierRole'] = $rec->identifierRole !== 'Accepted name change' ? $rec->identifierRole : null;
                 $label['identifiedBy'] = $agentName;
                 $label['dateIdentified'] = $detDate;
-                $label['note'] = $rec->note;
+                $label['note'] = '';
+                if ($rec->identifierRole === 'Accepted name change') {
+                    $label['note'] = $rec->note ? 'Accepted name change; ' . $rec->note : 'Accepted name change';
+                }
+                elseif ($rec->note) {
+                    $label['note'] = $rec->note;
+                }
                 $labeldata[] = $label;
             }
             
@@ -261,11 +267,15 @@ class Determinator_controller extends CI_Controller {
             if ($identifiedBy == 'MEL -- National Herbarium of Victoria') {
                 $identifiedBy = 'MEL';
             }
-            $text = $labeldata[$i]['identifierRole'] . ' ' . $identifiedBy . ', ' . $labeldata[$i]['dateIdentified'];
+            $text = $labeldata[$i]['identifierRole'] . ' ' . $identifiedBy;
             
             $pdf->SetY($props['dimensions']['labelfooter_pos']['y'][$y]);
-            $pdf->MultiCell($props['htmlWidth'], 5, $text , 0, 'L', 0, 1, 
+            $pdf->MultiCell($props['htmlWidth'] * 0.7, 5, $text , 0, 'L', 0, 1, 
                     $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, 
+                    true, 0, 'T', false);
+            $pdf->SetY($props['dimensions']['labelfooter_pos']['y'][$y]);
+            $pdf->MultiCell($props['htmlWidth'] * 0.3, 5, $labeldata[$i]['dateIdentified'] , 0, 'R', 0, 1, 
+                    $labelbody_pos['x'][$x] + ($props['htmlWidth'] * 0.7), $pdf->GetY(), true, 0, true, 
                     true, 0, 'T', false);
         }   
         // move pointer to last page

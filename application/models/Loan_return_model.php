@@ -173,8 +173,9 @@ class Loan_return_model extends CI_Model {
                 continue;
             }
             
-            if ($transferto)
+            /*if ($transferto) {
                 $this->transferPreparation($prep['LoanPreparationID'], $prep['Quantity'], $agentid, $transferto);
+            }*/
         
         }
         
@@ -224,8 +225,9 @@ class Loan_return_model extends CI_Model {
             'InComments' => $remarks,
             'ModifiedByAgentID' => $agentid,
         );
-        if ($transferred)
+        if ($transferred) {
             $updatedata['DescriptionOfMaterial'] = 'Transferred';
+        }
         $this->db->where('LoanPreparationID', $loanpreparationid);
         $this->db->update('loanpreparation', $updatedata);
     }

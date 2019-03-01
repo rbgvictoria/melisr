@@ -63,6 +63,7 @@ $(function() {
         $('.detslip').each(function() {
             var detslip = {};
             detslip.taxonID = $(this).find('[name=taxon]').val();
+            detslip.blankTaxonNameAllowed = $(this).find('[name=allowBlankTaxonName]').prop('checked');
             detslip.identifierRole = $(this).find('[name=identifierRole]').val();
             detslip.identifiedByID = $(this).find('[name=agent]').val();
             detslip.day = $(this).find('[name=day]').val();
@@ -71,6 +72,7 @@ $(function() {
             detslip.note = $(this).find('[name=note]').val();
             detslip.number = $(this).find('[name=number]').val();
             detslips.push(detslip);
+            console.log(detslip);
         });
         data.detslips = detslips;
         $('[name=data]').eq(0).val(JSON.stringify(data));

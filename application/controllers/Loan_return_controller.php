@@ -21,7 +21,7 @@ class Loan_return_controller extends CI_Controller {
         $this->data['title'] = 'MELISR | Loan return';
         $this->data['js'][] = 'jquery.melisr.htmltableoptions.js';
         $this->data['js'][] = 'jquery.loans.js';
-        $this->data['js'][] = 'jquery.transfer.js';
+        //$this->data['js'][] = 'jquery.transfer.js';
     }
 
     function index() {

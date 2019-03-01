@@ -38,10 +38,15 @@ require_once 'header.php'; ?>
                         <h3 class="text-center">National Herbarium of Victoria (MEL)</h3>
                         <br/>
                         <div class="form-group">
-                            <div class="col-lg-12">
+                            <div class="col-lg-9 col-md-8">
                                 <input type="text" class="form-control" name="taxonName" 
                                        placeholder="Enter taxon name" required="true"/>
                                 <input type="hidden" name="taxon" value="" />
+                            </div>
+                            <div class="col-lg-3 col-md-4 checkbox">
+                                <label>
+                                    <input type="checkbox" name="allowBlankTaxonName" value="allow"> Allow blank taxon name
+                                </label>
                             </div>
                         </div>
                         <div class="form-group">
@@ -52,9 +57,11 @@ require_once 'header.php'; ?>
                         <div class="form-group">
                             <div class="col-lg-3">
                                 <select name="identifierRole" class="form-control">
+                                    <option value=""></option>
                                     <option value="Det.">Det.</option>
                                     <option value="Conf.">Conf.</option>
                                     <option value="Annot.">Annot.</option>
+                                    <option value="Accepted name change">Accepted name change</option>
                                 </select>
                             </div>
                             <div class="col-lg-6">

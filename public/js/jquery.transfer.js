@@ -2,7 +2,7 @@ $(function() {
     $('#transfer').click(function(event) {
         if($(this).attr('checked')) {
             var loanid = $('input[name="loanid"]').attr('value');
-            var url = 'http://203.55.15.78/dev/melisr/index.php/loanreturn/transferTo/';
+            var url = 'http://melisr.rbg.vic.gov.au/loanreturn/transferTo/';
             $('#ajax').load(url + loanid);
             //$('#ajax').html(url + loanid);
         }

@@ -125,7 +125,8 @@ class Transaction_controller extends CI_Controller
         elseif (in_array($this->input->post('output'), array(10, 11, 18, 21))) {
             if ($this->input->post('institution')) {
                 $this->loaninfo = $this->exchangemodel->getAddressLabelInfo($this->input->post('institution'));
-                $this->addressLabelPDF($this->input->post('output'));
+                print_r($this->loaninfo);
+                //$this->addressLabelPDF($this->input->post('output'));
             }
             else {
                 $this->data['message'] = 'Please select an institution or person for which to print an address label.';
@@ -303,10 +304,12 @@ EOD;
         $paragraphs[] = <<<EOD
 For queries relating to loans, exchange or donations, please email MEL at herbmel@rbg.vic.gov.au.
 EOD;
-        
-        $paragraphs[] = <<<EOD
+
+        if ($this->loaninfo['ShippedTo']['Country'] != 'Australia') {
+            $paragraphs[] = <<<EOD
 <span style="color:#ff0000;font-weight:bold;">NOTE: Before returning loan, please contact MEL for current Biosecurity documentation.</span>
 EOD;
+        }
         
         $pdf->SetY($pdf->GetY()-2);
         foreach ($paragraphs as $para) {

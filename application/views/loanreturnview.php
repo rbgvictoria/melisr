@@ -192,7 +192,7 @@
                 
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" name="transfer" value="transfer">
+                        <input type="checkbox" id="transfer" name="transferto" value="1">
                         Transfer
                     </label>
                 </div>

@@ -68,7 +68,7 @@ class Exchange_data_controller extends CI_Controller {
 </request>
 QUERY;
             
-            $command = "curl --proxy helpdesk:glass3d@proxy.rbg.vic.gov.au:8080 --data \"query=" . urlencode($query) . "\" http://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_avh";
+            $command = "curl --data \"query=" . urlencode($query) . "\" https://biocase.rbg.vic.gov.au/biocase/pywrapper.cgi?dsa=mel_avh";
 
             $result = `$command`;
             

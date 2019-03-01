@@ -89,6 +89,9 @@ class Hispid5ToCsv {
                 if ($node->hasAttributes()) {
                     foreach ($node->attributes as $attribute){
                         $nodepath = $attribute->getNodePath();
+                        if (strpos($nodepath, 'Unit') !== false && strpos($nodepath, 'Unit[') === false) {
+                            $nodepath = str_replace('Unit/', 'Unit[0]/', $nodepath);
+                        }
                         preg_match('/Unit\[[\d]+\]/', $nodepath, $matches);
                         $nodepath = 'Unit' . substr($nodepath, strpos($nodepath, $matches[0])+strlen($matches[0]));
                         $nodepath = preg_replace(array('/\/[\w]+:/', '/@[\w]+:/'), array('/', '@'), $nodepath);
@@ -107,6 +110,9 @@ class Hispid5ToCsv {
                  */
                 if ($node->childNodes->length == 1) {
                     $nodepath = $node->getNodePath();
+                    if (strpos($nodepath, 'Unit') !== false && strpos($nodepath, 'Unit[') === false) {
+                        $nodepath = str_replace('Unit/', 'Unit[0]/', $nodepath);
+                    }
                     preg_match('/Unit\[[\d]+\]/', $nodepath, $matches);
                     $nodepath = 'Unit' . substr($nodepath, strpos($nodepath, $matches[0])+strlen($matches[0]));
                     $nodepath = preg_replace(array('/\/[\w]+:/', '/@[\w]+:/'), array('/', '@'), $nodepath);

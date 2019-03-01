@@ -139,9 +139,9 @@ class Gpi_model extends CI_Model {
     }
     
     public function getIsoCountryCode($country) {
-        $this->db->select('CountryCode');
-        $this->db->from('biocase.aux_iso_countries');
-        $this->db->where('Country', $country);
+        $this->db->select('Alpha2Code as CountryCode');
+        $this->db->from('gpi.iso_country');
+        $this->db->where('CountryName', $country);
         $query = $this->db->get();
         if ($query->num_rows()) {
             $row = $query->row();
