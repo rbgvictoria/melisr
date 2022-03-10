@@ -276,7 +276,7 @@ EOT;
         return $ret;
     }
     
-    public function getTaxonSuggestions($term, $storageId)
+    public function getTaxonSuggestions($term, $storageId, $author=false)
     {
         $ret = [];
         if (strpos($term, ' ') === false) {
@@ -287,11 +287,20 @@ EOT;
                 GROUP BY t.Name";
         }
         else {
-            $sql = "SELECT t.FullName AS Name
-                FROM taxon t
-                JOIN genusstorage g ON substring(t.FullName, 1, locate(' ', t.FullName)-1)=g.Name
-                WHERE g.StorageID=$storageId AND t.FullName LIKE '$term%'
-                GROUP BY t.FullName";
+            if ($author) {
+                $sql = "SELECT concat_ws(' ', t.FullName, t.Author) AS Name
+                    FROM taxon t
+                    JOIN genusstorage g ON substring(t.FullName, 1, locate(' ', t.FullName)-1)=g.Name
+                    WHERE g.StorageID=$storageId AND t.FullName LIKE '$term%'
+                    GROUP BY t.TaxonID";
+            }
+            else {
+                $sql = "SELECT t.FullName AS Name
+                    FROM taxon t
+                    JOIN genusstorage g ON substring(t.FullName, 1, locate(' ', t.FullName)-1)=g.Name
+                    WHERE g.StorageID=$storageId AND t.FullName LIKE '$term%'
+                    GROUP BY t.FullName";
+            }
         }
         $query = $this->db->query($sql);
         if ($query->num_rows()) {
@@ -343,6 +352,20 @@ EOT;
         $this->db->where('StorageId', 2);
         $query = $this->db->get();
         return $query->row();
+    }
+    
+    public function getMajorGroup($storageId)
+    {
+        $this->db->select('p.Name');
+        $this->db->from('storage s');
+        $this->db->join('storage p', 's.ParentID=p.StorageID');
+        $this->db->where('s.StorageID', $storageId);
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            $row = $query->row();
+            return $row->Name;
+        }
+        return false;
     }
     
 }

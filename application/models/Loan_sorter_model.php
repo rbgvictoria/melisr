@@ -48,10 +48,7 @@ class Loan_sorter_model extends CI_Model {
                 $this->db->join('loanpreparation lp', 'p.PreparationID=lp.PreparationID');
                 $this->db->where_in('co.CatalogNumber', $catalognumbers);
                 $this->db->where('lp.LoanID', $row->LoanID);
-                if (!$nonmel)
-                    $this->db->group_by('MelNumber');
-                else
-                    $this->db->group_by('CatalogNumber');
+                $this->db->group_by('CatalogNumber');
                 
                 $query2 = $this->db->get();
                 foreach ($query2->result() as $row2) {

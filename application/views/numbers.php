@@ -11,7 +11,7 @@
                 </div>
                 <div class="col-md-3">
                     <?php
-                        if(!isset($howmany)) $howmany = 100;
+                        if(!isset($howmany)) $howmany = 90;
                         echo form_input(['name' => 'howmany', 'value' => $howmany, 'class' => 'form-control']);
                     ?>
                 </div>

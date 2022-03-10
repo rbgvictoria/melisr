@@ -156,7 +156,7 @@ class Fqcm_model extends CI_Model {
         $ret = array();
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
-        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,6,8,10,12,13)", "left");
+        $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID AND p.PrepTypeID IN (1,2,3,4,6,8,10,12,13,156)", "left");
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where('co.CollectionMemberID', 4);
@@ -267,7 +267,7 @@ class Fqcm_model extends CI_Model {
         $this->db->join("agent a1", "a1.AgentID=co.CreatedByAgentID");
         $this->db->join("agent a2", "a2.AgentID=co.ModifiedByAgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("p.Status IS NULL AND DATE(co.TimestampCreated) >=", $startdate);
+        $this->db->where("p.Integer1 IS NULL AND DATE(co.TimestampCreated) >=", $startdate);
 
         if ($this->collids)
             $this->db->where_in("co.CollectionObjectID", $this->collids);
@@ -390,7 +390,7 @@ ce.StartDate AS DateCollected,l.LocalityName AS Locality,l.MinElevation,l.MaxEle
         $this->db->join("collectingevent ce", "l.LocalityID=ce.LocalityID");
         $this->db->join("collectionobject co", "ce.CollectingEventID=co.CollectingEventID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("(l.MinElevation IS NOT NULL OR l.MaxElevation IS NOT NULL) AND l.Text1 IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         
@@ -421,7 +421,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collectionobject co", "ce.CollectingEventID=co.CollectingEventID");
         $this->db->join("collection coll", "co.CollectionID=coll.CollectionID AND coll.CollectionID=4");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("((g.Name='Victoria' AND l.Text1='m' AND (l.MinElevation > 2010 OR l.maxElevation > 2010)) OR
 (g.Name='Victoria' AND l.Text1='ft' AND (l.MinElevation > 6600 OR l.maxElevation > 6600)) OR
 (g.Name='Western Australia' AND l.Text1='m' AND (l.MinElevation > 1280 OR l.maxElevation > 1280)) OR
@@ -462,7 +462,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
         $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("ce.LocalityID IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
 
@@ -491,7 +491,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
         $this->db->join("geography g", "l.GeographyID=g.GeographyID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("l.GeographyID IS NULL", FALSE, FALSE);
         
@@ -526,7 +526,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
         $this->db->join("geography g", "l.GeographyID=g.GeographyID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("l.GeographyID=31752", FALSE, FALSE);
 
         if ($this->collids)
@@ -558,10 +558,11 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->from("collectionobject co");
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
         $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
+        $this->db->join('geocoorddetail gc', 'l.LocalityID=gc.LocalityID', 'left');
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("Latitude1 IS NOT NULL AND ((l.Text2 IS NULL AND DATE(co.TimestampCreated)>'2013-10-12') OR OriginalElevationUnit IS NULL) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        $this->db->where("Latitude1 IS NOT NULL AND ((l.Text2 IS NULL AND gc.AgentID IS NULL) OR (l.OriginalElevationUnit IS NULL AND gc.GeoRefAccuracy IS NULL AND gc.MaxUncertaintyEst IS NULL)) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
 
         /*
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
@@ -570,7 +571,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
         $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("Latitude1 IS NOT NULL AND ((l.Text2 IS NULL AND DATE(co.TimestampCreated) > '2013-10-12') OR OriginalElevationUnit IS NULL) AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
          */
         if ($this->collids)
@@ -596,7 +597,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->from("collectionobject co");
         $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("d.DeterminationID IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
 
@@ -624,7 +625,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->from("collectionobject co");
         $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("d.FeatureOrBasis !='Type status' AND d.YesNo1=1 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
@@ -653,7 +654,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
         $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND col.CollectingEventID IS NULL AND (cea.Text1 IS NULL OR cea.Text1='') AND (cea.YesNo3 IS NULL OR cea.YesNo3 = 0) AND (cea.YesNo4 IS NULL OR cea.YesNo4 = 0)", FALSE, FALSE);
         
@@ -681,7 +682,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
         $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->join("agent aaa", "aaa.AgentID=col.AgentID");
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate' AND aaa.AgentType=3", FALSE, FALSE);
         
@@ -710,7 +711,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->from("collectionobject co");
         $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("d.FeatureOrBasis ='Type status' AND d.IsCurrent =1 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
 
@@ -764,7 +765,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID AND d.IsCurrent=1");
         $this->db->join("taxon t", "d.TaxonID=t.TaxonID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("t.RankID<220 AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
         
@@ -874,7 +875,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("determination d", "co.CollectionObjectID=d.CollectionObjectID");
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         if ($userid)
             $this->db->where("co.CreatedByAgentID", $userid);
@@ -883,10 +884,10 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         if ($this->collids)
             $this->db->where_in("co.CollectionObjectID", $this->collids);
 
-        /* $this->db->where("((d.DeterminedDatePrecision=1 AND d.DeterminedDate<ce.StartDate) OR
+        $this->db->where("((d.DeterminedDatePrecision=1 AND d.DeterminedDate<ce.StartDate) OR
           (d.DeterminedDatePrecision=2 AND LEFT(d.DeterminedDate, 7)<LEFT(ce.StartDate, 7)) OR
           (d.DeterminedDatePrecision=3 AND YEAR(d.DeterminedDate)<YEAR(ce.StartDate)));",
-          FALSE, FALSE); */
+          FALSE, FALSE);
 
 
 
@@ -917,6 +918,132 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
             return false;
     }
 
+    public function catalogedBeforeCollectingDate($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join('collectingevent ce', 'co.CollectingEventID=ce.CollectingEventID');
+        $this->db->join("agent a1", "co.CreatedByAgentID=a1.AgentID");
+        $this->db->join("agent a2", "co.ModifiedByAgentID=a2.AgentID");
+        $this->db->where("co.TimestampCreated>", '1992-01-01');
+        $this->db->where('date(co.TimestampCreated)<date(ce.StartDate)');
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
+        if ($startdate)
+            $this->db->where("DATE(co.TimestampModified)>=\"$startdate\"", FALSE, FALSE);
+            
+        if ($userid)
+            $this->db->where("(co.ModifiedByAgentID=$userid OR (co.ModifiedByAgentID IS NULL AND co.CreatedByAgentID=$userid))", FALSE, FALSE);
+        
+        if ($recordset)
+            $this->db->where_in("co.CollectionObjectID", $recordset);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+    public function zombieCollector($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join('collectingevent ce', 'co.CollectingEventID=ce.CollectingEventID');
+        $this->db->join('collectingeventattribute cea', 'ce.CollectingEventAttributeID=cea.CollectingEventAttributeID');
+        $this->db->join('collector c', 'ce.CollectingEventID=c.CollectingEventID');
+        $this->db->join("agent a1", "co.CreatedByAgentID=a1.AgentID");
+        $this->db->join("agent a2", "co.ModifiedByAgentID=a2.AgentID");
+        $this->db->where('cea.YesNo3=true', false, false);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
+        if ($startdate)
+            $this->db->where("DATE(co.TimestampModified)>=\"$startdate\"", FALSE, FALSE);
+            
+        if ($userid)
+            $this->db->where("(co.ModifiedByAgentID=$userid OR (co.ModifiedByAgentID IS NULL AND co.CreatedByAgentID=$userid))", FALSE, FALSE);
+        
+        if ($recordset)
+            $this->db->where_in("co.CollectionObjectID", $recordset);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
+    public function inferredFromVerbatimCollector($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join('collectingevent ce', 'co.CollectingEventID=ce.CollectingEventID');
+        $this->db->join('collectingeventattribute cea', 'ce.CollectingEventAttributeID=cea.CollectingEventAttributeID');
+        $this->db->join('collector c', 'ce.CollectingEventID=c.CollectingEventID');
+        $this->db->join("agent a1", "co.CreatedByAgentID=a1.AgentID");
+        $this->db->join("agent a2", "co.ModifiedByAgentID=a2.AgentID");
+        $this->db->where('cea.Text1 IS NOT NULL', false, false);
+        $this->db->where("trim(cea.Text1)!=''", false, false);
+        $this->db->where('cea.YesNo2=true', false, false);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
+        if ($startdate)
+            $this->db->where("DATE(co.TimestampModified)>=\"$startdate\"", FALSE, FALSE);
+            
+        if ($userid)
+            $this->db->where("(co.ModifiedByAgentID=$userid OR (co.ModifiedByAgentID IS NULL AND co.CreatedByAgentID=$userid))", FALSE, FALSE);
+        
+        if ($recordset)
+            $this->db->where_in("co.CollectionObjectID", $recordset);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+
+
+    public function localityNameNoDetailsGiven($startdate, $enddate=FALSE, $userid=FALSE, $recordset=FALSE) {
+        $ret = array();
+        $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a1.FirstName,' ',a1.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(a2.FirstName,' ',a2.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
+        $this->db->from("collectionobject co");
+        $this->db->join('collectingevent ce', 'co.CollectingEventID=ce.CollectingEventID');
+        $this->db->join('locality l', 'ce.LocalityID=l.LocalityID');
+        $this->db->join("agent a1", "co.CreatedByAgentID=a1.AgentID");
+        $this->db->join("agent a2", "co.ModifiedByAgentID=a2.AgentID");
+        $this->db->where_in('l.LocalityName', array('[No details given.]','[No details given].','[No details given]','No details given.','No details given'));
+        $this->db->where('l.GeographyID>', 1);
+        
+        if ($this->collids)
+            $this->db->where_in("co.CollectionObjectID", $this->collids);
+
+        if ($startdate)
+            $this->db->where("DATE(co.TimestampModified)>=\"$startdate\"", FALSE, FALSE);
+            
+        if ($userid)
+            $this->db->where("(co.ModifiedByAgentID=$userid OR (co.ModifiedByAgentID IS NULL AND co.CreatedByAgentID=$userid))", FALSE, FALSE);
+        
+        if ($recordset)
+            $this->db->where_in("co.CollectionObjectID", $recordset);
+
+        $query = $this->db->get();
+        if ($query->num_rows()) {
+            return $query->result_array();
+        }
+        else
+            return false;
+    }
+    
         /** Looks for taxon records for names of which we hold type specimens, 
          *  but which are missing protologue details.
          */
@@ -956,7 +1083,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
         $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("p.PrepTypeID NOT IN (15,16,17) AND (p.Text1 IS NOT NULL AND p.Text1 !='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
@@ -986,7 +1113,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
         $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("LENGTH(p.Text1) - LENGTH(REPLACE(p.Text1, ',', '')) != p.CountAmt-1
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
@@ -1016,7 +1143,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
         $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("p.PrepTypeID IN (1,3,4,8,10,12,13,15,16,17,24) AND !(p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
@@ -1046,7 +1173,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("preparation p", "co.CollectionObjectID=p.CollectionObjectID");
         $this->db->join("preptype pt", "p.PrepTypeID=pt.PrepTypeID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("p.PrepTypeID NOT IN (1,3,4,5,8,10,12,13,14,15,16,17,24) AND (p.SampleNumber IS NULL OR p.SampleNumber='')
             AND DATE(co.TimestampModified)>='$startdate'", FALSE, FALSE);
@@ -1087,7 +1214,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join('collectingevent ce', 'ce.CollectingEventID=co.CollectingEventID');
         $this->db->join('collector c', 'ce.CollectingEventID=c.CollectingEventID');
         $this->db->join('agent a', 'a.AgentID=co.CreatedByAgentID');
-        $this->db->join('agent aa', 'aa.AgentID=co.ModifiedByAgentID');
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("co.TimestampCreated > '$startdate'", FALSE, FALSE);
         $this->db->group_by('co.CollectionObjectID');
@@ -1117,7 +1244,7 @@ l.MinElevation AS MinAltitude,l.MaxElevation AS MaxAltitude", FALSE);
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
         $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
 AND cea.Text11 IS NOT NULL AND cea.Text12 IS NULL", FALSE, FALSE);
@@ -1147,7 +1274,7 @@ AND cea.Text11 IS NOT NULL AND cea.Text12 IS NULL", FALSE, FALSE);
         $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
         $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
 AND cea.Text13 IS NOT NULL AND (cea.Text14 IS NULL OR cea.Text14='')", FALSE, FALSE);
@@ -1177,7 +1304,7 @@ AND cea.Text13 IS NOT NULL AND (cea.Text14 IS NULL OR cea.Text14='')", FALSE, FA
         $this->db->join("collector col", "ce.CollectingEventID=col.CollectingEventID", "left");
         $this->db->join("collectingeventattribute cea", "ce.CollectingEventAttributeID=cea.CollectingEventAttributeID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
 AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
@@ -1206,7 +1333,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->from("collectionobject co");
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
                         AND ce.StartDate IS NULL AND ce.EndDate IS NOT NULL", FALSE, FALSE);
@@ -1236,7 +1363,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID");
         $this->db->join("collector col", "col.CollectingEventID=ce.CollectingEventID AND col.IsPrimary=1");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("DATE(co.TimestampCreated)>= '$startdate'
                         AND ce.StartDate IS NULL AND col.AgentID=co.CreatedByAgentID", FALSE, FALSE);
@@ -1266,7 +1393,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join("collectingevent ce", "ce.CollectingEventID=co.CollectingEventID", "left");
         $this->db->join("locality l", "l.LocalityID=ce.LocalityID", "left");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("LatLongMethod=4 AND StartDate<'1980-01-01' AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
 
@@ -1298,7 +1425,7 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
         $this->db->join("agent aa", "aa.AgentID=col.AgentID");
         $this->db->where("co.CollectionMemberID", 4);
-        $this->db->where("LatLongMethod=4 AND Datum IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
+        $this->db->where("(l.Latitude1 IS NOT NULL OR Longitude1 IS NOT NULL) AND l.Datum IS NULL AND DATE(co.TimestampCreated)>='$startdate'", FALSE, FALSE);
         $this->db->order_by("Collector, StationFieldNumber", FALSE);
         $this->db->where("co.CreatedByAgentID=col.AgentID", FALSE, FALSE);
 
@@ -1540,13 +1667,12 @@ AND col.OrderNumber = 0 AND col.IsPrimary !=1", FALSE, FALSE);
 
         $maxnumber = $this->db->get();
         $maxnumber = $maxnumber->row();
-
         $maxnumber = $maxnumber->maxnumber;
 
         $this->db->select("co.CollectionObjectID,co.CatalogNumber,CONCAT(a.FirstName,' ',a.LastName) AS CreatedBy,DATE(co.TimestampCreated) AS Created,CONCAT(aa.FirstName,' ',aa.LastName) AS EditedBy,DATE(co.TimestampModified) AS Edited", FALSE);
         $this->db->from("collectionobject co");
         $this->db->join("agent a", "a.AgentID=co.CreatedByAgentID");
-        $this->db->join("agent aa", "aa.AgentID=co.ModifiedByAgentID");
+        $this->db->join('agent aa', 'co.ModifiedByAgentID=aa.AgentID', 'left');
         $this->db->where("co.CollectionMemberID", 4);
         $this->db->where("LEFT(co.CatalogNumber,7)>", $maxnumber, FALSE);
         $this->db->where("co.TimestampCreated >", $startdate);

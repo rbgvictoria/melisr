@@ -107,7 +107,6 @@ class Label_controller extends CI_Controller {
                                 $storagemissing = TRUE;
                         }
                         if ($storagemissing) {
-                            $this->data['bannerimage'] = $this->banner();
                             $this->data['message'] = 'One or more of your records do not have storage information.<br/>
                                 Please check the genus storage.';
                             $this->load->view('message', $this->data);
@@ -228,6 +227,16 @@ class Label_controller extends CI_Controller {
                             $this->load->view('message', $this->data);
                         }
                         break;
+                    case 25:
+                        $labeldata = $this->labeldatamodel->getTypeAnnotationSlipData($records, $part);
+                        if ($labeldata){
+                            $this->printTypeAnnotationSlip($labeldata, $config, TRUE, $start-1);
+                        }
+                        else {
+                            $this->data['message'] = 'Nothing to print';
+                            $this->load->view('message', $this->data);
+                        }
+                        break;
                     case 16: // det. slips
                         $labeldata = $this->labeldatamodel->getAnnotationSlipData($records);
                         $this->printAnnotationSlip($labeldata, $config, TRUE);
@@ -242,10 +251,22 @@ class Label_controller extends CI_Controller {
                             $this->load->view('message', $this->data);
                         }
                         break;
+                    case 26: // Carpological collection label
+                        $labeldata = $this->labeldatamodel->getCarpologicalLabelData($records);
+                        //print_r($labeldata);
+                        if (count($labeldata) > 0){
+                            $labeldata = $this->carpologicalLabelHtml($labeldata);
+                            $this->printAveryLabel($labeldata, $config, $start-1);
+                        } else {
+                            $this->data['message'] = 'Your record set does not contain records for spirit collections.';
+                            $this->load->view('message', $this->data);
+                        }
+                        break;
                 }
             }
         }
     }
+    
 
     function labelConfig($printer, $type) {
         require_once(APPPATH . 'config/printerconfig.php');
@@ -308,6 +329,28 @@ class Label_controller extends CI_Controller {
             $html[] = "<td align=\"right\">" . $ldata['State'] . "</td></tr>";
             $html[] = "<tr><td>MEL $ldata[MelNumber]</td>";
             $html[] = "<td align=\"right\">$ldata[SpiritNumber] $ldata[JarSize]</td></tr>";
+            $html[] = '</table>';
+            $labels[] = implode('', $html);
+        }
+        return $labels;
+    }
+
+    function carpologicalLabelHtml($labeldata) {
+        $labels = array();
+        for ($i = 0; $i < count($labeldata); $i++) {
+            $ldata = $labeldata[$i];
+            $html = array();
+            $html[] = "<style>td#tname {padding-bottom: 40px;}</style>";
+            $html[] = '<table>';
+            $html[] = "<tr><td align=\"right\">$ldata[mel_number]</td></tr>";
+            $html[] = "<tr><td>$ldata[stored_under]</td></tr>";
+            $html[] = "<tr><td>$ldata[taxon_name]</td></tr>";
+            $distr = $ldata['continent'];
+            if ($ldata['country'] == 'Australia') {
+                $distr = 'Australia: ' . $ldata['state'];
+            }
+            
+            $html[] = "<tr><td>{$distr}</td></tr>";
             $html[] = '</table>';
             $labels[] = implode('', $html);
         }
@@ -1200,6 +1243,78 @@ class Label_controller extends CI_Controller {
         $pdf->Output('mellabel.pdf', 'I');
     }
 
+    function printTypeAnnotationSlip($labeldata, $props, $detnotes, $start=0) {
+        $numx = $props['numx'];
+        $numy = $props['numy'];
+        $labelheight = $props['dimensions']['labelheight'];
+        $labelwidht = $props['dimensions']['labelwidth'];
+        $labelheader_pos = $props['dimensions']['labelheader_pos'];
+        $labelbody_pos = $props['dimensions']['labelbody_pos'];
+        $numlabels = $numx*$numy;
+
+        set_time_limit(600);
+        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+
+        // set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Niels Klazenga');
+        $pdf->SetTitle('MEL Label');
+        $pdf->SetSubject('MEL Label');
+
+        //set margins
+        $pdf->SetMargins(5, 7.5, 5);
+
+        //set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, 3);
+
+        // remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // ---------------------------------------------------------
+
+        // set font
+        $pdf->SetFont('helvetica', '', 8);
+        // set cell padding
+        $pdf->setCellPaddings(0, 0, 0, 0);
+        // set cell margins
+        $pdf->setCellMargins(0, 0, 0, 0);
+
+        $labelheader='<p style="font-weight: bold"><span style="font-size:7px;">NATIONAL HERBARIUM OF VICTORIA (MEL)</span></p>';
+        if ($start > 0) $pdf->AddPage();
+        for($i=0; $i<count($labeldata); $i++) {
+            $j = $i+$start;
+            $offset = $j%($numx*$numy);
+            $x = $offset%$numx;
+            $y = floor($offset/$numx);
+
+            if($j%$numlabels == 0) $pdf->AddPage();
+            $pdf->MultiCell($props['wheader'], 1, $labelheader, 0, 'C', 0, 1, $labelheader_pos['x'][$x], $labelheader_pos['y'][$y], true, false, true);
+            $melno = '<p>MEL ';
+            $melno .= (integer) substr($labeldata[$i]['CatalogNumber'], 0, 7) . substr($labeldata[$i]['CatalogNumber'], 7);
+            $melno .= '</p>';
+            $pdf->MultiCell($props['whtml'], 5, $melno, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y]-1, true, 0, true, true, 0, 'T', false);
+            
+            $protologue = $labeldata[$i]['Protologue'] ? ', ' . $labeldata[$i]['Protologue'] . ' (' . $labeldata[$i]['Year'] . ').' : '';
+            $typeStatusQualifier = '';
+            if ($labeldata[$i]['TypeStatusQualifier']) {
+                $typeStatusQualifier = $labeldata[$i]['TypeStatusQualifier'] === '?'
+                        ? $labeldata[$i]['TypeStatusQualifier']
+                        : ucfirst($labeldata[$i]['TypeStatusQualifier']) . ' ';
+            }
+            
+            $typeStatus = $typeStatusQualifier . strtoupper($labeldata[$i]['TypeStatusName']) . ' of ' . $labeldata[$i]['FormattedName'] . $protologue;
+            $pdf->MultiCell($props['whtml'], 5, $typeStatus, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $pdf->GetY(), true, 0, true, true, 0, 'T', false);
+
+            $by = 'Annot. ' . $labeldata[$i]['Determiner'];
+            $pdf->MultiCell($props['whtml'], 5, $by, 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y]+15, true, 0, true, true, 0, 'T', false);
+            $pdf->MultiCell($props['whtml'], 5, $labeldata[$i]['DeterminedDate'], 0, 'R', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y]+15, true, 0, true, true, 0, 'T', false);
+        }
+
+        $pdf->lastPage();
+        $pdf->Output('mellabel.pdf', 'I');
+    }
+
     function printAveryLabel($labeldata, $props, $start=0) {
         $numx = $props['numx'];
         $numy = $props['numy'];
@@ -1211,7 +1326,7 @@ class Label_controller extends CI_Controller {
         $labelbody_pos = $props['dimensions']['labelbody_pos'];
         //$labelfooter_pos = $props['dimensions']['labelfooter_pos'];
         $numlabels = $numx*$numy;
-
+        
         set_time_limit (600);
         // create new PDF document
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
@@ -1241,22 +1356,28 @@ class Label_controller extends CI_Controller {
         // set cell margins
         $pdf->setCellMargins(0, 0, 0, 0);
 
-        if ($labelheader_pos)
+        if ($labelheader_pos) {
             $labelheader='<p style="font-weight: bold"><span style="font-size:7px;">NATIONAL HERBARIUM OF VICTORIA (MEL)</span></p>';
-
-        if ($start > 0) $pdf->AddPage();
+        }
+        if ($start > 0) {
+            $pdf->AddPage();
+            
+        }
         for($i=0; $i<count($labeldata); $i++) {
             $j = $i+$start;
             $offset = $j%($numx*$numy);
             $x = $offset%$numx;
             $y = floor($offset/$numx);
 
-            if($j%$numlabels == 0) $pdf->AddPage();
+            if($j%$numlabels == 0) {
+                $pdf->AddPage();
+            }
 
+            
             if ($labelheader_pos) {
                 $pdf->MultiCell($props['wheader'], 1, $labelheader, 0, 'C', 0, 1, $labelheader_pos['x'][$x], $labelheader_pos['y'][$y], true, false, true);
             }
-            $pdf->MultiCell($props['whtml'], 5, $labeldata[$i], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 0, 'T', false);
+            $pdf->MultiCell($props['wheader'], 5, $labeldata[$i], 0, 'L', 0, 1, $labelbody_pos['x'][$x], $labelbody_pos['y'][$y], true, 0, true, true, 0, 'T', false);
         }   
         // move pointer to last page
         $pdf->lastPage();
@@ -1265,7 +1386,7 @@ class Label_controller extends CI_Controller {
 
         //Close and output PDF document
         $pdf->Output('mellabel.pdf', 'I');
-	}
+    }
 
     function printBarcodeLabel($props, $barcode_start, $barcode_count=30, $start=0) {
         $numx = $props['numx'];

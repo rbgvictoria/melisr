@@ -23,6 +23,7 @@
                         <th>Fertile</th>
                         <th>Sterile</th>
                         <th>Curation notes</th>
+                        <th><i class="fa fa-wrench" title="Create VRS record"></i></th>
                     </tr>
                     <?php foreach ($records as $index=>$row): ?>
                     <?php if ($index%2==0): ?>
@@ -41,8 +42,9 @@
                         <td><?=form_checkbox("fertile[$index]", 1, ($row['Fertile']) ? TRUE : FALSE);?></td>
                         <td><?=form_checkbox("sterile[$index]", 1, ($row['Sterile']) ? TRUE : FALSE);?></td>
                         <td><?=form_textarea(['name'=>"curationnotes[$index]", 
-                            'value' => '','rows' => '1', 'class' => 'form-control']);?>
+                            'value' => '','rows' => '0', 'class' => 'form-control']);?>
                         </td>
+                        <td><?=form_checkbox("createVrsRec[$index]", $row['CollectionObjectID'], 0);?></td>
                     </tr>
                     <?php endforeach; ?>
                 </table>

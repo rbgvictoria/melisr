@@ -33,6 +33,7 @@ class Exchange_model extends Transaction_model {
                 $haspreps = ($row->numpreps > 0) ? 1 : 0;
                 $ret[] = array(
                     'giftid' => $row->GiftID,
+                    'giftno' => $row->GiftNumber,
                     'giftnumber' => ($row->Abbreviation) ? $row->GiftNumber . ' &mdash; ' . $row->Abbreviation : $row->GiftNumber,
                     'haspreps' => $haspreps
                 );

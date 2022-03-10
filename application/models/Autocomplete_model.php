@@ -30,7 +30,7 @@ class Autocomplete_model extends CI_Model
     
     public function taxonNameAutocomplete($term) 
     {
-        $this->db->select('TaxonID as value, UnitName1 as label');
+        $this->db->select("TaxonID as value, CONCAT_WS(' ', IF(FullName LIKE '%[ %', SUBSTRING(FullName, 1, LOCATE(' [', FullName)-1), FullName), Author) as label", false);
         $this->db->from('taxon');
         $this->db->like('FullName', $term, 'after');
         $this->db->order_by('label');

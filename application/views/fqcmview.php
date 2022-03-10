@@ -1,5 +1,12 @@
 <?php require_once('header.php'); ?>
 
+<?php 
+
+function specify7_link($colObjId, $catno) {
+    return anchor("https://specify.rbg.vic.gov.au/specify/view/collectionobject/{$colObjId}/", $catno, ['target' => '_blank']);
+}
+
+?>
 
 <div class="container">
     <div class="row">
@@ -28,7 +35,17 @@
                     <label class="col-md-3 control-label" for="startdate">Start date:</label>
                     <div class="col-md-9">
                         <input type="text" name="startdate" id="startdate"
-                               value="<?=(isset($startdate)) ? $startdate : ''?>"
+                               value="<?=(isset($startdate)) ? $startdate : date('Y-m-d')?>"
+                               placeholder="yyyy-mm-dd"
+                               class="form-control" required="true" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label" for="enddate">End date:</label>
+                    <div class="col-md-9">
+                        <input type="text" name="enddate" id="enddate"
+                               value="<?=(isset($enddate)) ? $enddate : date('Y-m-d')?>"
                                placeholder="yyyy-mm-dd"
                                class="form-control" required="true" />
                     </div>
@@ -83,6 +100,9 @@
             <?php endif; ?>
 
             <?php if((isset($HighCatalogueNumbers) && $HighCatalogueNumbers) ||
+                    (isset($catalogedBeforeCollectingDate) && $catalogedBeforeCollectingDate) ||
+                    (isset($zombieCollector) && $zombieCollector) ||
+                    (isset($inferredFromVerbatimCollector) && $inferredFromVerbatimCollector) ||
                     (isset($DodgyPart) && $DodgyPart) ||
                     (isset($PossiblyDodgyPart) && $PossiblyDodgyPart)): ?>
             <h3>Collection object</h3>
@@ -114,7 +134,118 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
+                    <td><?=$prep['CreatedBy']?></td>
+                    <td><?=$prep['Created']?></td>
+                    <td><?=$prep['EditedBy']?></td>
+                    <td><?=$prep['Edited']?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+            <?php endif; ?>
+
+            <?php if(isset($catalogedBeforeCollectingDate) && $catalogedBeforeCollectingDate): ?>
+            <h4>These records were ostensibly cataloged before they were collected (<?=count($catalogedBeforeCollectingDate)?>):</h4>
+            <div>
+                <a href="#" class="selectall">select/clear all</a>
+            </div>
+            <table class="table table-condensed table-bordered dberrors headingcolour" style="width: 100%">
+                <tr>
+                    <th style="width: 4%">&nbsp;</th>
+                    <th style="width: 18%">Catalogue number</th>
+                    <th style="width: 25%">Created by</th>
+                    <th style="width: 14%">Created on</th>
+                    <th style="width: 25%">Edited by</th>
+                    <th style="width: 14%">Edited on</th>
+                </tr>
+                <?php foreach ($catalogedBeforeCollectingDate as $prep): ?>
+                <tr>
+                    <td style="width: 4%">
+                        <?php
+                            $value = $prep['CollectionObjectID'];
+                            $opts = array(
+                                'name' => 'recsetitems[]',
+                                'value' => $value,
+                                'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                            );
+                        ?>
+                        <?=form_checkbox($opts)?>
+                    </td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
+                    <td><?=$prep['CreatedBy']?></td>
+                    <td><?=$prep['Created']?></td>
+                    <td><?=$prep['EditedBy']?></td>
+                    <td><?=$prep['Edited']?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+            <?php endif; ?>
+
+            <?php if(isset($zombieCollector) && $zombieCollector): ?>
+            <h4>Collectors have been entered, but &apos;Collector Unknown&apos; box has been ticked (<?=count($zombieCollector)?>):</h4>
+            <div>
+                <a href="#" class="selectall">select/clear all</a>
+            </div>
+            <table class="table table-condensed table-bordered dberrors headingcolour" style="width: 100%">
+                <tr>
+                    <th style="width: 4%">&nbsp;</th>
+                    <th style="width: 18%">Catalogue number</th>
+                    <th style="width: 25%">Created by</th>
+                    <th style="width: 14%">Created on</th>
+                    <th style="width: 25%">Edited by</th>
+                    <th style="width: 14%">Edited on</th>
+                </tr>
+                <?php foreach ($zombieCollector as $prep): ?>
+                <tr>
+                    <td style="width: 4%">
+                        <?php
+                            $value = $prep['CollectionObjectID'];
+                            $opts = array(
+                                'name' => 'recsetitems[]',
+                                'value' => $value,
+                                'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                            );
+                        ?>
+                        <?=form_checkbox($opts)?>
+                    </td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
+                    <td><?=$prep['CreatedBy']?></td>
+                    <td><?=$prep['Created']?></td>
+                    <td><?=$prep['EditedBy']?></td>
+                    <td><?=$prep['Edited']?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+            <?php endif; ?>
+
+            <?php if(isset($inferredFromVerbatimCollector) && $inferredFromVerbatimCollector): ?>
+            <h4>Verbatim collectors have been entered, but &apos;Collector Inferred&apos; box has been ticked (<?=count($inferredFromVerbatimCollector)?>):</h4>
+            <div>
+                <a href="#" class="selectall">select/clear all</a>
+            </div>
+            <table class="table table-condensed table-bordered dberrors headingcolour" style="width: 100%">
+                <tr>
+                    <th style="width: 4%">&nbsp;</th>
+                    <th style="width: 18%">Catalogue number</th>
+                    <th style="width: 25%">Created by</th>
+                    <th style="width: 14%">Created on</th>
+                    <th style="width: 25%">Edited by</th>
+                    <th style="width: 14%">Edited on</th>
+                </tr>
+                <?php foreach ($inferredFromVerbatimCollector as $prep): ?>
+                <tr>
+                    <td style="width: 4%">
+                        <?php
+                            $value = $prep['CollectionObjectID'];
+                            $opts = array(
+                                'name' => 'recsetitems[]',
+                                'value' => $value,
+                                'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                            );
+                        ?>
+                        <?=form_checkbox($opts)?>
+                    </td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -150,7 +281,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -188,7 +319,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -239,7 +370,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -276,7 +407,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -313,7 +444,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -350,7 +481,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -388,7 +519,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -425,7 +556,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -462,7 +593,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -499,7 +630,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -536,7 +667,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -679,7 +810,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -716,7 +847,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -753,7 +884,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -790,7 +921,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -827,7 +958,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -864,7 +995,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -901,7 +1032,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -938,7 +1069,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -975,7 +1106,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1012,7 +1143,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1049,7 +1180,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1086,7 +1217,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1123,7 +1254,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1160,7 +1291,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1197,7 +1328,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1247,7 +1378,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1284,7 +1415,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1321,7 +1452,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1358,7 +1489,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1395,7 +1526,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1432,7 +1563,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1469,44 +1600,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
-                    <td><?=$prep['CreatedBy']?></td>
-                    <td><?=$prep['Created']?></td>
-                    <td><?=$prep['EditedBy']?></td>
-                    <td><?=$prep['Edited']?></td>
-                </tr>
-                <?php endforeach; ?>
-            </table>
-            <?php endif; ?>
-            <?php endif; ?>
-
-            <?php if (isset($PrimaryCollectorNotFirst)): ?>
-            <?php if ($PrimaryCollectorNotFirst): ?>
-            <h4>The primary collector is not listed first (<?=count($PrimaryCollectorNotFirst)?>):</h4>
-            <div><a href="#" class="selectall">select/clear all</a></div>
-            <table class="table table-condensed table-bordered dberrors headingcolour3" style="width: 100%">
-                <tr>
-                    <th style="width: 4%">&nbsp;</th>
-                    <th style="width: 18%">Catalogue number</th>
-                    <th style="width: 25%">Created by</th>
-                    <th style="width: 14%">Created on</th>
-                    <th style="width: 25%">Edited by</th>
-                    <th style="width: 14%">Edited on</th>
-                </tr>
-                <?php foreach ($PrimaryCollectorNotFirst as $prep): ?>
-                <tr>
-                    <td style="width: 4%">
-                        <?php
-                            $value = $prep['CollectionObjectID'];
-                            $opts = array(
-                                'name' => 'recsetitems[]',
-                                'value' => $value,
-                                'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
-                            );
-                        ?>
-                        <?=form_checkbox($opts)?>
-                    </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1543,7 +1637,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1580,7 +1674,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1594,6 +1688,7 @@
             <?php if((isset($MissingLocality) && $MissingLocality) || 
                     (isset($MissingGeography) && $MissingGeography) ||
                     (isset($CultivatedInGeography) && $CultivatedInGeography) ||
+                    (isset($localityNameNoDetailsGiven) && $localityNameNoDetailsGiven) ||
                     (isset($MissingSourceOrPrecision) && $MissingSourceOrPrecision) ||
                     (isset($MissingAltitudeUnit) && $MissingAltitudeUnit) ||
                     (isset($TooMuchAltitude) && $TooMuchAltitude) ||
@@ -1628,7 +1723,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1665,7 +1760,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1702,7 +1797,44 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
+                    <td><?=$prep['CreatedBy']?></td>
+                    <td><?=$prep['Created']?></td>
+                    <td><?=$prep['EditedBy']?></td>
+                    <td><?=$prep['Edited']?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+            <?php endif; ?>
+            <?php endif; ?>
+
+            <?php if (isset($localityNameNoDetailsGiven)): ?>
+            <?php if ($localityNameNoDetailsGiven): ?>
+            <h4>'No details given' should only be entered in the Locality Name field if there is no geography information either; otherwise the country etc. should be entered (<?=count($localityNameNoDetailsGiven)?>):</h4>
+            <div><a href="#" class="selectall">select/clear all</a></div>
+            <table class="table table-condensed table-bordered dberrors headingcolour4" style="width: 100%">
+                <tr>
+                    <th style="width: 4%">&nbsp;</th>
+                    <th style="width: 18%">Catalogue number</th>
+                    <th style="width: 25%">Created by</th>
+                    <th style="width: 14%">Created on</th>
+                    <th style="width: 25%">Edited by</th>
+                    <th style="width: 14%">Edited on</th>
+                </tr>
+                <?php foreach ($localityNameNoDetailsGiven as $prep): ?>
+                <tr>
+                    <td style="width: 4%">
+                        <?php
+                            $value = $prep['CollectionObjectID'];
+                            $opts = array(
+                                'name' => 'recsetitems[]',
+                                'value' => $value,
+                                'checked' => ($this->input->post('recsetitems') && in_array($value, $this->input->post('recsetitems'))) ? TRUE : FALSE
+                            );
+                        ?>
+                        <?=form_checkbox($opts)?>
+                    </td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1739,7 +1871,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1776,7 +1908,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1813,7 +1945,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1850,7 +1982,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -1887,7 +2019,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['Collector']?></td>
@@ -2014,7 +2146,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -2051,7 +2183,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -2088,7 +2220,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep ['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['CreatedBy']?></td>
                     <td><?=$prep['Created']?></td>
                     <td><?=$prep['EditedBy']?></td>
@@ -2130,7 +2262,7 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$prep['CatalogNumber']?></td>
+                    <td><?=specify7_link($prep['CollectionObjectID'], $prep['CatalogNumber']);?></td>
                     <td><?=$prep['LocalityID']?></td>
                     <td><?=$prep['LocCount']?></td>
                     <td><?=$prep['PrimaryCollectors']?></td>

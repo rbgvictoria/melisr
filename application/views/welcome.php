@@ -251,6 +251,17 @@
                     <label>
                         <?=form_radio(array(
                             'name' => 'labeltype',
+                            'id' => 'lt26',
+                            'value' => '26',
+                            'checked' => false
+                        )); ?>
+                        Carpological collection label
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <?=form_radio(array(
+                            'name' => 'labeltype',
                             'id' => 'lt17',
                             'value' => '17',
                             'checked' => false
@@ -322,7 +333,13 @@
             <div class="radio">
                 <label>
                     <?=form_radio(['name' => 'labeltype', 'id' => 'lt15', 'value' => '15']); ?>
-                    Sticky labels, 30 per sheet
+                    Det. slips, sticky labels, 30 per sheet
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <?=form_radio(['name' => 'labeltype', 'id' => 'lt25', 'value' => '25']); ?>
+                    Type det. slips, sticky labels, 30 per sheet
                 </label>
             </div>
                 <?=form_fieldset_close();?>

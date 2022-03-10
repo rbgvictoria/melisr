@@ -23,3 +23,7 @@ if ( ! function_exists('json_output')) {
             return $json;
     }
 }
+
+/*
+ * /application/helpers/json_helper.php
+ */

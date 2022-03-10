@@ -65,7 +65,6 @@
                         <li><a href="<?=site_url()?>labels">Labels</a></li>
                         <li><a href="<?=site_url()?>numbers">Numbers</a></li>
                         <li><a href="<?=site_url()?>recordset">Record set creator</a></li>
-                        <li><a href="<?=site_url()?>genusstorage">Storage families</a></li>
                         <li><a href="<?=site_url()?>fqcm">FQCM</a></li>
                         <li><a href="<?=site_url()?>determinator">Determinator</a></li>
                         <li><a href="<?=site_url()?>imagemetadata">Attachment metadata</a></li>
@@ -77,6 +76,7 @@
                             <li><a href="<?=site_url()?>dnasequence/projects">Projects</a></li>
                           </ul>
                         </li>
+                        <li><a href="<?=site_url()?>utm-converter">AMG/MGA</a></li>
                       </ul>
                     </div><!--/.navbar-collapse -->
                 </nav>

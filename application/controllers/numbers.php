@@ -8,39 +8,53 @@
  * @property CI_DB_forge $dbforge
  */
 
-class Number_controller extends CI_Controller {
+class Numbers extends Controller {
     private $data;
     
     function __construct() {
-        parent::__construct();
-        $this->load->model('Count_model', 'countmodel');
+        parent::Controller();
+        $this->load->helper('form');
+        $this->load->helper('file');
+        $this->load->helper('url');
         $this->output->enable_profiler(FALSE);
         $this->data = array();
+        $this->data['bannerimage'] = $this->banner();
         $this->data['title'] = 'MELISR | Numbers';
     }
 
     function index() {
-        $this->session->unset_userdata(['error', 'warning', 'success']);
         $this->load->view('numbers', $this->data);
     }
 
+    function banner() {
+        $banners = get_dir_file_info('./images/banners', TRUE);
+        $banners = array_values($banners);
+        $count = count($banners);
+        $i = rand(0, $count-1);
+        return $banners[$i]['name'];
+    }
+
     function spirit() {
+        $this->load->model('countmodel');
         $this->data['spiritnumber'] = $this->countmodel->getSpiritNumber();
         $this->load->view('numbers', $this->data);
     }
 
     function slide() {
+        $this->load->model('countmodel');
         $this->data['slidenumber'] = $this->countmodel->getSlideNumber();
         $this->load->view('numbers', $this->data);
     }
     
     function silicagel() {
+        $this->load->model('countmodel');
         $this->data['silicagelnumber'] = $this->countmodel->getSilicagelNumber();
         $this->load->view('numbers', $this->data);
     }
 
     function melnumber() {
         $howmany = $this->input->post('howmany');
+        $this->load->model('countmodel');
         $last = $this->countmodel->getMelNumber();
         $this->data['startnumber'] = $last+1;
         $this->data['endnumber'] = $last+$howmany;
@@ -49,11 +63,13 @@ class Number_controller extends CI_Controller {
     }
     
     function melnumbers() {
+        $this->load->model('countmodel');
         $this->data['melnumbers'] = $this->countmodel->MelNumbers();
         $this->load->view('melnumbers_view', $this->data);
     }
 
     function melnumber_insert() {
+        $this->load->model('countmodel');
         $this->data['startnumber'] = $this->input->post('startnumber');
         $this->data['endnumber'] = $this->input->post('endnumber');
         if ($this->input->post('username')){
@@ -72,11 +88,13 @@ class Number_controller extends CI_Controller {
     }
 
     function loan() {
+        $this->load->model('countmodel');
         $this->data['loannumber'] = $this->countmodel->getLoanNumber();
         $this->load->view('numbers', $this->data);
     }
 
     function exchange() {
+        $this->load->model('countmodel');
         $this->data['exchangenumber'] = $this->countmodel->getExchangeNumber();
         $this->load->view('numbers', $this->data);
     }
@@ -84,6 +102,7 @@ class Number_controller extends CI_Controller {
     public function melnumbersusage($id) {
         if (!$id)
             $this->melnumbers();
+        $this->load->model('countmodel');
         $this->data['usage'] = $this->countmodel->checkUsage($id);
         $this->load->view('melnumbersusage_view', $this->data);
     }
@@ -97,16 +116,19 @@ class Number_controller extends CI_Controller {
         for ($i = $start; $i <= $end; $i+=7) {
             $line = array();
             for ($j = 0; $j < 7; $j++) {
-                if($i+$j<=$end) {
+                if($i+$j<=$end)
                     $line[] = $i+$j;
-                }
             }
             $csv[] = implode(',', $line);
         }
+        $path = '/var/www/melisr/tempfiles/';
         $filename = 'csv_' . time() . '.csv';
+        $file = fopen($path.$filename, 'w');
+        //echo $filename;
+        fwrite($file, implode("\n", $csv));
+        fclose($file);
         header('Content-type: text/csv; charset=UTF-8');
-        header('Content-Disposition: inline; filename="' . $filename . '"');
-        echo implode("\n", $csv);
+        header('Location: ' . base_url() . 'tempfiles/'  . $filename);
     }
     
 

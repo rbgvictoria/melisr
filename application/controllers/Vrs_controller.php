@@ -13,19 +13,19 @@ class Vrs_controller extends CI_Controller {
     
     function __construct() {
         parent::__construct();
-        $this->output->enable_profiler(false);
         $this->data['title'] = 'Vic. Ref. Set';
         $this->load->model('Vrs_model', 'vrsmodel');
     }
 
     function index() {
         if ($this->input->post('updatevrs')) {
-            $this->vrsmodel->createVRSRecords($_POST);
-            $this->session->set_flashdata('success', 'VRS collection has been updated');
+            $recordsCreated = $this->vrsmodel->createVRSRecords($_POST);
+            $this->session->set_flashdata('success', "$recordsCreated new records have been created in the VRS collection");
         }
         $this->data['records'] = $this->vrsmodel->getRecords();
-        if (!$this->data['records'])
+        if (!$this->data['records']) {
             $this->data['message'] = 'There are no records to add to the Vic. Ref. Set collection at this time';
+        }
         $this->load->view('vrsview', $this->data);
     }
 

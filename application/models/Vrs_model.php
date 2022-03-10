@@ -18,8 +18,8 @@ class Vrs_model extends CI_Model {
         $query = $this->db->query("SELECT p.PreparationID, co.CollectionObjectID, co.CatalogNumber, p.SampleNumber,
             IF(p.ModifiedByAgentID IS NOT NULL, p.ModifiedByAgentID, p.CreatedByAgentID) AS ModifiedByAgentID,
               IF(p.ModifiedByAgentID IS NOT NULL, mba.MiddleInitial, cba.MiddleInitial) AS MiddleInitial, p.TimestampModified,
-              coa.Number1 AS Flowers, coa.Number2 AS Fruit, coa.Number3 AS Buds,
-              coa.Number4 AS Leafless, coa.Number5 AS Fertile, coa.Number6 AS Sterile
+              coa.Text13 AS Flowers, coa.Text14 AS Fruit, coa.Text15 AS Buds,
+              coa.Text16 AS Leafless, coa.Text17 AS Fertile, coa.Text18 AS Sterile
             FROM collectionobject co
             LEFT JOIN collectionobjectattribute coa ON co.CollectionObjectAttributeID=coa.CollectionObjectAttributeID
             JOIN preparation p ON co.CollectionObjectID=p.CollectionObjectID
@@ -50,132 +50,136 @@ class Vrs_model extends CI_Model {
             FROM collectionobjectattribute;");
         $row = $query->row();
         $collectionobjectattributeid = $row->newcollectionobjectattributeid;
-        
+        $recordsCreated = 0;
         for ($i = 0; $i < $n; $i++) {
-            $this->db->trans_start();
-            
-            $flowers = (isset($data['flowers'][$i])) ? 1 : NULL; 
-            $fruit = (isset($data['fruit'][$i])) ? 1 : NULL; 
-            $buds = (isset($data['buds'][$i])) ? 1 : NULL; 
-            $leafless = (isset($data['leafless'][$i])) ? 1 : NULL; 
-            $fertile = (isset($data['fertile'][$i])) ? 1 : NULL; 
-            $sterile = (isset($data['sterile'][$i])) ? 1 : NULL; 
-            $curationnotes = (isset($data['curationnotes'][$i])) ? $data['curationnotes'][$i] : NULL;
-            
-            $attr = ($flowers || $fruit || $buds || $leafless || $fertile || $sterile || $curationnotes) ? TRUE : FALSE;
-            if ($attr) {
-                // Collection Object Attribute
+            if (isset($data['createVrsRec'][$i])) {
+                $this->db->trans_start();
+
+                $flowers = (isset($data['flowers'][$i])) ? 1 : NULL; 
+                $fruit = (isset($data['fruit'][$i])) ? 1 : NULL; 
+                $buds = (isset($data['buds'][$i])) ? 1 : NULL; 
+                $leafless = (isset($data['leafless'][$i])) ? 1 : NULL; 
+                $fertile = (isset($data['fertile'][$i])) ? 1 : NULL; 
+                $sterile = (isset($data['sterile'][$i])) ? 1 : NULL; 
+                $curationnotes = (isset($data['curationnotes'][$i])) ? $data['curationnotes'][$i] : NULL;
+
+                $attr = ($flowers || $fruit || $buds || $leafless || $fertile || $sterile || $curationnotes) ? TRUE : FALSE;
+                if ($attr) {
+                    // Collection Object Attribute
+                    $insertArray = array(
+                        'CollectionObjectAttributeID' => $collectionobjectattributeid, 
+                        'TimestampCreated' => date('Y-m-d H:i:s'), 
+                        'TimestampModified' => date('Y-m-d H:i:s'),
+                        'Version' => 0, 
+                        'CollectionMemberID' => $collectionid, 
+                        'Text13' => $flowers, 
+                        'Text14' => $fruit, 
+                        'Text15' => $buds, 
+                        'Text16' => $leafless, 
+                        'Text17' => $fertile, 
+                        'Text18' => $sterile,
+                        'Text1' => $curationnotes,
+                        'CreatedByAgentID' => $data['agentid'][$i], 
+                        'ModifiedByAgentID' => $data['agentid'][$i]
+                    );
+                    $this->db->insert('collectionobjectattribute', $insertArray);
+                }
+
+                // Collection Object
+                $query = $this->db->query("SELECT CatalogNumber, Remarks, Text1, CollectingEventID
+                    FROM collectionobject
+                    WHERE CollectionObjectID=" . $data['collectionobjectid'][$i]);
+                $row = $query->row_array();
+
                 $insertArray = array(
-                    'CollectionObjectAttributeID' => $collectionobjectattributeid, 
-                    'TimestampCreated' => date('Y-m-d H:i:s'), 
+                    'CollectionObjectID' => $collectionobjectid,
+                    'TimestampCreated' => date('Y-m-d H:i:s'),
                     'TimestampModified' => date('Y-m-d H:i:s'),
-                    'Version' => 0, 
-                    'CollectionMemberID' => $collectionid, 
-                    'Number1' => $flowers, 
-                    'Number2' => $fruit, 
-                    'Number3' => $buds, 
-                    'Number4' => $leafless, 
-                    'Number5' => $fertile, 
-                    'Number6' => $sterile,
-                    'Text1' => $curationnotes,
-                    'CreatedByAgentID' => $data['agentid'][$i], 
+                    'Version' => 0,
+                    'CollectionMemberID' => $collectionid,
+                    'CatalogNumber' => $data['vrsnumber'][$i],
+                    'Remarks' => $row['Remarks'],
+                    'Text1' => $row['Text1'],
+                    'CollectingEventID' => $row['CollectingEventID'],
+                    'GUID' => $this->uuid(),
+                    'CollectionID' => $collectionid,
+                    'CollectionObjectAttributeID' => ($attr) ? $collectionobjectattributeid : NULL,
+                    'ModifiedByAgentID' => $data['agentid'][$i],
+                    'CreatedByAgentID' => $data['agentid'][$i]
+                );
+                $this->db->insert('collectionobject', $insertArray);
+                $recordsCreated++;
+
+                // Determination
+                $query = $this->db->query("SELECT Addendum, AlternateName, DeterminedDate, DeterminedDatePrecision,
+                    FeatureOrBasis, `Method`, NameUsage, Qualifier, Remarks, VarQualifier,
+                    DeterminerID, PreferredTaxonID, TaxonID
+                  FROM determination
+                  WHERE CollectionObjectID=" . $data['collectionobjectid'][$i]. " AND IsCurrent=1");
+                $row = $query->row_array();
+
+                $insertArray = array(
+                    'TimestampCreated' => date('Y-m-d H:i:s'),
+                    'TimestampModified' => date('Y-m-d H:i:s'),
+                    'Version' => 0,
+                    'CollectionMemberID' => $collectionid,
+                    'Addendum' => $row['Addendum'],
+                    'AlternateName' => $row['AlternateName'],
+                    'DeterminedDate' => $row['DeterminedDate'],
+                    'DeterminedDatePrecision' => $row['DeterminedDatePrecision'],
+                    'FeatureOrBasis' => $row['FeatureOrBasis'],
+                    'Method' => $row['Method'],
+                    'NameUsage' => $row['NameUsage'],
+                    'Qualifier' => $row['Qualifier'],
+                    'Remarks' => $row['Remarks'],
+                    'VarQualifier' => $row['VarQualifier'],
+                    'DeterminerID' => $row['DeterminerID'],
+                    'PreferredTaxonID' => $row['PreferredTaxonID'],
+                    'TaxonID' => $row['TaxonID'],
+                    'GUID' => $this->uuid(),
+                    'CollectionObjectID' => $collectionobjectid,
+                    'ModifiedByAgentID' => $data['agentid'][$i],
+                    'CreatedByAgentID' => $data['agentid'][$i],
+                    'IsCurrent' => 1                
+                );
+                $this->db->insert('determination', $insertArray);
+
+                // Preparation
+                $insertArray = array(
+                    'TimestampCreated' => date('Y-m-d H:i:s'),
+                    'TimestampModified' => date('Y-m-d H:i:s'),
+                    'Version' => 0,
+                    'CollectionMemberID' => $collectionid,
+                    'CountAmt' => 1,
+                    'CreatedByAgentID' => $data['agentid'][$i],
+                    'CollectionObjectID' => $collectionobjectid,
+                    'PrepTypeID' => $preptypeid,
                     'ModifiedByAgentID' => $data['agentid'][$i]
                 );
-                $this->db->insert('collectionobjectattribute', $insertArray);
+                $this->db->insert('preparation', $insertArray);
+
+                // Other Identifier
+                $insertArray = array(
+                    'TimestampCreated' => date('Y-m-d H:i:s'),
+                    'TimestampModified' => date('Y-m-d H:i:s'),
+                    'Version' => 0,
+                    'CollectionMemberID' => $collectionid,
+                    'Identifier' => 'MEL',
+                    'Institution' => $data['catalognumber'][$i],
+                    'Remarks' => 'MEL catalogue number',
+                    'CreatedByAgentID' => $data['agentid'][$i],
+                    'CollectionObjectID' => $collectionobjectid,
+                    'ModifiedByAgentID' => $data['agentid'][$i],
+                );
+                $this->db->insert('otheridentifier', $insertArray);
+
+                $collectionobjectid++;
+                if ($attr) $collectionobjectattributeid++;
+
+                $this->db->trans_complete();
             }
-            
-            // Collection Object
-            $query = $this->db->query("SELECT CatalogNumber, Remarks, Text1, CollectingEventID
-                FROM collectionobject
-                WHERE CollectionObjectID=" . $data['collectionobjectid'][$i]);
-            $row = $query->row_array();
-            
-            $insertArray = array(
-                'CollectionObjectID' => $collectionobjectid,
-                'TimestampCreated' => date('Y-m-d H:i:s'),
-                'TimestampModified' => date('Y-m-d H:i:s'),
-                'Version' => 0,
-                'CollectionMemberID' => $collectionid,
-                'CatalogNumber' => $data['vrsnumber'][$i],
-                'Remarks' => $row['Remarks'],
-                'Text1' => $row['Text1'],
-                'CollectingEventID' => $row['CollectingEventID'],
-                'GUID' => $this->uuid(),
-                'CollectionID' => $collectionid,
-                'CollectionObjectAttributeID' => ($attr) ? $collectionobjectattributeid : NULL,
-                'ModifiedByAgentID' => $data['agentid'][$i],
-                'CreatedByAgentID' => $data['agentid'][$i]
-            );
-            $this->db->insert('collectionobject', $insertArray);
-            
-            // Determination
-            $query = $this->db->query("SELECT Addendum, AlternateName, DeterminedDate, DeterminedDatePrecision,
-                FeatureOrBasis, `Method`, NameUsage, Qualifier, Remarks, VarQualifier,
-                DeterminerID, PreferredTaxonID, TaxonID
-              FROM determination
-              WHERE CollectionObjectID=" . $data['collectionobjectid'][$i]. " AND IsCurrent=1");
-            $row = $query->row_array();
-            
-            $insertArray = array(
-                'TimestampCreated' => date('Y-m-d H:i:s'),
-                'TimestampModified' => date('Y-m-d H:i:s'),
-                'Version' => 0,
-                'CollectionMemberID' => $collectionid,
-                'Addendum' => $row['Addendum'],
-                'AlternateName' => $row['AlternateName'],
-                'DeterminedDate' => $row['DeterminedDate'],
-                'DeterminedDatePrecision' => $row['DeterminedDatePrecision'],
-                'FeatureOrBasis' => $row['FeatureOrBasis'],
-                'Method' => $row['Method'],
-                'NameUsage' => $row['NameUsage'],
-                'Qualifier' => $row['Qualifier'],
-                'Remarks' => $row['Remarks'],
-                'VarQualifier' => $row['VarQualifier'],
-                'DeterminerID' => $row['DeterminerID'],
-                'PreferredTaxonID' => $row['PreferredTaxonID'],
-                'TaxonID' => $row['TaxonID'],
-                'GUID' => $this->uuid(),
-                'CollectionObjectID' => $collectionobjectid,
-                'ModifiedByAgentID' => $data['agentid'][$i],
-                'CreatedByAgentID' => $data['agentid'][$i],
-                'IsCurrent' => 1                
-            );
-            $this->db->insert('determination', $insertArray);
-            
-            // Preparation
-            $insertArray = array(
-                'TimestampCreated' => date('Y-m-d H:i:s'),
-                'TimestampModified' => date('Y-m-d H:i:s'),
-                'Version' => 0,
-                'CollectionMemberID' => $collectionid,
-                'CountAmt' => 1,
-                'CreatedByAgentID' => $data['agentid'][$i],
-                'CollectionObjectID' => $collectionobjectid,
-                'PrepTypeID' => $preptypeid,
-                'ModifiedByAgentID' => $data['agentid'][$i]
-            );
-            $this->db->insert('preparation', $insertArray);
-            
-            // Other Identifier
-            $insertArray = array(
-                'TimestampCreated' => date('Y-m-d H:i:s'),
-                'TimestampModified' => date('Y-m-d H:i:s'),
-                'Version' => 0,
-                'CollectionMemberID' => $collectionid,
-                'Identifier' => 'MEL',
-                'Institution' => $data['catalognumber'][$i],
-                'Remarks' => 'MEL catalogue number',
-                'CreatedByAgentID' => $data['agentid'][$i],
-                'CollectionObjectID' => $collectionobjectid,
-                'ModifiedByAgentID' => $data['agentid'][$i],
-            );
-            $this->db->insert('otheridentifier', $insertArray);
-            
-            $collectionobjectid++;
-            if ($attr) $collectionobjectattributeid++;
-            
-            $this->db->trans_complete();
         }
+        return $recordsCreated;
     }
     
     private function uuid() {
@@ -202,17 +206,14 @@ class Vrs_model extends CI_Model {
     }
     
     public function getNotInMelRecords() {
-        $query = $this->db->query("SELECT co.CollectionObjectID, co.CatalogNumber AS VRSNumber, oi.Institution AS MELNumber, 
-            CONCAT(a.LastName, ', ', a.FirstName) AS Perp, co.TimestampCreated
-            FROM collectionobject co
-            JOIN otheridentifier oi ON co.CollectionObjectID=oi.CollectionObjectID
-            JOIN agent a ON co.CreatedByAgentID=a.AgentID
-            WHERE co.CollectionMemberID=65536 AND co.CatalogNumber NOT IN (
-              SELECT p.SampleNumber
-              FROM collectionobject co
-              JOIN preparation p ON co.CollectionObjectID=p.CollectionObjectID
-              WHERE co.CollectionMemberID=4 AND p.PrepTypeID=18
-            )");
+        $query = $this->db->query("SELECT co.CollectionObjectID, co.CatalogNumber AS VRSNumber, oi.Institution AS MELNumber,
+                    CONCAT(a.LastName, ', ', a.FirstName) AS Perp, co.TimestampCreated
+                FROM collectionobject co
+                LEFT JOIN preparation p ON co.CatalogNumber=p.SampleNumber AND co.CollectionID=65536 AND p.PrepTypeID=18
+                JOIN otheridentifier oi ON co.CollectionObjectID=oi.CollectionObjectID
+                JOIN agent a ON co.CreatedByAgentID=a.AgentID
+                WHERE co.CollectionID=65536 AND p.PreparationID IS NULL
+                ORDER BY VrsNumber");
         if ($query->num_rows())
             return $query->result_array();
         else

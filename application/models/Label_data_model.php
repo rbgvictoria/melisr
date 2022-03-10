@@ -53,6 +53,44 @@ class Label_data_model extends CI_Model {
 
     }
 
+    function getTypeAnnotationSlipData($colobjects, $part=FALSE, $multiple=FALSE, $type=FALSE) {
+        $this->db->select('co.CollectionObjectID, co.CatalogNumber, d.FeatureOrBasis AS DetType, d.DeterminerID, d.DeterminedDate, d.DeterminedDatePrecision, d.TypeStatusName, 
+            d.SubspQualifier as TypeStatusQualifier, t.CommonName as Protologue, t.Number2 as Year');
+        $this->db->from('collectionobject co');
+        $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID');
+        $this->db->join('taxon t', 'd.TaxonID=t.TaxonID');
+        $this->db->where_in('co.CollectionObjectID', $colobjects);
+        $this->db->where('d.YesNo1', 1);
+        //$this->db->where('d.Remarks IS NOT NULL', FALSE, FALSE);
+        $this->db->where('d.DeterminerID IS NOT NULL', FALSE, FALSE);
+        if (!$part)
+            $this->db->where("substring(CatalogNumber, 8, 1)='A'", FALSE, FALSE);
+        $query = $this->db->get();
+
+        if ($query->num_rows()) {
+            $labelarray = array();
+            foreach ($query->result() as $row) {
+                $labeldata = array();
+                $labeldata['CatalogNumber'] = $row->CatalogNumber;
+                $labeldata['Determiner'] = ($row->DeterminerID) ? $this->getAgentName($row->DeterminerID) : NULL;
+                if (substr($labeldata['Determiner'], 0, 6) == 'MEL --') { 
+                    $labeldata['Determiner'] = 'MEL';
+                }
+                $labeldata['TypeStatusName'] = $row->TypeStatusName;
+                $labeldata['TypeStatusQualifier'] = $row->TypeStatusQualifier;
+                $labeldata['Protologue'] = $row->Protologue;
+                $labeldata['Year'] = $row->Year;
+                $labeldata['DeterminedDate'] = ($row->DeterminedDate) ? $this->getProperDate($row->DeterminedDate, $row->DeterminedDatePrecision) : FALSE;
+                $labeldata['FormattedName'] = $this->getFormattedNameString($row->CollectionObjectID, 'i', true);
+                $labelarray[] = $labeldata;
+            }
+            return $labelarray;
+        }
+        else
+            return FALSE;
+
+    }
+
     function getLabelData($colobjects, $part=FALSE, $multiple=FALSE, $type=FALSE) {
         $this->db->select('co.CollectionObjectID,
               co.CatalogNumber,
@@ -247,12 +285,13 @@ class Label_data_model extends CI_Model {
               coa.Remarks AS EthnobotanyInfo,
               coa.Text3 AS ToxicityInfo,
               coa.YesNo4=1 AS IsHortRefSet,
-              co.Number1', FALSE);
+              co.Integer1 as num_labels', FALSE);
         $this->db->from('collectionobject co');
         $this->db->join('collectionobjectattribute coa', 'co.CollectionObjectAttributeID=coa.CollectionObjectAttributeID', 'left');
         $this->db->join('collectingevent ce', 'co.CollectingEventID=ce.CollectingEventID', 'left');
         $this->db->join('collectingeventattribute cea', 'ce.CollectingEventAttributeID=cea.CollectingEventAttributeID', 'left');
         $this->db->join('locality l', 'ce.LocalityID=l.LocalityID', 'left');
+        $this->db->join('geography g', 'l.GeographyID=g.GeographyID');
         $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID', 'left');
         $this->db->where('co.CollectionID', $collectionId);
         $this->db->where_in('co.CollectionObjectID', $colobjects);
@@ -262,6 +301,7 @@ class Label_data_model extends CI_Model {
         if (in_array($type, array(12, 22))) {
             $this->db->join('preparation p', 'co.CollectionObjectID=p.CollectionObjectID');
             $this->db->where('p.PrepTypeID', 2);
+            $this->db->select('p.Status as JarSize');
         }
 
         $query = $this->db->get();
@@ -345,11 +385,17 @@ class Label_data_model extends CI_Model {
                 
                 $vrsnumbers = $this->vrsNumber($row->CollectionObjectID);
                 
+                $num_labels = $row->num_labels ?: 1;
                 
                 if ($type == 6 || $type == 7 || $type == 13 || $type == 14) {
                     if ($numdups > 0) {
                         for ($i = 0; $i < $numdups; $i++)
                             $labelarray[] = $labeldata;
+                    }
+                }
+                elseif (in_array($type, [1, 2, 3, 4, 5])) {
+                    for ($i = 0; $i < $num_labels; $i++) {
+                        $labelarray[] = $labeldata;
                     }
                 }
                 elseif ($type == 19 || $type == 21) {
@@ -435,16 +481,18 @@ class Label_data_model extends CI_Model {
     }
     
     function getSpiritInfo($colobj) {
-        $this->db->select('SampleNumber, Status, CountAmt');
-        $this->db->from('preparation');
-        $this->db->where('PrepTypeID', 2);
-        $this->db->where('CollectionObjectID', $colobj);
+        $this->db->select('p.SampleNumber, pli.Title as JarSize, CountAmt');
+        $this->db->from('preparation p');
+        $this->db->join('picklistitem pli', 'p.Integer1=pli.Value');
+        $this->db->where('p.PrepTypeID', 2);
+        $this->db->where('p.CollectionObjectID', $colobj);
+        $this->db->where('pli.PickListID', 36);
         $query = $this->db->get();
         if ($query->num_rows()) {
             $row = $query->row();
             $ret = array();
             $ret['Number'] = $row->SampleNumber;
-            $ret['JarSize'] = $row->Status;
+            $ret['JarSize'] = $row->JarSize;
             $ret['Quantity'] = $row->CountAmt;
             return $ret;
         }
@@ -454,9 +502,10 @@ class Label_data_model extends CI_Model {
     function getSpiritJarLabelData($colobjects, $preptype=2) {
         $colobjects = implode(', ', $colobjects);
         $select = "SELECT co.CollectionObjectID, substring(CatalogNumber, 1, 7) AS MelNumber,
-                p.Status AS JarSize, p.SampleNumber, l.GeographyID, co.CollectingEventID, ce.StationFieldNumber
+                pi.Title AS JarSize, p.SampleNumber, l.GeographyID, co.CollectingEventID, ce.StationFieldNumber
             FROM collectionobject co
             JOIN preparation p ON co.CollectionObjectID=p.CollectionObjectID
+            LEFT JOIN picklistitem pi ON p.Integer1=pi.`Value` AND pi.PickListID=36
             JOIN collectingevent ce ON co.CollectingEventID=ce.CollectingEventID
             JOIN locality l ON ce.LocalityID=l.LocalityID
             WHERE co.CollectionObjectID IN ($colobjects) AND p.PrepTypeID=$preptype";
@@ -695,8 +744,13 @@ class Label_data_model extends CI_Model {
             $select = "SELECT Name FROM geography
                 WHERE GeographyTreeDefItemID=2 AND NodeNumber<=$node AND HighestChildNodeNumber>=$node";
             $query = $this->db->query($select);
-            $row = $query->row();
-            return $row->Name;
+            if ($query->num_rows()) {
+                $row = $query->row();
+                return $row->Name;
+            }
+            else {
+                return false;
+            }
         }
     }
 
@@ -817,6 +871,7 @@ class Label_data_model extends CI_Model {
         if ($query->num_rows() > 0) {
             $row = $query->row();
             $namearray = $this->getNameArray($row->TaxonID);
+            //print_r($namearray);
             $qualifier = $row->Qualifier;
             if($qualifier && $qualifier!='?') $qualifier .= ' ';
             $qualifierrank = ($row->QualifierRank) ? $row->QualifierRank : strtolower($namearray['Rank']);
@@ -837,7 +892,7 @@ class Label_data_model extends CI_Model {
                 elseif ($namearray['speciesHybrid'] == 'H')
                     $namearray['species'] = str_replace (' x ', ' × ', $namearray['species']);
                 $formattednamestring .= $namearray['species'] . "</$style>";
-                if(isset($namearray['subspecies']) || isset($namearray['variety']) || isset($namearray['forma'])) {
+                if(isset($namearray['subspecies']) || isset($namearray['variety']) || isset($namearray['forma']) || isset($namearray['subforma'])) {
                     if(isset($namearray['forma'])) {
                         if($namearray['forma']!=$namearray['species']) {
                             if($qualifier && $qualifierrank=='forma')
@@ -862,7 +917,33 @@ class Label_data_model extends CI_Model {
                                 $formattednamestring .= " f. <$style>" . $namearray['forma'] . "</$style>";
                             }
                         }
-                    } elseif(isset($namearray['variety'])) {
+                    } 
+                    elseif(isset($namearray['subforma'])) {
+                        if($namearray['subforma']!=$namearray['species']) {
+                            if($qualifier && $qualifierrank=='subforma')
+                                $formattednamestring .= ' ' . $qualifier;
+                            if ($namearray['subformaHybrid'] == 'x')
+                                $formattednamestring .= " nothosubf. <$style>" . $namearray['subforma'] . "</$style>";
+                            else {
+                                if ($namearray['subformaHybrid'] == 'H')
+                                    $namearray['subforma'] = str_replace (' x ', ' × ', $namearray['subforma']);
+                                $formattednamestring .= " subf. <$style>" . $namearray['subforma'] . "</$style>";
+                            }
+                            $formattednamestring .= ' ' . $namearray['subformaAuthor'];
+                        } else {
+                            $formattednamestring .= ' ' . $namearray['speciesAuthor'];
+                            if($qualifier && $qualifierrank=='forma')
+                                $formattednamestring .= ' ' . $qualifier;
+                            if ($namearray['formaHybrid'] == 'x')
+                                $formattednamestring .= " nothosubf. <$style>" . $namearray['subforma'] . "</$style>";
+                            else {
+                                if ($namearray['subformaHybrid'] == 'H')
+                                    $namearray['subforma'] = str_replace (' x ', ' × ', $namearray['subforma']);
+                                $formattednamestring .= " subf. <$style>" . $namearray['subforma'] . "</$style>";
+                            }
+                        }
+                    } 
+                    elseif(isset($namearray['variety'])) {
                         if($namearray['variety']!=$namearray['species']) {
                             if($qualifier && $qualifierrank=='variety')
                                 $formattednamestring .= ' ' . $qualifier;
@@ -1104,7 +1185,7 @@ class Label_data_model extends CI_Model {
             }
             $geographystring = '';
             if(!isset($geographyarray['Country']))
-                $geographystring .= $geographyarray['Continent'];
+                $geographystring .= isset($geographyarray['Continent']) ? $geographyarray['Continent'] : null;
             else {
                 $geographystring .= $geographyarray['Country'];
                 $geographystring .= (isset($geographyarray['State'])) ? ': ' . $geographyarray['State'] : '';
@@ -1427,7 +1508,41 @@ class Label_data_model extends CI_Model {
         } else return FALSE;
     }
 
-
+    public function getCarpologicalLabelData($colobjects)
+    {
+        $this->db->select("co.CollectionObjectID, 
+                concat('MEL ', cast(substring(co.CatalogNumber, 1, 7) as unsigned)) as mel_number,
+                s.Name as stored_under,
+                highergeography(l.GeographyID, 'continent') as continent,
+                highergeography(l.GeographyID, 'country') as country,
+                highergeography(l.GeographyID, 'state') as state", false);
+        $this->db->from('collectionobject co');
+        $this->db->join('preparation p', 'co.CollectionObjectID=p.CollectionObjectID');
+        $this->db->join('storage s', 'p.StorageID=s.StorageID');
+        $this->db->join('determination d', 'co.CollectionObjectID=d.CollectionObjectID');
+        $this->db->join('taxon t', 'd.TaxonID=t.TaxonID');
+        $this->db->join('collectingevent ce', 'co.CollectingEventID=ce.CollectingEventID');
+        $this->db->join('locality l', 'ce.LocalityID=l.LocalityID');
+        $this->db->where('p.PrepTypeID', 3);
+        $this->db->where('d.IsCurrent', true);
+        $this->db->where_in('co.CollectionObjectID', $colobjects);
+        $query = $this->db->get();
+        $ret = array();
+        $result = $query->result();
+        if ($result) {
+            foreach ($result as $row) {
+                $rec = array();
+                $rec['mel_number'] = $row->mel_number;
+                $rec['stored_under'] = $row->stored_under;
+                $rec['taxon_name'] = $this->getFormattedNameString($row->CollectionObjectID, 'i');
+                $rec['continent'] = $row->continent;
+                $rec['country'] = $row->country;
+                $rec['state'] = $row->state;
+                $ret[] = $rec;
+            }
+        }
+        return $ret;
+    }
 }
 
 ?>

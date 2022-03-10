@@ -49,6 +49,46 @@ class Mel_census_controller extends CI_Controller {
         elseif ($type == 'strawboard') {
             $this->strawboardLabel();
         }
+        elseif ($type == 'taxon-name') {
+            $this->taxonNameLabel();
+        }
+        elseif ($type == 'crypto-box') {
+            $this->cryptogamBoxLabel();
+        }
+    }
+    
+    protected function cryptogamBoxLabel()
+    {
+        if ($this->input->post('data')) {
+            $data = json_decode($this->input->post('data'));
+            $labels = $data->labels;
+            foreach ($labels as $index => $label) {
+                $labels[$index]->majorGroup = $this->mel_census_model->getMajorGroup($label->storageId);
+            }
+            $this->load->library('CryptoBoxLabelPDF');
+            $this->cryptoboxlabelpdf->render($labels);
+        }
+        else {
+            $this->load->view('crypto_box_label_view', $this->data);
+        }
+    }
+    
+    protected function taxonNameLabel()
+    {
+        if ($this->input->post('data')) {
+            $data = json_decode($this->input->post('data'));
+            $labels = [];
+            foreach ($data->labels as $label) {
+                for ($i = 0; $i < $label->num; $i++) {
+                    $labels[] = (object) ['taxonName' => $label->taxonName];
+                }
+            }
+            $this->load->library('TaxonNameLabelPDF');
+            $this->taxonnamelabelpdf->render($labels, $data->offset);
+        }
+        else {
+            $this->load->view('taxon_name_label_view', $this->data);
+        }
     }
     
     protected function cupboardLabel()
@@ -95,7 +135,7 @@ class Mel_census_controller extends CI_Controller {
     
     public function autocomplete_taxon_name()
     {
-        $data = $this->mel_census_model->getTaxonSuggestions(urldecode($this->input->get('term')), $this->input->get('storageId'));
+        $data = $this->mel_census_model->getTaxonSuggestions(urldecode($this->input->get('term')), $this->input->get('storageId'), $this->input->get('withAuthor'));
         echo json_output($data);
     }
     

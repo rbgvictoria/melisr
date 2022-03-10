@@ -32,8 +32,7 @@
             <h3>Uploaded data sets:</h3>
                 <table class="table table-bordered table-condensed">
                     <tr><th>Batch no.</th><th>Date uploaded</th>
-                        <th>Records</th><th>Issues</th><th>Parts</th><th colspan="3">Output</th>
-                        <th>Delete batch</th>
+                        <th>Records</th><th>Issues</th><th>Parts</th><th colspan="2">Output</th>
                         <th>Marked in MELISR</th>
                     </tr>
                 <?php $counts=array(); ?>
@@ -53,13 +52,10 @@
                             <?php endif; ?>
 
                         </td>
-                        <td><a href="<?=site_url()?>gpi/get_xml/<?=$set['BatchNo']?>/gpi"
-                            title="get XML (GPI Schema)">XML (GPI)</a></td>
-                        <td><a href="<?=site_url()?>gpi/get_xml/<?=$set['BatchNo']?>/biocase"
-                            title="get XML (with BioCASe wrapper)">XML (BioCASe)</a></td>
-                        <td><a href="<?=site_url()?>gpi/get_xml/<?=$set['BatchNo']?>/csv"
-                            title="get CSV">CSV</a></td>
-                        <td><a href="<?=site_url()?>gpi/delete_batch/<?=$set['BatchNo']?>">Delete</a></td>
+                        <td><a href="<?=site_url()?>gpi/dwca/<?=$set['BatchNo']?>"
+                            title="Darwin Core Archive">Darwin Core Archive</a></td>
+                        <td><a href="<?=site_url()?>gpi/jstor/<?=$set['BatchNo']?>"
+                            title="JSTOR XML" target="_blank">JSTOR XML</a></td>
                         <td>
                             <?php if($set['NumMarked']==$set['NumRecords']): ?>
                             Marked
@@ -73,8 +69,6 @@
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td style="font-weight:bold;"><?=array_sum($counts);?></td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>

@@ -3,43 +3,55 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-
+            <?php if ($BatchNo): ?>
             <h2>Batch <?=$BatchNo?></h2>
+            <?php else: ?>
+            <h2>All batches</h2>
+            <?php endif; ?>
 
             <?php //form_open(site_url() . "/gpi/create_error_record_set/batch/$BatchNo", array('style' => 'display: inline-block'))?>
             <form action="" 
                   method="post" class="form-horizontal">
             
             <?php $errortypes = array('NotAType', 'TypeStatusEqualsCurrent', 'NotABasionym', 'NoSpecies', 'NoAuthor', 'NoProtologue'); ?>
-
             <?php foreach ($errortypes as $type): ?>
-                <?php if (isset($Errors[$type])): ?>
-                <?php
-                    switch ($type) {
-                        case 'NotAType':
-                            echo '<h3>No type status determination in MELISR</h3>';
-                            break;
-                        case 'TypeStatusEqualsCurrent':
-                            echo '<h3>Type status determination and current determination in same determination</h3>';
-                            break;
-                        case 'NotABasionym':
-                            echo '<h3>Basionym with parenthetical authors (so not a basionym, or authorship incorrect)</h3>';
-                            break;
-                        case 'NoSpecies':
-                            echo '<h3>Typified name without specific epithet</h3>';
-                            break;
-                        case 'NoAuthor':
-                            echo '<h3>Name without author</h3>';
-                            break;
-                        case 'NoProtologue':
-                            echo '<h3>Typified name with missing or incomplete protologue info.</h3>';
-                            break;
+            <?php  
+                $err = array_filter($Errors, function ($arr) use ($type) {
+                    if ($arr['Type'] == $type) {
+                        return true;
                     }
-                ?>
-
+                    return false;
+                });
+            ?>
+            <?php if ($err): ?>
+            <?php
+                switch ($type) {
+                    case 'NotAType':
+                        echo '<h3>No type status determination in MELISR</h3>';
+                        break;
+                    case 'TypeStatusEqualsCurrent':
+                        echo '<h3>Type status determination and current determination in same determination</h3>';
+                        break;
+                    case 'NotABasionym':
+                        echo '<h3>Basionym with parenthetical authors (so not a basionym, or authorship incorrect)</h3>';
+                        break;
+                    case 'NoSpecies':
+                        echo '<h3>Typified name without specific epithet</h3>';
+                        break;
+                    case 'NoAuthor':
+                        echo '<h3>Name without author</h3>';
+                        break;
+                    case 'NoProtologue':
+                        echo '<h3>Typified name with missing or incomplete protologue info.</h3>';
+                        break;
+                }
+            ?>
             <table class="table table-bordered table-condensed table-responsive" style="width: 100%">
                 <tr>
                     <th>&nbsp;</th>
+                    <?php if (!$BatchNo): ?>
+                    <th>Batch #</th>
+                    <?php endif; ?>
                     <th>MEL number</th>
                     <?php if($type == 'NoProtologue') :?>
                     <th>Taxon name</th>
@@ -52,11 +64,11 @@
                     <th>Type status</th>
                     <?php endif; ?>
                 </tr>
-                <?php foreach ($Errors[$type] as $error): ?>
+                <?php foreach ($err as $error): ?>
                 <tr>
                     <td>
                         <?php
-                            $value = substr($error['MELNumber'], 4);
+                            $value = substr($error['CollectionObjectID'], 4);
                             $opts = array(
                                 'name' => 'recsetitems[]',
                                 'value' => $value,
@@ -65,21 +77,14 @@
                         ?>
                         <?=form_checkbox($opts)?>
                     </td>
-                    <td><?=$error['MELNumber']?></td>
+                    <?php if (!$BatchNo): ?>
+                    <td><?=$error['BatchNo']?></td>
+                    <?php endif; ?>
+                    <td><a href="https://specify.rbg.vic.gov.au/specify/view/collectionobject/<?=$error['CollectionObjectID']?>/" target="_blank"><?=$error['CatalogNumber']?></a></td>
                     <td>
-                        <?=$error['TaxonName']?>
+                        <?=$error['FullName']?>
                         <?php if ($type == 'NotABasionym' || $type == 'NoAuthor' || $type == 'NoProtologue'): ?>
-                        <?php
-                            if ($type == $errortypes[2])
-                                $name = str_replace (' ', '%20', $error['TaxonName']);
-                            else {
-                                $tname = explode(' ', $error['TaxonName']);
-                                $name = $tname[0];
-                                $name .=  (isset($tname[1])) ? '%20' . $tname[1] : '';
-                            }
-                        ?>
-
-                        <a href="http://anbg.gov.au/cgi-bin/apni?taxon_name=<?=$name?>%25" target="_blank"
+                        <a href="https://biodiversity.org.au/nsl/services/search/names?product=APNI&tree.id=&name=<?= urlencode($error['FullName'])?>" target="_blank"
                            style="float:right;clear:right;"
                            ><img src="<?=base_url()?>images/apni.gif" alt="anbg logo" width="16" height="16" /></a>
                         <?php endif; ?>
@@ -103,7 +108,7 @@
                     <?=form_dropdown('spuser', $SpecifyUsers, 
                             $this->input->post('spuser'), 'id="spuser" class="form-control"')?>
                 </div>
-                <label class="col-md-2 control-label" for="recsetname">Specify user:</label>
+                <label class="col-md-2 control-label" for="recsetname">Record set name:</label>
                 <div class="col-md-4">
                     <input type="text" name="recsetname" id="recsetname"
                           value="<?=($this->input->post('recsetname')) ? 
@@ -113,33 +118,16 @@
             </div> <!-- /.form-group -->
             
             <div>
+                <?php 
+                    $formaction = site_url() . 'gpi/create_error_record_set';
+                    if ($BatchNo) {
+                        $formaction .= '/batch/' . $BatchNo;
+                    }
+                ?>
                 <input type="submit" name="submit" value="Create Specify record set"
-                       formaction="<?=site_url()?>gpi/create_error_record_set/batch/<?=$BatchNo?>"
+                       formaction="<?=$formaction?>"
                        class="btn btn-primary" />
                 
-                <button type="submit" 
-                        formaction="<?=site_url()?>gpi/create_error_csv/batch/<?=$BatchNo?>"
-                        class="btn btn-primary">
-                    Create CSV file
-                </button>
-
-                <button type="submit" 
-                        formaction="<?=site_url()?>gpi/fix_errors/batch/<?=$BatchNo?>"
-                        class="btn btn-primary">
-                    Fix errors
-                </button>
-
-                <button type="submit" 
-                        formaction="<?=site_url()?>gpi/delete_hybrid_dets/batch/<?=$BatchNo?>"
-                        class="btn btn-primary">
-                    Delete hybrid determinations
-                </button>
-
-                <button type="submit" 
-                        formaction="<?=site_url()?>gpi/delete_non_types/batch/<?=$BatchNo?>"
-                        class="btn btn-primary">
-                    Delete non-types
-                </button>
             </div> <!-- /.form-group -->
 
         </div> <!-- /.col-md-12 -->

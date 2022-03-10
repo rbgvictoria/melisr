@@ -179,7 +179,8 @@ class Transaction_controller extends CI_Controller
             'Spirit' => 'spirit jar',
             'Cibachrome' => 'cibachrome',
             'Photograph of specimen' => 'photograph',
-            'Type' => 'type'
+            'Type' => 'type',
+            'Carpological' => 'carpological'
         );
 
         $this->LoanSummaryString();
@@ -271,38 +272,24 @@ class Transaction_controller extends CI_Controller
 
         $paragraphs = array();
         $paragraphs[] = <<<EOD
-Please verify the contents of the loan against the attached specimen list and acknowledge
-receipt by returning the yellow copy of this form. Any damage in transit should be noted
-on the yellow form.
+Please verify the contents of this loan against the attached specimen list and 
+acknowledge receipt by emailing this form to <a href="mailto:HerbMEL@rbg.vic.gov.au">HerbMEL@rbg.vic.gov.au</a>.
 EOD;
-        $paragraphs[] = <<<EOD
-This loan should be returned to MEL by the date shown above. An extension may be granted
-on request.
-EOD;
-
         if (strstr($this->LoanAgents, ' and ')) $c = 'comply';
         else $c = 'complies';
 
-/*        $paragraphs[] = <<<EOD
-Please ensure that $this->LoanAgents $c with the enclosed loan conditions.
-EOD;*/
         $loannumber = $this->loan->LoanNumber;
-/*        $paragraphs[] = <<<EOD
-Electronic data for the specimens in this loan can be accessed through <i>Australia's Virtual Herbarium</i> 
-(AVH), <a href="http://avh.ala.org.au">http://avh.ala.org.au</a>. You can query for the records in this loan using the Advanced search by typing '$loannumber' in the Loan identifier field (under Herbarium transactions) 
-and selecting 'National Herbarium of Victoria' from the Herbarium drop-down list (under Specimen).<br/>
-<a href="http://avh.ala.org.au/occurrences/search?q=loan_identifier:$loannumber&fq=collection_uid:co55">http://avh.ala.org.au/occurrences/search?q=loan_identifier:$loannumber&fq=collection_uid:co55</a> will get you to the results directly.
-EOD;
- * */
  
         $paragraphs[] = <<<EOD
-Data for the specimens in this loan is available through <i>Australia’s Virtual Herbarium</i> (AVH, <a href="http://avh.chah.org.au">http://avh.chah.org.au</a>). 
-Access the data directly at:<br/><a href="http://avh.ala.org.au/occurrences/search?q=loan_identifier:$loannumber&fq=collection_uid:co55">http://avh.ala.org.au/occurrences/search?q=loan_identifier:$loannumber&fq=collection_uid:co55</a>, 
-or go to Advanced search and select ‘National Herbarium of Victoria’ under Herbarium and enter '$loannumber' in Loan number.
+Data for the specimens in this loan is available through the Australasian Virtual 
+Herbarium (<a href="https://avh.chah.org.au/">https://avh.chah.org.au/</a>). Access the data directly at: 
+<a href="http://avh.ala.org.au/occurrences/search?q=loan_identifier:{$loannumber}&fq=collection_uid:co55">http://avh.ala.org.au/occurrences/search?q=loan_identifier:{$loannumber}&fq=collection_uid:co55</a>, 
+or go to Advanced search and select ‘National Herbarium of Victoria’ under 
+Herbarium and enter '{$loannumber}' in Loan number.
 EOD;
         
         $paragraphs[] = <<<EOD
-For queries relating to loans, exchange or donations, please email MEL at herbmel@rbg.vic.gov.au.
+This loan should be returned to MEL by the date shown above. An extension may be granted on request.
 EOD;
 
         if ($this->loaninfo['ShippedTo']['Country'] != 'Australia') {
@@ -310,6 +297,11 @@ EOD;
 <span style="color:#ff0000;font-weight:bold;">NOTE: Before returning loan, please contact MEL for current Biosecurity documentation.</span>
 EOD;
         }
+        
+        $paragraphs[] = <<<EOD
+For all correspondence relating to loans, exchange or donations, please email <a href="mailto:HerbMEL@rbg.vic.gov.au">HerbMEL@rbg.vic.gov.au</a>.
+EOD;
+
         
         $pdf->SetY($pdf->GetY()-2);
         foreach ($paragraphs as $para) {
@@ -438,10 +430,10 @@ EOD;
 
         $paragraphs = array();
         $paragraphs[] = <<<EOD
-Please acknowledge receipt by returning the yellow copy of this form. Any damage should be noted on the form.
+Please acknowledge receipt by emailing this form to <a href="mailto:HerbMEL@rbg.vic.gov.au">HerbMEL@rbg.vic.gov.au</a>.
 EOD;
         $paragraphs[] = <<<EOD
-For queries relating to loans, exchange or donations please email MEL at HerbMEL@rbg.vic.gov.au.
+For all correspondence relating to loans, exchange or donations, please email <a href="mailto:HerbMEL@rbg.vic.gov.au">HerbMEL@rbg.vic.gov.au</a>.
 EOD;
 
         $pdf->SetY($pdf->GetY()-2);
@@ -484,6 +476,7 @@ EOD;
             'Seed duplicate' => 'seed duplicate',
             'Silica gel sample' => 'silica gel sample',
             'Shipping material' => 'shipping material',
+            'Carpological' => 'carpological',
             'Type' => 'type'
         );
 
@@ -584,11 +577,11 @@ EOD;
 
         $paragraphs = array();
         $paragraphs[] = <<<EOD
-Please verify the contents of this consignment against the attached specimen list and acknowledge
-receipt by returning the yellow copy of this form.
+Please verify the contents of this consignment against the attached specimen list 
+and acknowledge receipt by emailing this form to <a href="mailto:HerbMEL@rbg.vic.gov.au">HerbMEL@rbg.vic.gov.au</a>.
 EOD;
         $paragraphs[] = <<<EOD
-For queries relating to loans, exchange or donations, please email MEL at herbmel@rbg.vic.gov.au.
+For all correspondence relating to loans, exchange or donations, please email <a href="mailto:HerbMEL@rbg.vic.gov.au">HerbMEL@rbg.vic.gov.au</a>.
 EOD;
 
         foreach ($paragraphs as $para)
@@ -630,7 +623,8 @@ EOD;
             'Spirit' => 'spirit jar',
             'Cibachrome' => 'cibachrome',
             'Photograph of specimen' => 'photograph',
-            'Type' => 'type'
+            'Type' => 'type',
+            'Carpological' => 'carpological'
         );
 
         $this->LoanSummaryString();
