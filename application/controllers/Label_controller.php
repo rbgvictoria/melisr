@@ -201,9 +201,24 @@ class Label_controller extends CI_Controller {
                                 $barcode_count = $this->input->post('melno_count');
                             else
                                 $barcode_count = $this->input->post('melno_end')-$this->input->post('melno_start')+1;
-                            $this->printBarcodeLabel($config, $barcode_start, $barcode_count, $start-1);
                         }
                         break;
+                    case 27:
+                        if ($this->input->post('recordset')) {
+                            $barcodes = $this->labeldatamodel->getBarcodeLabelData($records);
+                            //print_r($barcodes);
+                            $this->printBarcodeLabelRecordSetZebra($barcodes, $start-1);
+
+                        } 
+                        else {
+                            $barcode_start = $this->input->post('melno_start');
+                            if ($this->input->post('melno_count')) {
+                                $barcode_count = $this->input->post('melno_count');
+                            } else {
+                                $barcode_count = $this->input->post('melno_end')-$this->input->post('melno_start')+1;
+                            }
+                            $this->printBarcodeLabelZebra($barcode_start, $barcode_count, $start-1);
+                        }
                     case 20:
                         $barcodes = $this->labeldatamodel->getVrsBarcodeLabelData($records);
                         //print_r($barcodes);
@@ -1468,6 +1483,51 @@ class Label_controller extends CI_Controller {
         //Close and output PDF document
         $pdf->Output('mellabel.pdf', 'I');
 	}
+
+    function printBarcodeLabelZebra($barcode_start, $barcode_count=30, $start=0)
+    {
+        set_time_limit (600);
+        $pageFormat = array(65, 30);
+        $pdf = new TCPDF('L', 'mm', $pageFormat, true, 'UTF-8', false);
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Niels Klazenga');
+        $pdf->SetTitle('Barcode label');
+        $pdf->SetSubject('Barcode label');
+
+        $pdf->SetMargins(5, 7.5, 5);
+        $pdf->setAutoPageBreak(false);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        $pdf->SetFont('helvetica', 10);
+        $pdf->setCellPaddings(0, 0, 0, 0);
+        $pdf->setCellMargins(0, 0, 0, 0);
+
+        $barcodestyle = array(
+            'position' => '',
+            'padding' => 0,
+            'align' => 'C',
+            'stretch' => true,
+            'cellfitalign' => '',
+            'border' => false,
+            'hpadding' => 'auto',
+            'vpadding' => 'auto',
+            'fgcolor' => array(0,0,0),
+            'bgcolor' => false, //array(255,255,255),
+            'text' => false,
+        );
+
+        for ($i = 0; $i < $barcode_count; $i++) {
+            $pdf->AddPage();
+            $first = (int) $barcode_start;
+            $first+=$i;
+            $melnumber = 'MEL ' . $first;
+            $pdf->write1DBarcode($melnumber, 'C39', 5, 6, 55, 12, 0.1, $barcodestyle, 'N');
+            $pdf->MultiCell(55 , 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, 5, 17, true, false, true);
+        }
+        $pdf->lastPage();
+        $pdf->Output('barcode-label.pdf', 'I');
+    }
         
     function printBarcodeLabelRecordSet($props, $barcodes, $start=0) {
         $numx = $props['numx'];
@@ -1546,6 +1606,49 @@ class Label_controller extends CI_Controller {
 
         // Close and output PDF document
         $pdf->Output('mellabel.pdf', 'I');
+    }
+
+    function printBarcodeLabelRecordSetZebra($barcodes, $start=0)
+    {
+        set_time_limit (600);
+        $pageFormat = array(65, 30);
+        $pdf = new TCPDF('L', 'mm', $pageFormat, true, 'UTF-8', false);
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Niels Klazenga');
+        $pdf->SetTitle('Barcode label');
+        $pdf->SetSubject('Barcode label');
+
+        $pdf->SetMargins(5, 7.5, 5);
+        $pdf->setAutoPageBreak(false);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        $pdf->SetFont('helvetica', 10);
+        $pdf->setCellPaddings(0, 0, 0, 0);
+        $pdf->setCellMargins(0, 0, 0, 0);
+
+        $barcodestyle = array(
+            'position' => '',
+            'padding' => 0,
+            'align' => 'C',
+            'stretch' => true,
+            'cellfitalign' => '',
+            'border' => false,
+            'hpadding' => 'auto',
+            'vpadding' => 'auto',
+            'fgcolor' => array(0,0,0),
+            'bgcolor' => false, //array(255,255,255),
+            'text' => false,
+        );
+
+        for ($i = 0; $i < count($barcodes); $i++) {
+            $pdf->AddPage();
+            $melnumber = 'MEL ' . $barcodes[$i]['Barcode'];
+            $pdf->write1DBarcode($melnumber, 'C39', 5, 6, 55, 12, 0.1, $barcodestyle, 'N');
+            $pdf->MultiCell(55 , 5, '<b>'.$melnumber.'</b>', 0, 'C', 0, 1, 5, 17, true, false, true);
+        }
+        $pdf->lastPage();
+        $pdf->Output('barcode-label.pdf', 'I');
     }
 
     function printVrsBarcodeLabelRecordSet($props, $barcodes, $start=0) {

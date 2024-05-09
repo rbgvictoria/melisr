@@ -324,6 +324,17 @@
                         Barcode label
                     </label>
                 </div>
+                <div class="radio">
+                    <label>
+                        <?=form_radio(array(
+                            'name' => 'labeltype',
+                            'id' => 'lt11',
+                            'value' => '27',
+                            'checked' => false
+                        )); ?>
+                        Barcode label, single column
+                    </label>
+                </div>
                     </div>
                 </div> <!-- /.row -->
             </div>
