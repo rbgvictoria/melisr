@@ -469,8 +469,19 @@ class Label_data_model extends CI_Model {
             $row = $query->row();
             if ($row->StartDepth) {
                 $depth = $row->StartDepth;
-                if ($row->EndDepth) $depth .= '–' . $row->EndDepth;
-                $depth .= ' m';
+                if ($row->EndDepth) {
+                    $depth .= '–' . $row->EndDepth
+                };
+                switch ($row->StartDepthUnit) {
+                    case 2:
+                        $depth .= ' ft';
+                        break;
+                    case 3:
+                        $depth .= ' ftm';
+                        break;
+                    default:
+                        $depth .= ' m';
+                }
                 return $depth;
             }
             else
