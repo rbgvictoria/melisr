@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright 2021 Royal Botanic Gardens Victoria.
  *
@@ -21,7 +20,7 @@
  *
  * @author Niels.Klazenga <Niels.Klazenga at rbg.vic.gov.au>
  */
-class Exchange_data_model extends CI_Model 
+class Exchange_data_model extends CI_Model
 {
     function  __construct() {
         parent::__construct();
@@ -36,18 +35,20 @@ class Exchange_data_model extends CI_Model
         $this->db->from('gift g');
         $this->db->join('giftpreparation gp', 'g.GiftID=gp.GiftID');
         $this->db->join('preparation p', 'gp.PreparationID=p.PreparationID');
-        $this->db->join('mel_avh_occurrence_core oc', 'p.CollectionObjectID=oc.id');
+        $this->db->join('collectionobject co', 'p.CollectionObjectID=co.CollectionObjectID');
+        $this->db->join('mel_avh_occurrence_core oc', 'co.GUID=oc.id');
         $this->db->where('g.GiftNumber', $giftNumber);
         $query = $this->db->get();
         return $query->result_array();
     }
-    
+
     function getRecordSetData($recordSet)
     {
         $this->db->select('oc.*', false);
         $this->db->from('recordset rs');
         $this->db->join('recordsetitem rsi', 'rs.RecordSetID=rsi.RecordSetID');
-        $this->db->join('mel_avh_occurrence_core oc', 'rsi.RecordID=oc.id');
+        $this->db->join('collectionobject co', 'rsi.RecordID=co.CollectionObjectID');
+        $this->db->join('mel_avh_occurrence_core oc', 'co.GUID=oc.id');
         $this->db->where('rs.RecordSetID', $recordSet);
         $query = $this->db->get();
         return $query->result_array();
